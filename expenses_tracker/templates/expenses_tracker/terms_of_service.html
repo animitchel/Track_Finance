@@ -1,0 +1,69 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+    Track Finance—Terms of service	
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/terms_of_service.css' %}">	
+{% endblock %}
+
+{% block content %}
+    
+    <header>
+        <h1>Terms of Service</h1>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Acceptance of Terms</h2>
+            <p>By accessing or using our services, you agree to comply with and be bound by these Terms of Service.</p>
+        </section>
+
+        <section>
+            <h2>2. Use of the Services</h2>
+            <p>You agree to use the services only for purposes permitted by these Terms and applicable laws and regulations.</p>
+        </section>
+
+        <section>
+            <h2>3. User Accounts</h2>
+            <p>Creating an account with us is subject to providing accurate and complete information. You are responsible for maintaining the confidentiality of your account credentials.</p>
+        </section>
+
+        <section>
+            <h2>4. Privacy</h2>
+            <p>Your use of our services is also governed by our Privacy Policy. Please review the policy to understand how we collect, use, and disclose information.</p>
+        </section>
+
+        <section>
+            <h2>5. Termination</h2>
+            <p>We reserve the right to terminate or suspend your account without notice if you violate these Terms or engage in any prohibited activities.</p>
+        </section>
+
+        <section>
+            <h2>6. Changes to Terms</h2>
+            <p>We may update these Terms of Service from time to time. Changes will be effective upon posting the revised terms. Continued use of the services after changes constitutes acceptance.</p>
+        </section>
+
+        <section>
+            <h2>7. Limitation of Liability</h2>
+            <p>We shall not be liable for any indirect, incidental, special, consequential, or punitive damages, or any loss of profits or revenues.</p>
+        </section>
+
+        <section>
+            <h2>8. Governing Law</h2>
+            <p>These Terms of Service are governed by and construed in accordance with the laws of [Your Jurisdiction].</p>
+        </section>
+    </main>
+    
+    <footer>
+    <div class="footer-links">
+        <a href="{% url 'privacy_policy_page' %}">Privacy Policy</a>
+        <a href="{% url 'contact_us_page' %}">Contact Us</a>
+    </div>
+    <p>&copy; 2023 Mitchel Ani. All rights reserved.</p>
+</footer>
+    
+{% endblock %}

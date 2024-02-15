@@ -1,0 +1,90 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static "sidebar.css" %}">
+
+    {% block css_file %}{% endblock %}
+    <title>{% block page_title %} Track Expenses {% endblock %}</title>
+
+</head>
+<body>
+
+    <div class="sidebar">
+        <h2>Track Finance</h2>
+        <ul>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Dashboard</a>
+                <div class="dropdown-content">
+                    <a href="{% url 'overview_page' %}">Overview</a>
+                    <a href="{% url 'home' %}">Home</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Transactions</a>
+                <div class="dropdown-content">
+                    <a href="{% url 'all_transactions_page' %}">All Transactions</a>
+                    <a href="{% url 'add_transactions_page' %}">Add Transaction</a>
+                    <a href="{% url 'categories_page' %}">Categories</a>
+                    <a href="{% url 'recurring_transactions_page' %}">Recurring Transactions</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Budget</a>
+                <div class="dropdown-content">
+                    <a href="{% url 'budget-overview_page' %}">Budget Overview</a>
+                    <a href="{% url 'add_budget_page' %}">Add Budget</a>
+                    <a href="#">Budget Categories</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Reports</a>
+                <div class="dropdown-content">
+                    <a href="{% url 'expenses_report_page' %}">Expense Reports</a>
+                    <a href="{% url 'income_report_page' %}">Income Reports</a>
+                    <a href="{% url 'custom_report_page' %}">Custom Reports</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Goals</a>
+                <div class="dropdown-content">
+                    <a href="#">Savings Goals</a>
+                    <a href="#">Debt Repayment</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Settings</a>
+                <div class="dropdown-content">
+                    <a href="{% url 'profile_page' %}">Profile</a>
+                    <a href="{% url 'notification_page' %}">Notifications</a>
+                    <a href="#">Currency</a>
+                    <a href="{% url 'account_settings_page' %}">Account Settings</a>
+                </div>
+            </li>
+            <li class="dropdown">
+                <a href="#" class="dropbtn">Help & Support</a>
+                <div class="dropdown-content">
+                    <a href="#">FAQ</a>
+                    <a href="{% url 'contact_us_page' %}">Contact Support</a>
+                    <a href="#">Tutorials</a>
+                    <a href="#">Feedback</a>
+                </div>
+            </li>
+            <li><a href="#">Logout/Sign Out</a></li>
+        </ul>
+    </div>
+
+
+    <div class="content">
+
+        {% block content %} {% endblock %}
+    </div>
+
+
+</body>
+
+</html>

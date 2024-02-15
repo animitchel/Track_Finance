@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+    Track Finance - Add Budget
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/add-budget.css' %}">
+{% endblock %}
+
+{% block content %}
+    <header>
+        <h1>Add Budget</h1>
+    </header>
+    
+    <main>
+        <section class="budget-form">
+            <div class="container">
+                <form method="POST">
+                    {% csrf_token %}
+                    
+                    <div class="form-group">
+                        
+                        <label>
+                            <span class="element1">{{ form.category.label_tag }}</span>
+                            <span class="element2">*</span>
+                            {{ form.category.errors }}
+                        </label>
+                        
+                        {{ form.category }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <span class="element1">{{ form.amount.label_tag }}</span>
+                            <span class="element2">*</span>
+                            {{ form.amount.errors }}
+                        </label>
+                        {{ form.amount }}
+                    </div>
+                    
+                    <div class="form-group">
+                        <label>
+                            <span class="element1">{{ form.description.label_tag }}</span>
+                            <span class="element2">*</span>
+                            {{ form.description.errors }}
+                        </label>
+                        {{ form.description }}
+                    </div>
+                    
+                
+                    
+{#                        {{ form.durational.label_tag }}#}
+{#                        {{ form.durational }}#}
+        
+{#                    <div id="recurring-options" style="display: none;">#}
+                    <div class="form-group">
+                        <label>
+                            <span class="element1">{{ form.duration.label_tag }}</span>
+                            <span class="element2">*</span>
+                        </label>
+                        {{ form.duration }}
+                    </div>
+{#                    </div>#}
+                  
+                    <button type="submit">Add Budget</button>
+                </form>
+            </div>
+        </section>
+    </main>
+    
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var checkbox = document.getElementById('{{ form.durational.id_for_label }}');
+        var options = document.getElementById('recurring-options');
+
+        checkbox.addEventListener('change', function () {
+            options.style.display = checkbox.checked ? 'block' : 'none';
+        });
+
+        // Initial check to set the display
+        options.style.display = checkbox.checked ? 'block' : 'none';
+    });
+</script>
+    
+    {% include "expenses_tracker/include/footer.html" %}
+{% endblock %}

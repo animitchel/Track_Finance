@@ -1,0 +1,70 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+    Track Finance - budget-overview
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/budget-overview.css' %}">
+{% endblock %}
+
+{% block content %}
+    <header>
+        <h1>Budget Overview</h1>
+    </header>
+    
+        <main>
+            <section class="transaction-list">
+            <div class="container">
+            <p>Filter-coming soon</p>
+            <h2>Delete recurring_transactions bottom</h2>
+                <ul>
+                    {% for field in budget %}
+                    <li class="list_display">
+                        <div class="transaction-info">
+{#                        {% if field.category == budget %}#}
+{#                            jhhf#}
+{#                        {% else %}#}
+                            <h2>{{ field.category|title }}</h2>
+{#                        {% endif %}#}
+                            <hr>
+                            <p>Budget: <strong>${{ field.budget|floatformat:"2g" }}</strong></p>
+                            {% if field.spent > 0 %}
+                                <p>Spent: <strong>${{ field.spent|floatformat:"2g" }}</strong></p>
+                            {% endif %}
+                            <p>Remaining: <strong>${{ field.amount|floatformat:"2g" }}</strong></p>
+                        </div>
+                        {% if field.expiration_date %}
+                            <div class="transaction-date">
+{#                                <p>Expiration Date: {{ field.expiration_date|date:"D, d M Y | H:i:s" }}</p>#}
+                                <p>Expiring in: {{ field.expiration_date|timeuntil }}</p>
+                            </div>
+                        {% endif %}
+                    </li>
+                    {% endfor %}
+                    <!-- Add more transactions as needed -->
+                </ul>
+            </div>
+        </section>
+{#            <section class="budget-info">#}
+{#                <div class="container">#}
+{#                    {% for field in budget %}#}
+{#                    <div class="category">#}
+{#                        <h2>{{ field.category }}</h2>#}
+{#                        <p>Budget: ${{ field.amount }}</p>#}
+{#                        <p>Spent: $350.00</p>#}
+{#                        <p>Remaining: $150.00</p>#}
+{#                     #}
+{#                    </div>#}
+{#                    <div class="transaction-date">#}
+{#                        <p>{{ field.expiration_date|date:"D, d M Y" }}</p>#}
+{#                    </div>     #}
+{#                      #}
+{#                    {% endfor %}#}
+{#                </div>#}
+{#            </section>#}
+        </main>
+    
+    {% include "expenses_tracker/include/footer.html" %}
+{% endblock %}

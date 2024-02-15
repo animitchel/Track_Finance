@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+    Track Finance - Account Settings	
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/account_settings.css' %}">	
+{% endblock %}
+
+{% block content %}
+    
+    <header>
+        <h1>Account Settings</h1>
+    </header>
+
+    <main>
+        <div class="container">
+            <form class="account-form">
+                <label for="username">Username:</label>
+                <input type="text" id="username" name="username" value="john_doe" disabled>
+
+                <label for="email">Email:</label>
+                <input type="email" id="email" name="email" value="john.doe@example.com">
+
+                <label for="password">Password:</label>
+                <input type="password" id="password" name="password" placeholder="********">
+
+                <label for="confirm-password">Confirm Password:</label>
+                <input type="password" id="confirm-password" name="confirm-password" placeholder="********">
+
+                <button type="submit">Save Changes</button>
+            </form>
+        </div>
+    </main>
+    
+    {% include "expenses_tracker/include/footer.html" %}
+    
+	
+{% endblock %}

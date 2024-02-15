@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+    Track Finance - All Transactions
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/all_transactions.css' %}">
+{% endblock %}
+
+{% block content %}
+    <header>
+        <h1>All Transactions</h1>
+    </header>
+    
+    <main>
+        <section class="transaction-list">
+            <div class="container">
+            <p>Filter-coming soon</p>
+                <ul>
+                    {% for field in transactions %}
+                    <li class="list_display">
+                        <div class="transaction-info">
+                            <h2>{{ field.category|title }}</h2>
+                            <hr>
+                            <p><strong>${{ field.amount|floatformat:"2g" }}</strong></p>
+                            <hr>
+                            <span>Desc: <em>{{ field.description }}</em></span>
+                        </div>
+                        <div class="transaction-date">
+                            {% if date_now > field.date.date %}
+                                <p>{{ field.date|date:"D, d M Y | H:i:s" }}</p>
+                            {% else %}
+                                <p>{{ field.date|timesince }} ago</p>
+                            {% endif %}
+                            
+                        </div>
+                    </li>
+                    {% endfor %}
+                    <!-- Add more transactions as needed -->
+                </ul>
+            </div>
+        </section>
+    </main>
+    
+    {% include "expenses_tracker/include/footer.html" %}
+    
+{% endblock %}

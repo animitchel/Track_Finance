@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block page_title %}
+    Track Finance - Privacy Policy	
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/privacy_policy.css' %}">	
+{% endblock %}
+
+{% block content %}
+    
+    <header>
+        <h1>Privacy Policy</h1>
+    </header>
+
+    <main>
+        <section>
+            <h2>1. Information We Collect</h2>
+            <p>We collect the following types of information to provide and improve our services:</p>
+            <ul>
+                <li>Personal Information: Name, email, and other account details.</li>
+                <li>Financial Information: Transaction details, budget data, and income information.</li>
+                <li>Usage Information: How you interact with the app, preferences, and settings.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>2. How We Use Your Information</h2>
+            <p>We use the collected information for the following purposes:</p>
+            <ul>
+                <li>Providing and maintaining the app functionality.</li>
+                <li>Personalizing user experience and improving our services.</li>
+                <li>Analyzing usage patterns to enhance app features.</li>
+                <li>Communicating important updates and announcements.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>3. Sharing Your Information</h2>
+            <p>We do not share your information with third parties except in the following cases:</p>
+            <ul>
+                <li>With your explicit consent.</li>
+                <li>For legal purposes or to comply with applicable laws.</li>
+                <li>For security reasons or to prevent fraud.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>4. Security</h2>
+            <p>We take robust measures to protect your information, including:</p>
+            <ul>
+                <li>Encryption of sensitive data during transmission.</li>
+                <li>Regular security assessments and updates.</li>
+                <li>Access controls to limit data access to authorized personnel.</li>
+            </ul>
+        </section>
+
+        <section>
+            <h2>5. Changes to This Privacy Policy</h2>
+            <p>We may update our privacy policy to reflect changes in our practices. You will be notified of any significant changes.</p>
+        </section>
+
+        <section>
+            <h2>6. Contact Us</h2>
+            <p>If you have any questions about our privacy policy, please contact us at <a href="mailto:info@expensestracker.com">info@expensestracker.com</a>.</p>
+        </section>
+    </main>
+
+    <footer>
+    <div class="footer-links">
+        <a href="{% url 'terms_of_service_page' %}">Terms of Service</a>
+        <a href="{% url 'contact_us_page' %}">Contact Us</a>
+    </div>
+    <p>&copy; 2023 Mitchel Ani. All rights reserved.</p>
+</footer>
+	
+{% endblock %}

@@ -1,0 +1,100 @@
+<!-- expenses_overview.html -->
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %}
+    Track Finance - Overview
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/overview.css' %}">
+{% endblock %}
+
+{% block content %}
+    
+    <header>
+        <h1>Expenses Overview</h1>
+    </header>
+    
+    <main>
+    <div class="container1">
+        <section class="overview-section">
+        
+            <div class="card">
+                <h2>Total Expenses</h2>
+                <p><strong style="color: #007bff">${{ transactions|floatformat:"2g" }}</strong></p>
+            </div>
+        
+            <div class="card">
+                <h2> Ongoing Total Budgets</h2>
+                <p><strong style="color: #007bff">${{ total_budget|floatformat:"2g" }}</strong></p>
+            </div>
+        
+{#            <div class="card">#}
+{#                <a href="{% url 'categories_page' %}"><h2 style="color: #343a40">Categories</h2></a>#}
+{#                <ul>#}
+{#                    {% for key, value in category.items %}#}
+{#                        <li style="color: #007bff">{{ key }}: ${{ value|floatformat:"2g" }}</li>#}
+{#                    {% endfor %}#}
+{#                </ul>#}
+{#            </div>#}
+        
+        </section>
+    </div>
+    <div class="container">
+        <section class="recent-transactions">
+            <a href="{% url 'all_transactions_page' %}"><h2 style="text-align: center">Recent Transactions</h2></a>
+            <ul>
+                {% for field in recent_transactions %}
+                <li>{{ field.category }} - ${{ field.amount|floatformat:"2g" }}
+                <h4 style="text-align: end">{{ field.date|timesince }} ago</h4>
+                <hr>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        <section class="recent-transactions">
+            <a href="{% url 'budget-overview_page' %}"><h2 style="text-align: center">Current Budgets</h2></a>
+            <ul>
+                {% for field in budget %}
+                <li>{{ field.category }} - ${{ field.budget|floatformat:"2g" }} - ${{ field.amount|floatformat:"2g" }} 
+                    - {{ field.duration }}
+                    <h4 style="text-align: end"> {{ field.expiration_date|timeuntil }} left</h4> 
+                    <hr>
+                </li>
+
+                {% endfor %}
+            </ul>
+        </section>
+        <section class="recent-transactions">
+            <a href="{% url 'recurring_transactions_page' %}"><h2 style="text-align: center">Recurring Transactions</h2></a>
+            <ul>
+                {% for field in recur_transaction %}
+                <li>
+                    {{ field.category }} - ${{ field.amount|floatformat:"2g" }} - {{ field.transaction_title }} 
+                    <h4 style="text-align: end"> Next in {{ field.next_occurrence|timeuntil }}</h4>
+                <hr>
+                </li>
+                    
+                {% endfor %}
+            </ul>
+        </section>
+        <section class="recent-transactions">
+            <a href="{% url 'categories_page' %}"><h2 style="text-align: center">Categories : Subtotal</h2></a>
+            <ul>
+                {% for key, value in category.items %}
+                    <li style="color: #007bff">{{ key }}: ${{ value|floatformat:"2g" }}</li>
+                <hr>
+                {% endfor %}
+            </ul>
+        </section>
+        <br>
+        <br>
+    </div>
+    </main>
+    
+    {% include "expenses_tracker/include/footer.html" %}
+{% endblock %}
+
+
+

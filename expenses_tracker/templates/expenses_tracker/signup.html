@@ -1,0 +1,64 @@
+{% load static %}
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'expenses_tracker/signup.css' %}">
+    <title>Sign Up</title>
+</head>
+<body>
+    <header>
+        <h1>Sign Up / Register</h1>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="form-container">
+                <form  method="POST" class="signup-form">
+                    {% csrf_token %}
+                
+                <div class="{% if field.errors %} error" {% endif %} >
+
+                    {% for field in form %}
+                        
+                        {{ field.label_tag }}
+                        {{ field.errors }}
+                        {{ field }}
+                        
+                    {% endfor %}
+                </div>
+                    
+                    
+                <div class="{% if password_not_confirm  %} error {% endif %}"  > 
+                
+                    <label for="confirm-password">Confirm Password:</label>
+                    
+                        {% if password_not_confirm  %}
+                            {{ password_not_confirm }}  
+                        {% endif %}
+                </div>     
+                        
+                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+                       
+                    <button type="submit">Sign Up</button>
+                
+                    <hr>
+                    <p><a href="{% url 'login_page' %}">Already have an Account?</a></p>
+                    <p>By signing up, you agree with Track Finance's 
+                        <a href="{% url 'terms_of_service_page' %}">Terms & Conditions</a> and 
+                        <a href="{% url 'privacy_policy_page' %}">Privacy Policy.</a></p>
+                </form>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+    <div class="footer-links">
+        <a href="{% url 'contact_us_page' %}">Contact Us</a>
+    </div>
+    <p>&copy; 2023 Mitchel Ani. All rights reserved.</p>
+</footer>
+</body>
+</html>

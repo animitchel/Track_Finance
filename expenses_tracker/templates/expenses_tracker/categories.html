@@ -1,0 +1,36 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %} 
+    Track Finance - categories
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/categories.css' %}">
+{% endblock %}
+
+{% block content %}
+    
+    <header>
+        <h1>Categories - Subtotal</h1>
+    </header>
+    
+        <main>
+            <section class="category-list">
+                <div class="container">
+                    <p>Filter-coming soon</p>
+                    <ul>
+                        {% for key, value in categories.items %}
+                        <li class="cat_display">
+                            <a class='dog_display' href="#">{{ key }}  <h4>${{ value|floatformat:"2g" }}</h4>
+                            </a>
+                        </li>
+                            
+                        {% endfor %}
+                    </ul>
+                </div>
+            </section>
+        </main>
+    
+{% include "expenses_tracker/include/footer.html" %}
+{% endblock %}

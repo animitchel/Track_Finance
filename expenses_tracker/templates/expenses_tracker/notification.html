@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+    Track Finance - Notifications
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/notification.css' %}">
+{% endblock %}
+
+{% block content %}
+    
+    <header>
+        <h1>Notifications</h1>
+    </header>
+
+    <main>
+        <div class="container">
+            <ul class="notification-list">
+                <li>
+                    <div class="notification-content">
+                        <p class="notification-text">You have a new message from John Doe.</p>
+                        <span class="notification-time">2 hours ago</span>
+                    </div>
+                </li>
+                <li>
+                    <div class="notification-content">
+                        <p class="notification-text">Your expense report has been approved.</p>
+                        <span class="notification-time">Yesterday</span>
+                    </div>
+                </li>
+                <li>
+                    <div class="notification-content">
+                        <p class="notification-text">Reminder: Budget review due tomorrow.</p>
+                        <span class="notification-time">3 days ago</span>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </main>
+	
+    {% include "expenses_tracker/include/footer.html" %}
+{% endblock %}

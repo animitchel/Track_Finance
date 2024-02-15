@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %} Track Finance - Home {% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/index.css' %}">
+{% endblock %}
+
+{% block content %}
+    
+    <header>
+        <h1>Welcome to the Expenses Tracking App</h1>
+    </header>
+    <main>
+        <section class="intro-section">
+            <div class="container">
+                <p>Track and manage your expenses with ease. Stay on top of your budget and financial goals.</p>
+            </div>
+        </section>
+        <section class="get-started">
+            <div class="container">
+                <h2>Get Started</h2>
+                <p>Start managing your expenses today! Sign up for an account and take control of your finances.</p>
+                <a href="{% url 'register_page' %}" class="btn">Sign Up</a>
+            </div>
+        </section>
+        <section class="features">
+            <div class="container">
+                <h2>Key Features</h2>
+                <ul>
+                    <li>Effortlessly track your expenses</li>
+                    <li>Set and manage your budget</li>
+                    <li>Generate insightful reports</li>
+                    <li>Set savings goals and track progress</li>
+                </ul>
+            </div>
+        </section>
+        
+    </main>
+    {% include "expenses_tracker/include/footer.html" %}
+    
+{% endblock %}

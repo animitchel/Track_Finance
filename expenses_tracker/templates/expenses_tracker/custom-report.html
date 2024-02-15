@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% load static %}
+    
+{% block page_title %}
+    Track Finance - Custom Report
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/custom-report.css' %}">
+{% endblock %}
+
+{% block content %}
+    
+    <main>
+    <div class="container">
+    <header>
+      <h1>Custom Report</h1>
+      <div class="report-info">
+        <p><strong>Report Title:</strong> [Your Custom Title]</p>
+        <p><strong>Report Date:</strong> [Report Date]</p>
+      </div>
+    </header>
+
+    <section class="report-content">
+      <!-- Your custom report content goes here -->
+      <p>[Your custom content here]</p>
+    </section>
+
+    <section class="notes-comments">
+      <h2>Notes or Comments:</h2>
+      <p>Add any necessary notes or comments here.</p>
+    </section>
+
+    <section class="approval-signatures">
+      <h2>Approval and Signatures:</h2>
+      <p>Include space for signatures and approvals.</p>
+    </section>
+    </div>
+    </main>    
+    
+    {% include "expenses_tracker/include/footer.html" %}
+{% endblock %}

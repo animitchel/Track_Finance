@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% load static %}
+
+{% block page_title %}
+    Track Finance - Profile Details
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/profile.css' %}">
+{% endblock %}
+
+{% block content %}
+    
+    <header>
+        <h1>User Profile</h1>
+    </header>
+
+    <main>
+        <div class="container">
+            <div class="profile-section">
+                <div class="profile-header">
+                    <div class="profile-picture">
+                        <img src="{% static 'expenses_tracker/images/mitchel_best.JPG' %}" alt="Profile Picture">
+                    </div>
+                    <div class="user-details">
+                        <h2>John Doe</h2>
+                        <p>Web Developer</p>
+                    </div>
+                </div>
+
+                <ul class="user-info">
+                    <li><strong>City:</strong> New York</li>
+                    <li><strong>Country:</strong> USA</li>
+                    <li><strong>Email:</strong> john.doe@example.com</li>
+                    <li><strong>Phone:</strong> +1 123 456 7890</li>
+                </ul>
+            </div>
+        </div>
+    </main>
+    
+    {% include "expenses_tracker/include/footer.html" %}
+
+{% endblock %}
