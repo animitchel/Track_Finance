@@ -29,16 +29,23 @@
                             <span>Desc: <em>{{ field.description }}</em></span>
                         </div>
                         <div class="transaction-date">
-                            {% if date_now > field.date.date %}
-                                <p>{{ field.date|date:"D, d M Y | H:i:s" }}</p>
-                            {% else %}
-                                <p>{{ field.date|timesince }} ago</p>
-                            {% endif %}
-                            
+                            <div class="delete-button">
+                                <form method="POST" action="{% url 'all_transactions_page' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="all_transaction_id" value="{{ field.id }}">
+                                    <button type="submit"><img src="{% static 'expenses_tracker/images/delete-189.png' %}" alt="Delete"></button>
+                                </form>
+                            </div>
+                            <div class="date-info">
+                                {% if date_now > field.date.date %}
+                                    <p>{{ field.date|date:"D, d M Y | H:i:s" }}</p>
+                                {% else %}
+                                    <p>{{ field.date|timesince }} ago</p>
+                                {% endif %}
+                            </div>
                         </div>
                     </li>
                     {% endfor %}
-                    <!-- Add more transactions as needed -->
                 </ul>
             </div>
         </section>

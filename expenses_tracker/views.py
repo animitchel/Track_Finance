@@ -1,3 +1,5 @@
+from django.contrib.auth.mixins import LoginRequiredMixin
+from django.http import HttpResponse
 from django.shortcuts import render, HttpResponseRedirect
 from django.views.generic import CreateView, TemplateView
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView
@@ -33,9 +35,6 @@ def overview(request):
     budget1 = budget.aggregate(amount=Sum('amount'))
     budget2 = budget.order_by('expiration_date')[:3]
 
-    # parsed_datetime = datetime.now()
-    # desired_timezone = pytz.timezone('UTC')
-    # date_now = parsed_datetime.replace(tzinfo=pytz.utc).astimezone(desired_timezone).date()
     date_now = timezone.now()
 
     return render(
@@ -52,6 +51,14 @@ def overview(request):
     )
 
 
+def budget_calculation(budget_objs, transaction_obj):
+    for field in budget_objs.all():
+        if field.budget > field.amount:
+            field.amount += transaction_obj.amount
+            field.spent -= transaction_obj.amount
+            field.save()
+
+
 class AllTransactionsView(ListView):
     template_name = 'expenses_tracker/all_transactions.html'
     model = Transaction
@@ -62,11 +69,26 @@ class AllTransactionsView(ListView):
 
     def get_context_data(self, **kwargs):
         context = super(AllTransactionsView, self).get_context_data(**kwargs)
-        # parsed_datetime = datetime.now()
-        # desired_timezone = pytz.timezone('UTC')
-        # parsed_datetime.replace(tzinfo=pytz.utc).astimezone(desired_timezone).date()
         context['date_now'] = timezone.now()
         return context
+
+    def post(self, request, *args, **kwargs):
+        transaction_id = request.POST.get('all_transaction_id')
+        transaction_obj = Transaction.objects.get(id=transaction_id)
+        budget_objects = Budget.objects.all()
+        budget_objects_categories = budget_objects.filter(category=transaction_obj.category)
+        all_transactions_budget = budget_objects.filter(category="All Transactions")
+
+        budget_calculation(budget_objs=budget_objects_categories, transaction_obj=transaction_obj)
+        budget_calculation(budget_objs=all_transactions_budget, transaction_obj=transaction_obj)
+        transaction_obj.delete()
+        return HttpResponseRedirect('/all_transactions')
+
+
+def budget_calc(field, form_instance):
+    field.amount -= form_instance.amount
+    field.spent = field.budget - field.amount
+    field.save()
 
 
 class AddTransactionView(CreateView):
@@ -75,6 +97,15 @@ class AddTransactionView(CreateView):
     form_class = TransactionForm
     success_url = "/all_transactions"
     context_object_name = 'transactions'
+
+    def form_valid(self, form):
+        for field in Budget.objects.all():
+            if field.category == 'All Transactions':
+                budget_calc(field=field, form_instance=form.instance)
+
+            elif field.category == form.instance.category:
+                budget_calc(field=field, form_instance=form.instance)
+        return super(AddTransactionView, self).form_valid(form)
 
 
 class CategoryView(ListView):
@@ -95,14 +126,21 @@ class RecurringTransactions(ListView):
 
     def get_queryset(self):
         data = super(RecurringTransactions, self).get_queryset().filter(recurring_transaction=True)
-        # .filter(next_occurrence__gte=datetime.now()).order_by('next_occurrence')
         for recurring_transaction in data.all():
             if timezone.now() > recurring_transaction.next_occurrence:
                 recurring_transaction.date = timezone.now()
                 recurring_transaction.save()
-                print(recurring_transaction.date)
         return data.order_by('next_occurrence')
-        # .filter(next_occurrence__gte=timezone.now())
+
+    def post(self, request, *args, **kwargs):
+        transaction_id = request.POST.get('recurring_transaction_id')
+        transaction_obj = Transaction.objects.get(id=transaction_id)
+        transaction_obj.recurring_transaction = False
+        transaction_obj.frequency = None
+        transaction_obj.transaction_title = None
+        transaction_obj.next_occurrence = None
+        transaction_obj.save()
+        return HttpResponseRedirect('/recurring-transactions')
 
 
 class BudgetOverviewView(ListView):
@@ -114,9 +152,13 @@ class BudgetOverviewView(ListView):
         db = super(BudgetOverviewView, self).get_queryset()
         for field in db:
             if field.spent >= field.budget or timezone.now() > field.expiration_date:
-                print(field.expiration_date)
                 field.delete()
         return db.order_by('expiration_date')
+
+    def post(self, request, *args, **kwargs):
+        budget_id = request.POST.get('budget_overview_id')
+        Budget.objects.get(id=budget_id).delete()
+        return HttpResponseRedirect('/budget-overview')
 
 
 class AddBudgetView(CreateView):
@@ -243,3 +285,8 @@ def contact_us(request):
         template_name='expenses_tracker/contact_us.html',
         status=200
     )
+
+
+class DeleteItemView(LoginRequiredMixin, View):
+    def post(self, request, *args, **kwargs):
+        pass

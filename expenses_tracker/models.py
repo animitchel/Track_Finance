@@ -81,24 +81,8 @@ class Transaction(models.Model):
             '11 months': 49.5714,
         }
 
-        for field in Budget.objects.all():
-
-            if field.category == 'All Transactions':
-                field.amount -= self.amount
-                field.spent = field.budget - field.amount
-                field.save()
-
-            elif field.category == self.category:
-                field.amount -= self.amount
-                field.spent = field.budget - field.amount
-                field.save()
-
         if self.recurring_transaction:
             frequency = next(_frequency[key] for key in _frequency if key == self.frequency)
-
-            # parsed_datetime = datetime.now() + timedelta(weeks=frequency)
-            # desired_timezone = pytz.timezone('UTC')
-            # self.next_occurrence = parsed_datetime.replace(tzinfo=pytz.utc).astimezone(desired_timezone)
             self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
 
             if not self.transaction_title:
@@ -142,7 +126,6 @@ class Budget(models.Model):
     spent = models.FloatField(default=0.0)
     description = models.TextField(max_length=500)
     duration = models.CharField(max_length=20, null=True, blank=True)
-    # durational = models.BooleanField(default=False)
     expiration_date = models.DateTimeField(null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='budget', null=True)
 
@@ -167,10 +150,6 @@ class Budget(models.Model):
 
         if self.spent == 0.0:
             validity_period = next(_duration[key] for key in _duration if key == self.duration)
-
-            # parsed_datetime = datetime.now() + timedelta(weeks=validity_period)
-            # desired_timezone = pytz.timezone('UTC')
-            # self.expiration_date = parsed_datetime.replace(tzinfo=pytz.utc).astimezone(desired_timezone)
             self.expiration_date = timezone.now() + timedelta(weeks=validity_period)
 
         super(Budget, self).save(*args, **kwargs)
