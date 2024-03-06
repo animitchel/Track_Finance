@@ -1,4 +1,4 @@
-{% extends "base.html" %}
+{% extends "base.html"%}
 
 {% load static %}
 
@@ -18,18 +18,37 @@
 
     <main>
         <div class="container">
-            <form class="account-form">
-                <label for="username">Username:</label>
-                <input type="text" id="username" name="username" value="john_doe" disabled>
-
-                <label for="email">Email:</label>
-                <input type="email" id="email" name="email" value="john.doe@example.com">
-
-                <label for="password">Password:</label>
-                <input type="password" id="password" name="password" placeholder="********">
-
-                <label for="confirm-password">Confirm Password:</label>
-                <input type="password" id="confirm-password" name="confirm-password" placeholder="********">
+        {% if profile_updated %}
+            <div class="success_msg"><h1>{{ profile_updated }}</h1></div>
+        {% endif %}
+            <form class="account-form" method="post">
+                {% csrf_token %}
+{#                <label for="username">Username:</label>#}
+{#                <input type="text" id="username" name="username" value="john_doe" disabled>#}
+                
+                {% for field in form %}
+{#                    {% if field.label == 'Username' %}#}
+{#                        <label for="username">Username:</label>#}
+{#                        <input type="text" id="username" name="username" value="john_doe" disabled>#}
+{#                    {% else %}#}
+                        <label for="{{ field.label }}">{{ field.label }}:</label>
+                        {{ field.errors }}
+                        {{ field }}
+                        
+{#                        {% if field.label == 'Password' %}#}
+{#                            <label for="confirm-password">Confirm Password:</label>#}
+{#                            <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password">#}
+{#                        {% endif %}#}
+{#                    {% endif %}#}
+                {% endfor %}
+{#                <label for="email">Email:</label>#}
+{#                <input type="email" id="email" name="email" value="john.doe@example.com">#}
+{##}
+{#                <label for="password">Password:</label>#}
+{#                <input type="password" id="password" name="password" placeholder="********">#}
+{##}
+{#                <label for="confirm-password">Confirm Password:</label>#}
+{#                <input type="password" id="confirm-password" name="confirm-password" placeholder="********">#}
 
                 <button type="submit">Save Changes</button>
             </form>

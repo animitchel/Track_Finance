@@ -1,12 +1,13 @@
 from django.urls import path
 from . import views
 
+
 urlpatterns = [
     path('', views.IndexView.as_view(), name='home'),
 
-    path('login/', views.login, name='login_page'),
+    path('login/', views.login_user, name='login_page'),
 
-    path('logout/', views.logout, name='logout'),
+    path('logout/', views.logout_user, name='logout'),
 
     path('register-signup/', views.RegisterView.as_view(), name='register_page'),
 
@@ -34,7 +35,7 @@ urlpatterns = [
 
     path('notifications/', views.notification, name='notification_page'),
 
-    path('account-settings/', views.account_settings, name='account_settings_page'),
+    path('account-settings/', views.AccountSettingsView.as_view(), name='account_settings_page'),
 
     path('privacy-policy/', views.privacy_policy, name='privacy_policy_page'),
 
@@ -42,5 +43,5 @@ urlpatterns = [
 
     path('contact-us/', views.contact_us, name='contact_us_page'),
 
-    #path('delete-item/<int:pk>/', views.BudgetDeleteItemView.as_view(), name='budget_delete_item')
+    # path('delete-item/<int:pk>/', views.BudgetDeleteItemView.as_view(), name='budget_delete_item')
 ]

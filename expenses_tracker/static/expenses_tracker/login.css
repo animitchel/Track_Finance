@@ -39,6 +39,7 @@ main {
 }
 
 .login-form {
+    width: 300px;
     margin: 40px auto;
     padding: 20px;
     border: 1px solid #ccc;
@@ -101,3 +102,27 @@ footer {
 .footer-links a:hover {
     text-decoration: underline;
 }
+
+.errorlist {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+  color: #680000;
+}
+
+.errors input {
+  border-color: #680000;
+  background-color: #fde3e3;
+}
+
+.errors label {
+  color: #680000;
+}
+
+.error {
+  color: #680000;
+  /*margin: 0.5rem 0;*/
+  padding: 0;
+  margin-bottom: 6px;
+}
+

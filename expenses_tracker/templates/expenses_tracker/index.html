@@ -21,8 +21,12 @@
         <section class="get-started">
             <div class="container">
                 <h2>Get Started</h2>
-                <p>Start managing your expenses today! Sign up for an account and take control of your finances.</p>
-                <a href="{% url 'register_page' %}" class="btn">Sign Up</a>
+                {% if not user_status %}
+                    <p>Start managing your expenses today! Sign up for an account and take control of your finances.</p>
+                    <a href="{% url 'register_page' %}" class="btn">Sign Up</a>
+                {% else %}
+                    <p>Welcome back! Start managing your expenses today! Take control of your finances and explore all the features of our application.</p>
+                {% endif %}
             </div>
         </section>
         <section class="features">

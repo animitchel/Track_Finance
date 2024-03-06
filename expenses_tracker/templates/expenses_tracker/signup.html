@@ -19,29 +19,58 @@
                 <form  method="POST" class="signup-form">
                     {% csrf_token %}
                 
-                <div class="{% if field.errors %} error" {% endif %} >
-
-                    {% for field in form %}
-                        
-                        {{ field.label_tag }}
-                        {{ field.errors }}
-                        {{ field }}
-                        
-                    {% endfor %}
-                </div>
                     
-                    
-                <div class="{% if password_not_confirm  %} error {% endif %}"  > 
                 
-                    <label for="confirm-password">Confirm Password:</label>
+                    <div class="form-group">
                     
-                        {% if password_not_confirm  %}
-                            {{ password_not_confirm }}  
+{#                        {% if field.errors %} error" {% endif %}#}
+                        <label for="username">Username:</label>
+                    
+                        {% if error_message %}
+                            <div class="error">{{ error_message }}</div>
                         {% endif %}
-                </div>     
+                    
+                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                    
+                        <label for="email">Email:</label>
+                        <input type="text" id="email" name="email" placeholder="Enter an email address" required>
+                    
+                        <label for="password">Password:</label>
+                        <input type="password" id="password" name="password" placeholder="Enter a password" required>
+                    
+                        <label for="confirm-password">Confirm Password:</label>
                         
-                    <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
-                       
+                        {% if password_not_confirm  %}
+                            <div class="error">{{ password_not_confirm }}</div>
+                        {% endif %}
+                            
+                        <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
+                    
+                        {% for field in form %}
+                            {% if field.label in fields_to_display %}
+                                {{ field.label_tag }}
+                                {{ field.errors }}
+                                {{ field }}
+                            {% endif %}
+                        {% endfor %}
+                    
+{#                          {% for field in form %}#}
+{#                            {% if field.errors %}#}
+{#                                {% for error in field.errors %}#}
+{#                                    <div class="error">{{ error }}</div>#}
+{#                                    {{ field.label_tag }}#}
+{#                                    {{ field }}#}
+{#                                {% endfor %}#}
+{#                            {% else %}#}
+{#                                {% if field.label in fields_to_display %}#}
+{#                                    {{ field.label_tag }}#}
+{#                                    {{ field }}#}
+{#                                {% endif %}#}
+{#                            {% endif %}#}
+{#                        {% endfor %}#}
+                   
+                    </div>
+                
                     <button type="submit">Sign Up</button>
                 
                     <hr>
@@ -58,7 +87,7 @@
     <div class="footer-links">
         <a href="{% url 'contact_us_page' %}">Contact Us</a>
     </div>
-    <p>&copy; 2023 Mitchel Ani. All rights reserved.</p>
+    <p>&copy; 2024 Mitchel Ani. All rights reserved.</p>
 </footer>
 </body>
 </html>

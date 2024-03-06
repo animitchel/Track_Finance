@@ -21,19 +21,20 @@
             <div class="profile-section">
                 <div class="profile-header">
                     <div class="profile-picture">
-                        <img src="{% static 'expenses_tracker/images/mitchel_best.JPG' %}" alt="Profile Picture">
+                        <img src="{% static '{{ }}' %}" alt="Profile Picture">
+{#                        expenses_tracker/images/mitchel_best.JPG#}
                     </div>
                     <div class="user-details">
-                        <h2>John Doe</h2>
-                        <p>Web Developer</p>
+                        <h2>{{ profile.first_name }}</h2>
+                        <p>{{ profile.occupation }}</p>
                     </div>
                 </div>
 
                 <ul class="user-info">
-                    <li><strong>City:</strong> New York</li>
-                    <li><strong>Country:</strong> USA</li>
+                    <li><strong>City:</strong> {{ profile.city }}</li>
+                    <li><strong>Country:</strong> {{ profile.country }}</li>
                     <li><strong>Email:</strong> john.doe@example.com</li>
-                    <li><strong>Phone:</strong> +1 123 456 7890</li>
+                    <li><strong>Phone:</strong> {{ profile.phone_number }}</li>
                 </ul>
             </div>
         </div>

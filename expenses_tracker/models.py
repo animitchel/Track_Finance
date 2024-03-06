@@ -1,23 +1,61 @@
 from copy import copy
 
+from django.contrib.auth.base_user import AbstractBaseUser
 from django.db import models
 from django.core.validators import RegexValidator
 from datetime import datetime, timedelta
 from django.utils import timezone
+from django.contrib.auth.models import User
 
 
 # Create your models here.
 
-class User(models.Model):
-    username = models.CharField(max_length=100, unique=True, null=False)
-    email_address = models.EmailField(max_length=150, null=False, unique=True)
-    password = models.CharField(max_length=20, null=False, blank=False)
+class Profile(models.Model):
+
+    CURRENCY_CHOICES = [
+        ('$', 'Dollar - USD'),
+        ('€', 'Euro - EUR'),
+        ('£', 'Pound Sterling - GBP'),
+        ('¥', 'Yen - JPY'),
+        ('₣', 'Franc - CHF'),
+        ('₹', 'Rupee - INR'),
+        ('₦', 'Naira - NGN'),
+        ('د.ك', 'Dinar - KWD'),
+        ('د.إ', 'Dirham - AED'),
+        ('﷼‎', 'Riyal - SAR'),
+        ('₻', 'Mark - DEM'),
+        ('₽', 'Ruouble - RUB'),
+        ('₾', 'Lari - GEL'),
+        ('₺', 'Lira - TRY'),
+        ('₼', 'Manat - AZN'),
+        ('₸', 'Tenge - KZT'),
+        ('₴', 'Hryvnia - UAH'),
+        ('₷', 'Spesmilo - XDR'),
+        ('฿', 'Baht - THB'),
+        ('원', 'Won - KRW'),
+        ('₫', 'Dong - VND'),
+        ('₮', 'Tugrik - MNT'),
+        ('₯', 'Drachma - GRD'),
+        ('₱', 'Peso - PHP'),
+        ('₳', 'Austral - AUD'),
+        ('₵', 'Cedi - GHS'),
+        ('₲', 'Guarani - PYG'),
+        ('₪', 'Sheqel - ILS'),
+        ('₰', 'Penny - GBP')
+
+    ]
+
+    # username = models.CharField(max_length=100, unique=True, null=False)
+    # email_address = models.EmailField(max_length=150, null=False, unique=True)
+    # password = models.CharField(max_length=20, null=False, blank=False)
+    currency = models.CharField(max_length=20, null=True, choices=CURRENCY_CHOICES)
     first_name = models.CharField(max_length=100, null=True)
     last_name = models.CharField(max_length=100, null=True)
     image = models.ImageField(upload_to='images', null=True)
     occupation = models.CharField(max_length=100, null=True)
     city = models.CharField(max_length=100, null=True)
     country = models.CharField(max_length=100, null=True)
+
     phone_number = models.CharField(max_length=15,
                                     null=True,
                                     validators=[
@@ -25,9 +63,11 @@ class User(models.Model):
                                                        message="Phone number must be entered in the format: "
                                                                "'+999999999'"
                                                                ". Up to 15 digits allowed.")])
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile', null=True)
 
 
 class Transaction(models.Model):
+
     EXPENSE_CATEGORIES = [
         ('Housing', 'Housing'),
         ('Transportation', 'Transportation'),
@@ -56,7 +96,7 @@ class Transaction(models.Model):
     description = models.TextField(null=True, max_length=400)
     recurring_transaction = models.BooleanField(default=False)
     frequency = models.CharField(max_length=10, null=True)
-    transaction_title = models.CharField(max_length=50, null=True)
+    transaction_title = models.CharField(max_length=40, null=True)
     date = models.DateTimeField(default=timezone.now)
     next_occurrence = models.DateTimeField(null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction', null=True)
@@ -127,6 +167,7 @@ class Budget(models.Model):
     description = models.TextField(max_length=500)
     duration = models.CharField(max_length=20, null=True, blank=True)
     expiration_date = models.DateTimeField(null=True)
+    date = models.DateTimeField(default=timezone.now, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='budget', null=True)
 
     def save(self, *args, **kwargs):

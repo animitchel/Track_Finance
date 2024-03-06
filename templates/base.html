@@ -74,7 +74,9 @@
                     <a href="#">Feedback</a>
                 </div>
             </li>
-            <li><a href="#">Logout/Sign Out</a></li>
+            {% if user_status %}
+                <li><a href="{% url 'logout' %}">Logout/Sign Out</a></li>
+            {% endif %}
         </ul>
     </div>
 

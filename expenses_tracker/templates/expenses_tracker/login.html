@@ -15,11 +15,16 @@
     <main>
         <div class="container">
             <div class="form-container">
-                <form class="login-form">
+                <form class="login-form" method="post" action="{% url 'login_page' %}">
                     {% csrf_token %}
-                    <form class="login-form">
-                    <label for="usernameOrEmail">Username or Email:</label>
-                    <input type="text" id="usernameOrEmail" name="usernameOrEmail" placeholder="Enter your username or email" required>
+{#                    <form class="login-form">#}
+                    <div class="{% if error_message  %} error {% endif %}" > 
+                        {% if error_message %}
+                            {{ error_message }}
+                        {% endif %}
+                    </div>
+                    <label for="username">Username:</label>
+                    <input type="text" id="username" name="username" placeholder="Enter your username or email" required>
 
                     <label for="password">Password:</label>
                     <input type="password" id="password" name="password" placeholder="Enter your password" required>
