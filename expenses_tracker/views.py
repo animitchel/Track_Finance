@@ -23,11 +23,6 @@ from django.utils import timezone
 # CURRENT_USER = None
 
 
-def got_user(request):
-    current_user = request.user.id
-    return
-
-
 class IndexView(TemplateView):
     template_name = 'expenses_tracker/index.html'
 
@@ -39,8 +34,6 @@ class IndexView(TemplateView):
 
 @login_required
 def overview(request):
-    t = Transaction.objects.get(id=112)
-    print(t.user.profile.currency)
     transactions = Transaction.objects.all().filter(user_id=request.user.id)
 
     category_transactions = transactions.order_by('-date')[:3]
@@ -153,7 +146,6 @@ class CategoryView(LoginRequiredMixin, ListView):
     context_object_name = 'categories'
 
     def get_queryset(self):
-        # .filter(user_id=self.request.session.get('current_user'))
         db = super(CategoryView, self).get_queryset().filter(user_id=self.request.user.id)
         return {field.category: db.filter(category=field.category).aggregate(
             sum=Sum('amount')).get('sum') for field in db.order_by("-date")}
@@ -280,12 +272,6 @@ def profile_details(request):
     )
 
 
-# class ProfileView(LoginRequiredMixin, DetailView):
-#     model = Profile
-#     template_name = 'expenses_tracker/profile.html'
-#     context_object_name = 'profile'
-
-
 @login_required
 def notification(request):
     return render(
@@ -296,17 +282,6 @@ def notification(request):
     )
 
 
-# def account_settings(request):
-#     form = UserForm()
-#     return render(
-#         request,
-#         template_name='expenses_tracker/account_settings.html',
-#         status=200,
-#         context={'form': form}
-#     )
-
-
-# LoginRequiredMixin,
 class AccountSettingsView(LoginRequiredMixin, View):
     template_name = 'expenses_tracker/account_settings.html'
     profile_update = None
@@ -348,8 +323,6 @@ class AccountSettingsView(LoginRequiredMixin, View):
 
             profile_form.save()
 
-            # my_param = 'Profile updated successfully'
-
             request.session['message'] = 'Profile updated successfully'
 
             return HttpResponseRedirect('/account-settings')
@@ -359,28 +332,6 @@ class AccountSettingsView(LoginRequiredMixin, View):
             context={'user_status': request.user.is_authenticated,
                      'form': profile_form}
         )
-
-    # def get_queryset(self):
-    #     return super(AccountSettingsView, self).get_queryset()
-
-    # def get(self, request):
-    #     form = UserForm()
-    #
-    #     return render(request, template_name='expenses_tracker/account_settings.html',
-    #                   context={'form': form})
-    #
-    # def post(self, request):
-    #     print("good")
-    #     form = UserForm(request.POST)
-    #     print(form.is_valid())
-    #
-    #     if form.is_valid():
-    #         form.save()
-    #     # h = form.save(commit=False)
-    #     # print(h.email_address)
-    #     # h.saave
-    #
-    #     return HttpResponseRedirect('/profile-details')
 
 
 class RegisterView(View):
@@ -461,10 +412,6 @@ def login_user(request):
         username = request.POST.get('username')
         password = request.POST.get('password')
 
-        # try:
-        # if '@' in username_or_email:
-        #     user = authenticate(email=username_or_email, password=password)
-        # else:
         user = authenticate(username=username, password=password)
 
         if user is not None:
@@ -479,15 +426,6 @@ def login_user(request):
             logging.info(msg='Authentication failed')
             error_message = "Username or password incorrect"
 
-        # except User.DoesNotExist:
-        #     error_message = "Username or email does not exist"
-        # else:
-        #     pass
-        #     if current_user.password == password:
-        #         request.session["current_user"] = current_user.id
-        #         return HttpResponseRedirect('/overview')
-        #     error_message = "Password does not match"
-
     return render(
         request,
         template_name='expenses_tracker/login.html',
@@ -500,10 +438,8 @@ def login_user(request):
 
 
 def logout_user(request):
-    # request.session.delete()
+    request.session.delete()
     logout(request)
-    print("logged out")
-    print(request.user.id)
     return HttpResponseRedirect('/login')
 
 
@@ -534,6 +470,3 @@ def contact_us(request):
     )
 
 
-class DeleteItemView(LoginRequiredMixin, View):
-    def post(self, request, *args, **kwargs):
-        pass

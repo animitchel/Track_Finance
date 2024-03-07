@@ -3,23 +3,23 @@ from .models import Profile, Budget, Transaction
 from django.contrib.auth.models import User
 
 
-class UserForm(forms.ModelForm):
-    class Meta:
-        model = User
-        fields = ['username', 'email', 'password']
-
-        labels = {'username': 'Username', 'email': 'Email', 'password': 'Password'}
-
-        widgets = {'password': forms.PasswordInput(attrs={'placeholder': 'Enter a password'}),
-                   'username': forms.TextInput(attrs={'placeholder': 'Enter a username'}),
-                   'email': forms.EmailInput(attrs={'placeholder': 'Enter an email address'})
-                   }
-
-        error_messages = {
-            'username': {'required': 'Please enter a username'},
-            'email': {'required': 'Please enter a valid email address'},
-            'password': {'required': 'Please enter a password'}
-        }
+# class UserForm(forms.ModelForm):
+#     class Meta:
+#         model = User
+#         fields = ['username', 'email', 'password']
+#
+#         labels = {'username': 'Username', 'email': 'Email', 'password': 'Password'}
+#
+#         widgets = {'password': forms.PasswordInput(attrs={'placeholder': 'Enter a password'}),
+#                    'username': forms.TextInput(attrs={'placeholder': 'Enter a username'}),
+#                    'email': forms.EmailInput(attrs={'placeholder': 'Enter an email address'})
+#                    }
+#
+#         error_messages = {
+#             'username': {'required': 'Please enter a username'},
+#             'email': {'required': 'Please enter a valid email address'},
+#             'password': {'required': 'Please enter a password'}
+#         }
 
 
 class ProfileForm(forms.ModelForm):
