@@ -22,7 +22,6 @@ class UserForm(forms.ModelForm):
         }
 
 
-
 class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
@@ -72,7 +71,7 @@ class ProfileForm(forms.ModelForm):
                                    widget=forms.TextInput(
                                        attrs={'placeholder': 'Enter your phone number e.g +999999999'}
                                    ))
-    image = forms.ImageField(required=False)
+    # image = forms.ImageField(required=False)
     # username = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Enter a username'}))
 
 

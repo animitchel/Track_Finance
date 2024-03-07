@@ -24,7 +24,7 @@
                         <div class="transaction-info">
                             <h2>{{ field.category|title }}</h2>
                             <hr>
-                            <p><strong>${{ field.amount|floatformat:"2g" }}</strong></p>
+                            <p><strong>{{ user_currency }}{{ field.amount|floatformat:"2g" }}</strong></p>
                             <hr>
                             <span>Desc: <em>{{ field.description }}</em></span>
                         </div>

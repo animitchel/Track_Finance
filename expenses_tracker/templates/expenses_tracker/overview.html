@@ -22,12 +22,12 @@
         
             <div class="card">
                 <h2>Total Expenses</h2>
-                <p><strong style="color: #007bff">${{ transactions|floatformat:"2g" }}</strong></p>
+                <p><strong style="color: #007bff">{{ user_currency }}{{ transactions|floatformat:"2g" }}</strong></p>
             </div>
         
             <div class="card">
                 <h2> Ongoing Total Budgets</h2>
-                <p><strong style="color: #007bff">${{ total_budget|floatformat:"2g" }}</strong></p>
+                <p><strong style="color: #007bff">{{ user_currency }}{{ total_budget|floatformat:"2g" }}</strong></p>
             </div>
         
 {#            <div class="card">#}
@@ -46,7 +46,7 @@
             <a href="{% url 'all_transactions_page' %}"><h2 style="text-align: center">Recent Transactions</h2></a>
             <ul>
                 {% for field in recent_transactions %}
-                <li>{{ field.category }} - ${{ field.amount|floatformat:"2g" }}
+                <li>{{ field.category }} - {{ user_currency }}{{ field.amount|floatformat:"2g" }}
                 <h4 style="text-align: end">{{ field.date|timesince }} ago</h4>
                 <hr>
                 </li>
@@ -57,7 +57,7 @@
             <a href="{% url 'budget-overview_page' %}"><h2 style="text-align: center">Current Budgets</h2></a>
             <ul>
                 {% for field in budget %}
-                <li>{{ field.category }} - ${{ field.budget|floatformat:"2g" }} - ${{ field.amount|floatformat:"2g" }} 
+                <li>{{ field.category }} - {{ user_currency }}{{ field.budget|floatformat:"2g" }} - {{ user_currency }}{{ field.amount|floatformat:"2g" }} 
                     - {{ field.duration }}
                     <h4 style="text-align: end"> {{ field.expiration_date|timeuntil }} left</h4> 
                     <hr>
@@ -71,7 +71,7 @@
             <ul>
                 {% for field in recur_transaction %}
                 <li>
-                    {{ field.category }} - ${{ field.amount|floatformat:"2g" }} - {{ field.transaction_title }} 
+                    {{ field.category }} - {{ user_currency }}{{ field.amount|floatformat:"2g" }} - {{ field.transaction_title }} 
                     <h4 style="text-align: end"> Next in {{ field.next_occurrence|timeuntil }}</h4>
                 <hr>
                 </li>
@@ -83,7 +83,7 @@
             <a href="{% url 'categories_page' %}"><h2 style="text-align: center">Categories : Subtotal</h2></a>
             <ul>
                 {% for key, value in category.items %}
-                    <li style="color: #007bff">{{ key }}: ${{ value|floatformat:"2g" }}</li>
+                    <li style="color: #007bff">{{ key }}: {{ user_currency }}{{ value|floatformat:"2g" }}</li>
                 <hr>
                 {% endfor %}
             </ul>

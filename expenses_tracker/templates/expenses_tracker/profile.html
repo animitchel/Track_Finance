@@ -21,11 +21,10 @@
             <div class="profile-section">
                 <div class="profile-header">
                     <div class="profile-picture">
-                        <img src="{% static '{{ }}' %}" alt="Profile Picture">
-{#                        expenses_tracker/images/mitchel_best.JPG#}
+                        <img src="{{ profile.image.url }}" alt="Profile Picture">
                     </div>
                     <div class="user-details">
-                        <h2>{{ profile.first_name }}</h2>
+                        <h2>{{ profile.first_name }} {{ profile.last_name }}</h2>
                         <p>{{ profile.occupation }}</p>
                     </div>
                 </div>
@@ -33,7 +32,7 @@
                 <ul class="user-info">
                     <li><strong>City:</strong> {{ profile.city }}</li>
                     <li><strong>Country:</strong> {{ profile.country }}</li>
-                    <li><strong>Email:</strong> john.doe@example.com</li>
+                    <li><strong>Email:</strong> {{ profile.user.email }}</li>
                     <li><strong>Phone:</strong> {{ profile.phone_number }}</li>
                 </ul>
             </div>

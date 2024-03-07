@@ -1,0 +1,147 @@
+
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: slategray;
+    color: #333;
+
+}
+
+header {
+    background-color: #2c3e50;
+    color: #fff;
+    padding: 20px;
+    text-align: center;
+    font-family: 'Montserrat', sans-serif;
+    font-weight: bold;
+}
+
+main {
+    flex: 1;
+    margin-top: auto; /* Push main content to the bottom */
+}
+
+.content {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh; /* Set minimum height to 100% of the viewport height */
+}
+
+h1 {
+    margin: 0;
+}
+
+.container {
+    width: 80%;
+    margin: 0 auto;
+}
+
+.intro-section {
+    padding: 40px 0;
+    background-color: dimgray; /* Emerald Green */
+    color: #fff;
+    text-align: center;
+}
+
+.intro-section p {
+    font-size: 18px;
+}
+
+.get-started {
+    padding: 40px 0;
+    background-color: #2c3e50; /* Strong Blue */
+    color: #fff;
+    text-align: center;
+}
+
+.get-started:hover {
+    transform: scale(1.02);
+}
+
+.get-started h2 {
+    color: #fff;
+}
+
+.get-started p {
+    font-size: 18px;
+    margin-bottom: 20px;
+}
+
+.btn {
+    display: inline-block;
+    padding: 10px 20px;
+    background-color: #2ecc71; /* Emerald Green */
+    color: #f4f4f4;
+    text-decoration: none;
+    border-radius: 5px;
+    transition: background-color 0.3s;
+}
+
+.btn:hover {
+    background-color: #27ae60; /* Nephritis Green */
+}
+
+.features {
+    padding: 40px 0;
+    text-align: center;
+}
+
+.features h2 {
+    color: #333;
+}
+
+.features ul {
+    list-style: none;
+    padding: 0;
+}
+
+.features li {
+    margin: 15px 0;
+}
+
+
+
+@media screen and (max-width: 768px) {
+    .container {
+        width: 90%;
+    }
+
+    .intro-section, .get-started, .features, footer {
+        padding: 30px 0;
+    }
+}
+
+footer:hover {
+    transform: scale(1.02);
+}
+
+footer {
+    background-color: #2c3e50;
+    color: #fff;
+    text-align: center;
+    padding: 20px 0;
+}
+
+
+.footer-links {
+    margin-top: 10px;
+}
+
+.footer-links a {
+    color: #fff;
+    text-decoration: none;
+    margin: 0 15px;
+    font-size: 14px;
+}
+
+.footer-links a:hover {
+    text-decoration: underline;
+}
+
+/*footer {*/
+/*    background-color: #2c3e50;*/
+/*    color: #fff;*/
+/*    text-align: center;*/
+/*    padding: 70px 0;*/
+/*}*/

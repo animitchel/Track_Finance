@@ -51,7 +51,7 @@ class Profile(models.Model):
     currency = models.CharField(max_length=20, null=True, choices=CURRENCY_CHOICES)
     first_name = models.CharField(max_length=100, null=True)
     last_name = models.CharField(max_length=100, null=True)
-    image = models.ImageField(upload_to='images', null=True)
+    image = models.ImageField(upload_to='images', null=True, blank=True)
     occupation = models.CharField(max_length=100, null=True)
     city = models.CharField(max_length=100, null=True)
     country = models.CharField(max_length=100, null=True)
@@ -100,6 +100,7 @@ class Transaction(models.Model):
     date = models.DateTimeField(default=timezone.now)
     next_occurrence = models.DateTimeField(null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction', null=True)
+    # profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='transaction', null=True)
 
     def save(self, *args, **kwargs):
 
@@ -169,6 +170,7 @@ class Budget(models.Model):
     expiration_date = models.DateTimeField(null=True)
     date = models.DateTimeField(default=timezone.now, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='budget', null=True)
+    # profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='budget', null=True)
 
     def save(self, *args, **kwargs):
         _duration = {

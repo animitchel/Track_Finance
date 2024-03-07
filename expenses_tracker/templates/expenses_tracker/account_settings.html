@@ -21,7 +21,7 @@
         {% if profile_updated %}
             <div class="success_msg"><h1>{{ profile_updated }}</h1></div>
         {% endif %}
-            <form class="account-form" method="post">
+            <form class="account-form" method="POST" enctype="multipart/form-data">
                 {% csrf_token %}
 {#                <label for="username">Username:</label>#}
 {#                <input type="text" id="username" name="username" value="john_doe" disabled>#}

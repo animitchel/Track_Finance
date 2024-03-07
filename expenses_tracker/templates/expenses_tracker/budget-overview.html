@@ -24,11 +24,11 @@
                         <div class="transaction-info">
                             <h2>{{ field.category|title }}</h2>
                             <hr>
-                            <p>Budget: <strong>${{ field.budget|floatformat:"2g" }}</strong></p>
+                            <p>Budget: <strong>{{ user_currency }}{{ field.budget|floatformat:"2g" }}</strong></p>
                             {% if field.spent > 0 %}
-                                <p>Spent: <strong>${{ field.spent|floatformat:"2g" }}</strong></p>
+                                <p>Spent: <strong>{{ user_currency }}{{ field.spent|floatformat:"2g" }}</strong></p>
                             {% endif %}
-                            <p>Remaining: <strong>${{ field.amount|floatformat:"2g" }}</strong></p>
+                            <p>Remaining: <strong>{{ user_currency }}{{ field.amount|floatformat:"2g" }}</strong></p>
                         </div>
                         
                         <div class="transaction-date">

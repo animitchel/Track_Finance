@@ -39,7 +39,10 @@ class IndexView(TemplateView):
 
 @login_required
 def overview(request):
+    t = Transaction.objects.get(id=112)
+    print(t.user.profile.currency)
     transactions = Transaction.objects.all().filter(user_id=request.user.id)
+
     category_transactions = transactions.order_by('-date')[:3]
     transactions_sum_total = transactions.aggregate(amount=Sum('amount'))
 
@@ -55,6 +58,7 @@ def overview(request):
 
     date_now = timezone.now()
     print(request.session.get('current_user'))
+    user_currency = request.session.get('user_currency')
 
     return render(
         request,
@@ -66,7 +70,8 @@ def overview(request):
                  'total_budget': budget_sum_total['amount'],
                  'recur_transaction': recurring_transaction,
                  'date_now': date_now,
-                 'user_status': request.user.is_authenticated
+                 'user_status': request.user.is_authenticated,
+                 'user_currency': user_currency
                  }
     )
 
@@ -91,6 +96,7 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
         context = super(AllTransactionsView, self).get_context_data(**kwargs)
         context['date_now'] = timezone.now()
         context['user_status'] = self.request.user.is_authenticated
+        context['user_currency'] = self.request.session.get('user_currency')
         return context
 
     def post(self, request, *args, **kwargs):
@@ -155,6 +161,7 @@ class CategoryView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(CategoryView, self).get_context_data(**kwargs)
         context['user_status'] = self.request.user.is_authenticated
+        context['user_currency'] = self.request.session.get('user_currency')
         return context
 
 
@@ -175,6 +182,7 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(RecurringTransactions, self).get_context_data(**kwargs)
         context['user_status'] = self.request.user.is_authenticated
+        context['user_currency'] = self.request.session.get('user_currency')
         return context
 
     def post(self, request, *args, **kwargs):
@@ -203,6 +211,7 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(BudgetOverviewView, self).get_context_data(**kwargs)
         context['user_status'] = self.request.user.is_authenticated
+        context['user_currency'] = self.request.session.get('user_currency')
         return context
 
     def post(self, request, *args, **kwargs):
@@ -261,12 +270,15 @@ def custom_report(request):
 
 @login_required
 def profile_details(request):
+    profile = Profile.objects.get(user=request.user)
     return render(
         request,
         template_name='expenses_tracker/profile.html',
         status=200,
-        context={'user_status': request.user.is_authenticated}
+        context={'user_status': request.user.is_authenticated,
+                 'profile': profile}
     )
+
 
 # class ProfileView(LoginRequiredMixin, DetailView):
 #     model = Profile
@@ -307,12 +319,12 @@ class AccountSettingsView(LoginRequiredMixin, View):
             profile_updated = None
 
         profile = Profile.objects.get(user_id=request.user.id)
+
         profile_form = ProfileForm(
 
             initial={'currency': profile.currency,
                      'first_name': profile.first_name,
                      'last_name': profile.last_name,
-                     'image': profile.image,
                      'occupation': profile.occupation,
                      'city': profile.city,
                      'country': profile.country,
@@ -330,8 +342,10 @@ class AccountSettingsView(LoginRequiredMixin, View):
     def post(self, request, *args, **kwargs):
 
         profile = Profile.objects.get(user_id=request.user.id)
-        profile_form = ProfileForm(request.POST, instance=profile)
+        profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
         if profile_form.is_valid():
+            self.request.session['user_currency'] = profile_form.instance.currency
+
             profile_form.save()
 
             # my_param = 'Profile updated successfully'
@@ -342,7 +356,8 @@ class AccountSettingsView(LoginRequiredMixin, View):
 
         return render(
             request, self.template_name,
-            context={'user_status': request.user.is_authenticated}
+            context={'user_status': request.user.is_authenticated,
+                     'form': profile_form}
         )
 
     # def get_queryset(self):
@@ -411,7 +426,13 @@ class RegisterView(View):
 
                 else:
                     user.save()
+
                     form.instance.user = user
+                    # adding the default blank image
+                    form.instance.image = 'images/c0749b7cc401421662ae901ec8f9f660.jpg'
+
+                    self.request.session['user_currency'] = form.instance.currency
+
                     form.save()
 
                     # current_user = User.objects.get(username=form.cleaned_data["username"])
@@ -449,6 +470,9 @@ def login_user(request):
         if user is not None:
             logging.info(msg='Authentication successful')
             request.session["current_user"] = user.id
+
+            request.session['user_currency'] = user.profile.currency
+
             login(request, user)
             return HttpResponseRedirect('/overview')
         else:
@@ -477,9 +501,9 @@ def login_user(request):
 
 def logout_user(request):
     # request.session.delete()
-    print(request.user.id)
     logout(request)
     print("logged out")
+    print(request.user.id)
     return HttpResponseRedirect('/login')
 
 
