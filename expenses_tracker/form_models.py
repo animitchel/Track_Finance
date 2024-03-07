@@ -26,7 +26,6 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
 
-        # fields = ['username', 'email_address', 'password']
         # fields = "__all__"
         exclude = ["user"]
 

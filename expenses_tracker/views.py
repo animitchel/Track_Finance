@@ -9,7 +9,7 @@ from django.views.generic import CreateView, TemplateView
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView
 from django.db.models import Count, Sum, Avg
 
-from .form_models import ProfileForm, TransactionForm, BudgetForm, UserForm
+from .form_models import ProfileForm, TransactionForm, BudgetForm
 from django.views import View
 from datetime import datetime, timedelta
 from .models import Transaction, Budget, Profile
