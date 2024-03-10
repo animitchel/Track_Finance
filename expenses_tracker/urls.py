@@ -29,7 +29,7 @@ urlpatterns = [
 
     path('income-report/', views.income_report, name='income_report_page'),
 
-    path('custom-report/', views.custom_report, name='custom_report_page'),
+    path('expense-reports-form/', views.expense_report_form, name='expense_reports_form_page'),
 
     path('profile-details/', views.profile_details, name='profile_page'),
 
