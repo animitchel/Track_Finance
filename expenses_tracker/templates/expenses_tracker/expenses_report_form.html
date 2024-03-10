@@ -27,7 +27,7 @@
     </header>
     
     <main>
-        <form action="#" method="post">
+        <form action="{% url 'expense_reports_form_page' %}" method="POST">
             {% csrf_token %}
             <div class="form-group">
                 <label for="purpose">Purpose:</label>
@@ -53,5 +53,4 @@
 {% include "expenses_tracker/include/footer.html" %}
 
 {% endblock %}
-{#</body>#}
-{#</html>#}
+

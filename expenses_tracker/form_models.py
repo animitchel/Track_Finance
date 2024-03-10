@@ -21,6 +21,13 @@ from django.contrib.auth.models import User
 #             'password': {'required': 'Please enter a password'}
 #         }
 
+class ExpenseReportForm(forms.Form):
+    purpose = forms.CharField(max_length=100, required=True)
+    note = forms.CharField(max_length=200, required=True, widget=forms.Textarea(attrs={'rows': 4}))
+    start_date = forms.DateField()
+    end_date = forms.DateField()
+    # widget=forms.DateInput(attrs={'type': 'date'})
+
 
 class ProfileForm(forms.ModelForm):
     class Meta:

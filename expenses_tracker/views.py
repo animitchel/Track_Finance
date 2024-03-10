@@ -254,10 +254,10 @@ def expenses_report(request):
     user = User.objects.get(id=request.user.id)
     user_currency = user.profile.currency
 
-    start_date = request.session.get('start_date')
-    end_date = request.session.get('end_date')
-    purpose = request.session.get('purpose')
-    note = request.session.get('note')
+    start_date = request.session.pop('start_date')
+    end_date = request.session.pop('end_date')
+    purpose = request.session.pop('purpose')
+    note = request.session.pop('note')
 
     reports_transaction = Transaction.objects.filter(
         user_id=user.id).filter(date__date__gte=start_date, date__date__lte=end_date)
@@ -305,11 +305,23 @@ def income_report(request):
 
 @login_required
 def expense_report_form(request):
+
+    from expenses_tracker.form_models import ExpenseReportForm
+
     if request.method == 'POST':
-        for key, value in request.POST.items():
-            if key != 'csrfmiddlewaretoken':
-                request.session[key] = value
-        return HttpResponseRedirect('/expenses-report', request)
+        form = ExpenseReportForm(request.POST or None)
+
+        if form.is_valid():
+            for key, value in form.cleaned_data.items():
+
+                if key != 'csrfmiddlewaretoken':
+                    if key == 'start_date' or key == 'end_date':
+                        # Convert a date object to string
+                        serialized_date = value.isoformat()
+                        request.session[key] = serialized_date
+                    else:
+                        request.session[key] = value
+            return HttpResponseRedirect('/expenses-report')
 
     return render(
         request,
