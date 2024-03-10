@@ -1,5 +1,7 @@
 import logging
+import os
 
+from functools import wraps
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.db import IntegrityError
 from django.http import HttpResponse
@@ -14,13 +16,16 @@ from django.views import View
 from datetime import datetime, timedelta
 from .models import Transaction, Budget, Profile
 from django.contrib.auth.models import User
-from django.contrib.auth import authenticate, login, logout, get_user
+from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
+from django.template.loader import render_to_string
+# import wkhtmltopdf
+# from django_wkhtmltopdf.utils import wkhtmltopdf
+# from weasyprint import HTML
+# from wkhtmltopdf import WKHtmlToPdf()
+
 from django.utils import timezone
-
-
-# CURRENT_USER = None
 
 
 class IndexView(TemplateView):
@@ -50,7 +55,8 @@ def overview(request):
     all_budget = budget.order_by('expiration_date')[:3]
 
     date_now = timezone.now()
-    print(request.session.get('current_user'))
+
+    # print(request.session.get('current_user'))
     user_currency = request.session.get('user_currency')
 
     return render(
@@ -230,13 +236,60 @@ class AddBudgetView(LoginRequiredMixin, CreateView):
         return context
 
 
+def expenses_report_decorator(func):
+    @wraps(func)
+    def decorated_function(request, *args, **kwargs):
+        if not request.session.get('start_date'):
+            return HttpResponseRedirect('/expense-reports-form')
+
+        # If the condition is not met, proceed to the wrapped function
+        return func(request, *args, **kwargs)
+
+    return decorated_function
+
+
+@expenses_report_decorator
 @login_required(login_url='/login/')
 def expenses_report(request):
+    user = User.objects.get(id=request.user.id)
+    user_currency = user.profile.currency
+
+    start_date = request.session.get('start_date')
+    end_date = request.session.get('end_date')
+    purpose = request.session.get('purpose')
+    note = request.session.get('note')
+
+    reports_transaction = Transaction.objects.filter(
+        user_id=user.id).filter(date__date__gte=start_date, date__date__lte=end_date)
+
+    transactions_sum_total = reports_transaction.aggregate(amount=Sum('amount'))
+
+    category = {field.category: reports_transaction.filter(category=field.category).aggregate(
+        sum=Sum('amount')).get('sum') for field in reports_transaction}
+
+    context = {
+        'first_name': user.profile.first_name,
+        'last_name': user.profile.last_name,
+        'occupation': user.profile.occupation,
+        'email': user.email,
+        'start_date': start_date,
+        'end_date': end_date,
+        'user_status': request.user.is_authenticated,
+        'transactions': reports_transaction,
+        'purpose': purpose,
+        'note': note,
+        'user_currency': user_currency,
+        'category': category,
+        'transactions_sum_total': transactions_sum_total['amount']
+    }
+
+    # html_content = render_to_string('expenses_tracker/expenses-report.html', context)
+
     return render(
         request,
         'expenses_tracker/expenses-report.html',
         status=200,
-        context={'user_status': request.user.is_authenticated}
+        context=context
     )
 
 
@@ -251,10 +304,16 @@ def income_report(request):
 
 
 @login_required
-def custom_report(request):
+def expense_report_form(request):
+    if request.method == 'POST':
+        for key, value in request.POST.items():
+            if key != 'csrfmiddlewaretoken':
+                request.session[key] = value
+        return HttpResponseRedirect('/expenses-report', request)
+
     return render(
         request,
-        template_name='expenses_tracker/custom-report.html',
+        template_name='expenses_tracker/expenses_report_form.html',
         status=200,
         context={'user_status': request.user.is_authenticated}
     )
@@ -284,7 +343,6 @@ def notification(request):
 
 class AccountSettingsView(LoginRequiredMixin, View):
     template_name = 'expenses_tracker/account_settings.html'
-    profile_update = None
 
     def get(self, request, *args, **kwargs):
 
@@ -362,7 +420,7 @@ class RegisterView(View):
 
         for key, value in form.data.items():
             if not value:
-                print(key, value)
+                # print(key, value)
                 continue_to_form = False
 
         if form.is_valid() and continue_to_form:
@@ -468,5 +526,3 @@ def contact_us(request):
         status=200,
         context={'user_status': request.user.is_authenticated}
     )
-
-

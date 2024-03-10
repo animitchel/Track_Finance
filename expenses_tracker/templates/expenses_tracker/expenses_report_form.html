@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+    Track Finance - Expenses Report Form
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/expenses_report_form.css' %}">
+{% endblock %}
+
+{#<!DOCTYPE html>#}
+{#<html lang="en">#}
+{#<head>#}
+{#    <meta charset="UTF-8">#}
+{#    <meta name="viewport" content="width=device-width, initial-scale=1.0">#}
+{#    <link rel="stylesheet" href="{% static 'expenses_tracker/expenses_report_form.css' %}">#}
+{#    <title>Expenses Report</title>#}
+{#</head>#}
+{#<body>#}
+{##}
+    
+
+{% block content %}
+    <header>
+        <h1>Expenses Report Form</h1>
+    </header>
+    
+    <main>
+        <form action="#" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <label for="purpose">Purpose:</label>
+                <input type="text" id="purpose" name="purpose" required>
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes or Comments:</label>
+                <textarea id="notes" name="note" rows="4"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="start_date">Report Period:</label>
+                <input type="date" id="start_date" name="start_date" required>
+                <span>to</span>
+                <input type="date" id="end_date" name="end_date" required>
+            </div>
+
+            <button type="submit">Generate Report</button>
+        </form>
+    </main>
+
+{% include "expenses_tracker/include/footer.html" %}
+
+{% endblock %}
+{#</body>#}
+{#</html>#}
