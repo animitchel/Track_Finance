@@ -6,7 +6,8 @@
 {% endblock %}
 
 {% block css_file %}
-    <link rel="stylesheet" href="{% static 'expenses_tracker/expenses_report_form.css' %}">
+    <link rel="stylesheet" href="{% static 'expenses_tracker/expenses_report_form.css' %}"
+          xmlns="http://www.w3.org/1999/html">
 {% endblock %}
 
 {#<!DOCTYPE html>#}
@@ -29,6 +30,9 @@
     <main>
         <form action="{% url 'expense_reports_form_page' %}" method="POST">
             {% csrf_token %}
+            {% if errors %}
+                <em style="color: darkred">{{ errors }}</em>
+            {% endif %}
             <div class="form-group">
                 <label for="purpose">Purpose:</label>
                 <input type="text" id="purpose" name="purpose" required>
@@ -46,7 +50,7 @@
                 <input type="date" id="end_date" name="end_date" required>
             </div>
 
-            <button type="submit">Generate Report</button>
+            <button type="submit">Generate Report PDF</button>
         </form>
     </main>
 

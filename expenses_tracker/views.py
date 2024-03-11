@@ -19,12 +19,7 @@ from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 
-from django.template.loader import render_to_string
-# import wkhtmltopdf
-# from django_wkhtmltopdf.utils import wkhtmltopdf
-# from weasyprint import HTML
-# from wkhtmltopdf import WKHtmlToPdf()
-
+from django.template.loader import render_to_string, get_template
 from django.utils import timezone
 
 
@@ -249,8 +244,9 @@ def expenses_report_decorator(func):
 
 
 @expenses_report_decorator
-@login_required(login_url='/login/')
+@login_required
 def expenses_report(request):
+    from .pdf import convert_html_to_pdf
     user = User.objects.get(id=request.user.id)
     user_currency = user.profile.currency
 
@@ -283,14 +279,12 @@ def expenses_report(request):
         'transactions_sum_total': transactions_sum_total['amount']
     }
 
-    # html_content = render_to_string('expenses_tracker/expenses-report.html', context)
+    # < link rel = "stylesheet" href = "{% static 'expenses_tracker/expenses-report.css' %}" >
 
-    return render(
-        request,
-        'expenses_tracker/expenses-report.html',
-        status=200,
-        context=context
-    )
+    html_content = render_to_string('expenses_tracker/expenses-report.html', context)
+
+    pdf_response = convert_html_to_pdf(html_content)
+    return pdf_response
 
 
 @login_required
@@ -305,9 +299,8 @@ def income_report(request):
 
 @login_required
 def expense_report_form(request):
-
     from expenses_tracker.form_models import ExpenseReportForm
-
+    error = None
     if request.method == 'POST':
         form = ExpenseReportForm(request.POST or None)
 
@@ -322,12 +315,15 @@ def expense_report_form(request):
                     else:
                         request.session[key] = value
             return HttpResponseRedirect('/expenses-report')
+        else:
+            error = form.errors
 
     return render(
         request,
         template_name='expenses_tracker/expenses_report_form.html',
         status=200,
-        context={'user_status': request.user.is_authenticated}
+        context={'user_status': request.user.is_authenticated,
+                 'errors': error}
     )
 
 

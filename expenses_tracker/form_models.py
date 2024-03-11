@@ -22,11 +22,10 @@ from django.contrib.auth.models import User
 #         }
 
 class ExpenseReportForm(forms.Form):
-    purpose = forms.CharField(max_length=100, required=True)
-    note = forms.CharField(max_length=200, required=True, widget=forms.Textarea(attrs={'rows': 4}))
+    purpose = forms.CharField(max_length=150, required=True)
+    note = forms.CharField(max_length=400, required=True)
     start_date = forms.DateField()
     end_date = forms.DateField()
-    # widget=forms.DateInput(attrs={'type': 'date'})
 
 
 class ProfileForm(forms.ModelForm):
