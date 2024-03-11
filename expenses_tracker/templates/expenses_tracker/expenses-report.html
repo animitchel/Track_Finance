@@ -4,14 +4,85 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <style>
+   body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+    }
+    
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    main {
+        flex: 1;
+        margin-top: auto;
+    }
+    
+    .content {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    
+    header h1 {
+        margin: 0;
+        color: #007bff;
+        font-weight: bold;
+    }
+    
+    .employee-info, .report-period {
+        margin-bottom: 10px;
+    }
+    
+    .introduction, .expense-categories,
+    .total-expenses, .notes-comments,
+    .expense-details {
+        margin-bottom: 20px;
+    }
+    
+    ul {
+        list-style: none;
+        padding: 0;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+    
+    th, td {
+        padding: 10px;
+        text-align: left;
+    }
+    
+    tfoot {
+        font-weight: bold;
+    }
+
+   </style> 
   <title>Track Finance - Expenses Report</title>
-  <link rel="stylesheet" href="{% static 'expenses_tracker/expenses-report.css' %}">
+  
 </head>
 
 <main>
     <div class="container">
     <header>
-      <h1>Expenses Report</h1>
+      <h1 >Expenses Report</h1>
       <div class="employee-info">
         <p><strong>Name:</strong> {{ first_name }} {{ last_name }}</p>
         <p><strong>Occupation:</strong> {{ occupation }}</p>
