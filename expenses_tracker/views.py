@@ -46,7 +46,9 @@ def overview(request):
     recurring_transaction = transactions.filter(recurring_transaction=True).order_by('next_occurrence')[:3]
 
     budget = Budget.objects.all().filter(user_id=request.user.id)
-    budget_sum_total = budget.aggregate(amount=Sum('amount'))
+    budget_sum_total = budget.aggregate(budget=Sum('budget'))
+    budget_remaining_total = budget.aggregate(amount=Sum('amount'))
+
     all_budget = budget.order_by('expiration_date')[:3]
 
     date_now = timezone.now()
@@ -61,7 +63,8 @@ def overview(request):
                  'category': category,
                  'recent_transactions': recent_transactions,
                  'budget': all_budget,
-                 'total_budget': budget_sum_total['amount'],
+                 'total_budget': budget_sum_total['budget'],
+                 'budget_remaining_total': budget_remaining_total['amount'],
                  'recur_transaction': recurring_transaction,
                  'date_now': date_now,
                  'user_status': request.user.is_authenticated,
@@ -84,31 +87,57 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
     context_object_name = 'transactions'
 
     def get_queryset(self):
-        return super(AllTransactionsView, self).get_queryset().filter(user_id=self.request.user.id).order_by('-date')
+
+        filter_category = self.request.session.get('filter_category')
+        # order_by = self.request.session.get('order_by')
+        sort_order = self.request.session.get('sort_order')
+
+        query = super(AllTransactionsView, self).get_queryset().filter(user_id=self.request.user.id).order_by('-date')
+
+        if filter_category:
+
+            if sort_order == 'ascending':
+                self.request.session.pop('sort_order')
+                return query.filter(category=self.request.session.pop('filter_category')).order_by(
+                    f"{self.request.session.pop('order_by')}")
+
+            elif sort_order == 'descending':
+                self.request.session.pop('sort_order')
+                return query.filter(category=self.request.session.pop('filter_category')).order_by(
+                    f"-{self.request.session.pop('order_by')}")
+
+        return query
 
     def get_context_data(self, **kwargs):
         context = super(AllTransactionsView, self).get_context_data(**kwargs)
         context['date_now'] = timezone.now()
         context['user_status'] = self.request.user.is_authenticated
         context['user_currency'] = self.request.session.get('user_currency')
+        context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         return context
 
     def post(self, request, *args, **kwargs):
         transaction_id = request.POST.get('all_transaction_id')
-        transaction_obj = Transaction.objects.get(id=transaction_id)
+        if transaction_id:
+            transaction_obj = Transaction.objects.get(id=transaction_id)
 
-        budget_objects = Budget.objects.all().filter(user_id=self.request.user.id)
-        budget_objects_categories = budget_objects.filter(category=transaction_obj.category).filter(
-            date__lte=transaction_obj.date)
+            budget_objects = Budget.objects.all().filter(user_id=self.request.user.id)
+            budget_objects_categories = budget_objects.filter(category=transaction_obj.category).filter(
+                date__lte=transaction_obj.date)
 
-        all_transactions_budget = budget_objects.filter(category="All Transactions").filter(
-            date__lte=transaction_obj.date)
+            all_transactions_budget = budget_objects.filter(category="All Transactions").filter(
+                date__lte=transaction_obj.date)
 
-        budget_calculation(budget_objs=budget_objects_categories, transaction_obj=transaction_obj)
+            budget_calculation(budget_objs=budget_objects_categories, transaction_obj=transaction_obj)
 
-        budget_calculation(budget_objs=all_transactions_budget, transaction_obj=transaction_obj)
+            budget_calculation(budget_objs=all_transactions_budget, transaction_obj=transaction_obj)
 
-        transaction_obj.delete()
+            transaction_obj.delete()
+
+        request.session['filter_category'] = request.POST.get('filter_category')
+        request.session['order_by'] = request.POST.get('order_by')
+        request.session['sort_order'] = request.POST.get('sort_order')
+
         return HttpResponseRedirect('/all_transactions')
 
 
@@ -457,7 +486,7 @@ class RegisterView(View):
 
                     login(request, user)
 
-                    return HttpResponseRedirect('/overview')
+                    return HttpResponseRedirect('/')
             else:
                 password_not_confirm = "Password must be the same on both fields"
         else:
@@ -487,7 +516,7 @@ def login_user(request):
             request.session['user_currency'] = user.profile.currency
 
             login(request, user)
-            return HttpResponseRedirect('/overview')
+            return HttpResponseRedirect('/')
         else:
             logging.info(msg='Authentication failed')
             error_message = "Username or password incorrect"
