@@ -48,47 +48,8 @@
                 </ul>
             </div>
         </section>
-        <aside class="sidebar2">
-        <div class="filter-section">
-            <div class="filter_header">
-                <h2>Filter & Order</h2>
-            </div>
-            <!-- Add filtering and ordering options here -->
-            <form method="post" action="{% url 'all_transactions_page' %}">
-                {% csrf_token %}
-                <div class="filter-options">
-                    <label for="filter_category">Category:</label>
-                    <select id="filter_category" name="filter_category">
-{#                        <option value="" selected="">---------</option>#}
-                        {% for field, value in transaction_category.items %}
-                            <option value="{{ field }}">{{ field }}</option>
-                        {% endfor %}
-{#                        <option value="Food">Food</option>#}
-{#                        <option value="utilities">Utilities</option>#}
-{#                        <option value="entertainment">Entertainment</option>#}
-                    </select>
-                </div>
-                <div class="order-options">
-                    <label for="order_by">Order By:</label>
-                    <select id="order_by" name="order_by">
-                        <option value="date">Date</option>
-                        <option value="amount">Amount</option>
-{#                        <option value="category">Category</option>#}
-                    </select>
-                    <label for="sort_order">Sort Order:</label>
-                    <select id="sort_order" name="sort_order">
-                        <option value="ascending">Ascending</option>
-                        <option value="descending">Descending</option>
-                    </select>
-                </div>
-                <button class="filter_button" type="submit">Apply Filters</button>
-            
-                <br>
-                <a class="reset" href="{% url 'all_transactions_page' %}">Reset</a>
-            </form>    
-            
-        </div>
-    </aside>
+        {% include "expenses_tracker/include/right_sidebar.html" %}
+
     </main>
     
     {% include "expenses_tracker/include/footer.html" %}

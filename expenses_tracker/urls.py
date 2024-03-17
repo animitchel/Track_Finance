@@ -42,6 +42,4 @@ urlpatterns = [
     path('terms_of_service/', views.terms_of_service, name='terms_of_service_page'),
 
     path('contact-us/', views.contact_us, name='contact_us_page'),
-
-    # path('delete-item/<int:pk>/', views.BudgetDeleteItemView.as_view(), name='budget_delete_item')
 ]
