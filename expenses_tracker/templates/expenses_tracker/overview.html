@@ -29,15 +29,7 @@
                 <h2> Ongoing Total Budgets</h2>
                 <p><strong style="color: #007bff">{{ user_currency }}{{ total_budget|floatformat:"2g" }} - {{ user_currency }}{{ budget_remaining_total|floatformat:"2g" }}</strong></p>
             </div>
-        
-{#            <div class="card">#}
-{#                <a href="{% url 'categories_page' %}"><h2 style="color: #343a40">Categories</h2></a>#}
-{#                <ul>#}
-{#                    {% for key, value in category.items %}#}
-{#                        <li style="color: #007bff">{{ key }}: ${{ value|floatformat:"2g" }}</li>#}
-{#                    {% endfor %}#}
-{#                </ul>#}
-{#            </div>#}
+            
         
         </section>
     </div>
