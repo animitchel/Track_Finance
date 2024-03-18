@@ -6,7 +6,6 @@
             <h2>Filter & Order</h2>
         </div>
         <!-- Add filtering and ordering options here -->
-        <form method="post" action="{% url 'all_transactions_page' %}">
             {% csrf_token %}
             <div class="filter-options">
                 <label for="filter_category">Category:</label>
@@ -32,8 +31,7 @@
             <button class="filter_button" type="submit">Apply Filters</button>
 
             <br>
-            <a class="reset" href="{% url 'all_transactions_page' %}">Reset</a>
-        </form>
+            <a class="reset" href="{% url url %}">Reset</a>
 
     </div>
 </div>

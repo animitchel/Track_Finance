@@ -46,7 +46,9 @@
                     </ul>
                 </div>
             </section>
-            {% include "expenses_tracker/include/right_sidebar.html" %}
+            <form method="post" action="{% url 'recurring_transactions_page' %}">
+                {% include "expenses_tracker/include/right_sidebar.html" with url='recurring_transactions_page' %}
+            </form>
         </main> 
     
     {% include "expenses_tracker/include/footer.html" %}

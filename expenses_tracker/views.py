@@ -209,12 +209,15 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
 
     def post(self, request, *args, **kwargs):
         transaction_id = request.POST.get('recurring_transaction_id')
-        transaction_obj = Transaction.objects.get(id=transaction_id)
-        transaction_obj.recurring_transaction = False
-        transaction_obj.frequency = None
-        transaction_obj.transaction_title = None
-        transaction_obj.next_occurrence = None
-        transaction_obj.save()
+        if transaction_id:
+            transaction_obj = Transaction.objects.get(id=transaction_id)
+            transaction_obj.recurring_transaction = False
+            transaction_obj.frequency = None
+            transaction_obj.transaction_title = None
+            transaction_obj.next_occurrence = None
+            transaction_obj.save()
+        else:
+            print(request.POST.get('order_by'))
         return HttpResponseRedirect('/recurring-transactions')
 
 
@@ -238,8 +241,9 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
 
     def post(self, request, *args, **kwargs):
         budget_id = request.POST.get('budget_overview_id')
-
-        Budget.objects.get(id=budget_id).delete()
+        if budget_id:
+            Budget.objects.get(id=budget_id).delete()
+        print(request.POST.get('order_by'))
         return HttpResponseRedirect('/budget-overview')
 
 
@@ -266,7 +270,7 @@ def expenses_report_decorator(func):
         if not request.session.get('start_date'):
             return HttpResponseRedirect('/expense-reports-form')
 
-        # If the condition is not met, proceed to the wrapped function
+        # If the condition is met, proceed to the wrapped function
         return func(request, *args, **kwargs)
 
     return decorated_function
@@ -307,8 +311,6 @@ def expenses_report(request):
         'category': category,
         'transactions_sum_total': transactions_sum_total['amount']
     }
-
-    # < link rel = "stylesheet" href = "{% static 'expenses_tracker/expenses-report.css' %}" >
 
     html_content = render_to_string('expenses_tracker/expenses-report.html', context)
 
