@@ -18,14 +18,12 @@
         <main>
             <section class="category-list">
                 <div class="container">
-                    <p>Filter-coming soon</p>
                     <ul>
                         {% for key, value in categories.items %}
-                        <li class="cat_display">
-                            <a class='dog_display' href="#">{{ key }}  <h4>{{ user_currency }}{{ value|floatformat:"2g" }}</h4>
-                            </a>
-                        </li>
-                            
+                            <li class="cat_display">
+                                <a class='dog_display' href="#">{{ key }}  <h4>{{ user_currency }}{{ value|floatformat:"2g" }}</h4>
+                                </a>
+                            </li>
                         {% endfor %}
                     </ul>
                 </div>

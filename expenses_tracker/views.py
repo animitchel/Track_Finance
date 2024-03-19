@@ -22,6 +22,8 @@ from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string, get_template
 from django.utils import timezone
 
+from .filter_func import expenses_query_filter_func
+
 
 class IndexView(TemplateView):
     template_name = 'expenses_tracker/index.html'
@@ -89,22 +91,16 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
     def get_queryset(self):
 
         filter_category = self.request.session.get('filter_category')
-        # order_by = self.request.session.get('order_by')
         sort_order = self.request.session.get('sort_order')
 
         query = super(AllTransactionsView, self).get_queryset().filter(user_id=self.request.user.id).order_by('-date')
 
+
         if filter_category:
-
-            if sort_order == 'ascending':
-                self.request.session.pop('sort_order')
-                return query.filter(category=self.request.session.pop('filter_category')).order_by(
-                    f"{self.request.session.pop('order_by')}")
-
-            elif sort_order == 'descending':
-                self.request.session.pop('sort_order')
-                return query.filter(category=self.request.session.pop('filter_category')).order_by(
-                    f"-{self.request.session.pop('order_by')}")
+            return expenses_query_filter_func(sort_order=sort_order,
+                                              filter_category=self.request.session.pop('filter_category'),
+                                              order_by=self.request.session.pop('order_by'), query_db=query,
+                                              sort_pop=self.request.session.pop('sort_order'))
 
         return query
 
@@ -177,6 +173,7 @@ class CategoryView(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         db = super(CategoryView, self).get_queryset().filter(user_id=self.request.user.id)
+
         return {field.category: db.filter(category=field.category).aggregate(
             sum=Sum('amount')).get('sum') for field in db.order_by("-date")}
 
@@ -186,6 +183,12 @@ class CategoryView(LoginRequiredMixin, ListView):
         context['user_currency'] = self.request.session.get('user_currency')
         return context
 
+    def post(self, request, *args, **kwargs):
+        request.session['order_by'] = request.POST.get('order_by')
+        request.session['sort_order'] = request.POST.get('sort_order')
+
+        return HttpResponseRedirect('/categories')
+
 
 class RecurringTransactions(LoginRequiredMixin, ListView):
     template_name = 'expenses_tracker/recurring-transactions.html'
@@ -193,18 +196,29 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
     context_object_name = 'recurring_transactions'
 
     def get_queryset(self):
+        filter_category = self.request.session.get('filter_category')
+        sort_order = self.request.session.get('sort_order')
+
         data = (super(RecurringTransactions, self).get_queryset().filter(
             user_id=self.request.user.id).filter(recurring_transaction=True))
+
         for recurring_transaction in data.all():
             if timezone.now() > recurring_transaction.next_occurrence:
                 recurring_transaction.date = timezone.now()
                 recurring_transaction.save()
+
+        if filter_category:
+            return expenses_query_filter_func(sort_order=sort_order,
+                                              filter_category=self.request.session.pop('filter_category'),
+                                              order_by=self.request.session.pop('order_by'), query_db=data,
+                                              sort_pop=self.request.session.pop('sort_order'))
         return data.order_by('next_occurrence')
 
     def get_context_data(self, **kwargs):
         context = super(RecurringTransactions, self).get_context_data(**kwargs)
         context['user_status'] = self.request.user.is_authenticated
         context['user_currency'] = self.request.session.get('user_currency')
+        context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         return context
 
     def post(self, request, *args, **kwargs):
@@ -217,7 +231,9 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
             transaction_obj.next_occurrence = None
             transaction_obj.save()
         else:
-            print(request.POST.get('order_by'))
+            request.session['filter_category'] = request.POST.get('filter_category')
+            request.session['order_by'] = request.POST.get('order_by')
+            request.session['sort_order'] = request.POST.get('sort_order')
         return HttpResponseRedirect('/recurring-transactions')
 
 
@@ -227,23 +243,40 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
     context_object_name = 'budget'
 
     def get_queryset(self):
+        filter_category = self.request.session.get('filter_category')
+        sort_order = self.request.session.get('sort_order')
+        order_by = self.request.session.get('order_by')
+
         db = super(BudgetOverviewView, self).get_queryset().filter(user_id=self.request.user.id)
         for field in db:
             if field.spent >= field.budget or timezone.now() > field.expiration_date:
                 field.delete()
+
+        if filter_category:
+            return expenses_query_filter_func(sort_order=sort_order,
+                                              filter_category=self.request.session.pop('filter_category'),
+                                              order_by=self.request.session.pop('order_by'), query_db=db,
+                                              sort_pop=self.request.session.pop('sort_order'))
+
         return db.order_by('expiration_date')
 
     def get_context_data(self, **kwargs):
         context = super(BudgetOverviewView, self).get_context_data(**kwargs)
         context['user_status'] = self.request.user.is_authenticated
         context['user_currency'] = self.request.session.get('user_currency')
+        context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         return context
 
     def post(self, request, *args, **kwargs):
         budget_id = request.POST.get('budget_overview_id')
+
         if budget_id:
             Budget.objects.get(id=budget_id).delete()
-        print(request.POST.get('order_by'))
+
+        request.session['filter_category'] = request.POST.get('filter_category')
+        request.session['order_by'] = request.POST.get('order_by')
+        request.session['sort_order'] = request.POST.get('sort_order')
+        # print(request.POST.get('order_by'))
         return HttpResponseRedirect('/budget-overview')
 
 
