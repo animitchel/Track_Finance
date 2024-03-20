@@ -95,7 +95,6 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
 
         query = super(AllTransactionsView, self).get_queryset().filter(user_id=self.request.user.id).order_by('-date')
 
-
         if filter_category:
             return expenses_query_filter_func(sort_order=sort_order,
                                               filter_category=self.request.session.pop('filter_category'),

@@ -100,8 +100,6 @@ h1 {
     margin: 15px 0;
 }
 
-
-
 @media screen and (max-width: 768px) {
     .container {
         width: 90%;

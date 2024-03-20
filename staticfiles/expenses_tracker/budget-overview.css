@@ -57,7 +57,6 @@ li:hover {
 }
 
 .transaction-info {
-    /*padding: 10px;*/
     padding-right: 20px;
     padding-bottom: 10px;
     padding-left: 20px;
@@ -75,7 +74,6 @@ li:hover {
 
 .transaction-date {
     background-color: #2c3e50;
-    /*color: #fff;*/
     padding: 15px;
     display: flex;
     align-items: center; /* Align items vertically */
