@@ -71,7 +71,6 @@ li:hover {
 .transaction-info p {
     font-size: 18px;
     color: #007bff;
-    /*#28a745*/
     margin: 10px 0;
 }
 
@@ -90,7 +89,6 @@ li:hover {
 }
 
 .transaction-date p {
-    /*color: #fff;*/
     margin: 0;
     text-align: right;
 }
@@ -98,7 +96,6 @@ li:hover {
 @media screen and (max-width: 768px) {
     .container {
         width: 90%;
-        /*margin-right: 15px;*/
     }
 
 }
