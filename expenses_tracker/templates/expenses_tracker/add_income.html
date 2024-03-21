@@ -1,0 +1,46 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %} Track Finance - Add Income {% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/add_income.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<body>
+
+<header>
+    <h1>Add Income</h1>
+</header>
+
+<main>
+    <section class="add-income-form">
+        <div class="container">
+            <form action="{% url 'add_income_page' %}" method="POST">
+                {% csrf_token %}
+
+                <div class="form-group">
+                    {{ form.source.label_tag }}
+                    {{ form.source.error }}
+                    {{ form.source }}
+                    
+                    {{ form.amount.label_tag }}
+                    {{ form.amount.error }}
+                    {{ form.amount }}
+                    
+                    {{ form.notes.label_tag }}
+                    {{ form.notes.error }}
+                    {{ form.notes }}
+                    
+                    <button type="submit">Add Income</button>
+                </div>
+            </form>
+        </div>
+    </section>
+</main>
+{% include "expenses_tracker/include/footer.html" %}
+
+</body>
+{% endblock %}

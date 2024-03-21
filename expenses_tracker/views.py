@@ -11,10 +11,10 @@ from django.views.generic import CreateView, TemplateView
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView
 from django.db.models import Count, Sum, Avg
 
-from .form_models import ProfileForm, TransactionForm, BudgetForm
+from .form_models import ProfileForm, TransactionForm, BudgetForm, IncomeForm
 from django.views import View
 from datetime import datetime, timedelta
-from .models import Transaction, Budget, Profile
+from .models import Transaction, Budget, Profile, Income
 from django.contrib.auth.models import User
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -69,7 +69,6 @@ def overview(request):
                  'budget_remaining_total': budget_remaining_total['amount'],
                  'recur_transaction': recurring_transaction,
                  'date_now': date_now,
-                 'user_status': request.user.is_authenticated,
                  'user_currency': user_currency
                  }
     )
@@ -106,7 +105,6 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(AllTransactionsView, self).get_context_data(**kwargs)
         context['date_now'] = timezone.now()
-        context['user_status'] = self.request.user.is_authenticated
         context['user_currency'] = self.request.session.get('user_currency')
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         return context
@@ -159,11 +157,6 @@ class AddTransactionView(LoginRequiredMixin, CreateView):
                 budget_calc(field=field, form_instance=form.instance)
         return super(AddTransactionView, self).form_valid(form)
 
-    def get_context_data(self, **kwargs):
-        context = super(AddTransactionView, self).get_context_data(**kwargs)
-        context['user_status'] = self.request.user.is_authenticated
-        return context
-
 
 class CategoryView(LoginRequiredMixin, ListView):
     template_name = 'expenses_tracker/categories.html'
@@ -178,7 +171,6 @@ class CategoryView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(CategoryView, self).get_context_data(**kwargs)
-        context['user_status'] = self.request.user.is_authenticated
         context['user_currency'] = self.request.session.get('user_currency')
         return context
 
@@ -215,7 +207,6 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(RecurringTransactions, self).get_context_data(**kwargs)
-        context['user_status'] = self.request.user.is_authenticated
         context['user_currency'] = self.request.session.get('user_currency')
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         return context
@@ -261,7 +252,6 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs):
         context = super(BudgetOverviewView, self).get_context_data(**kwargs)
-        context['user_status'] = self.request.user.is_authenticated
         context['user_currency'] = self.request.session.get('user_currency')
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         return context
@@ -275,7 +265,6 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
         request.session['filter_category'] = request.POST.get('filter_category')
         request.session['order_by'] = request.POST.get('order_by')
         request.session['sort_order'] = request.POST.get('sort_order')
-        # print(request.POST.get('order_by'))
         return HttpResponseRedirect('/budget-overview')
 
 
@@ -289,11 +278,6 @@ class AddBudgetView(LoginRequiredMixin, CreateView):
         form.instance.budget = float(form.cleaned_data.get('amount'))
         form.instance.user_id = self.request.user.id
         return super(AddBudgetView, self).form_valid(form)
-
-    def get_context_data(self, **kwargs):
-        context = super(AddBudgetView, self).get_context_data(**kwargs)
-        context['user_status'] = self.request.user.is_authenticated
-        return context
 
 
 def expenses_report_decorator(func):
@@ -388,6 +372,29 @@ def expense_report_form(request):
         context={'user_status': request.user.is_authenticated,
                  'errors': error}
     )
+
+
+class IncomeData(LoginRequiredMixin, ListView):
+    model = Income
+    template_name = 'expenses_tracker/income_data.html'
+    context_object_name = 'income_data'
+
+    def get_context_data(self, **kwargs):
+        context = super(IncomeData, self).get_context_data(**kwargs)
+        context['user_currency'] = self.request.session.get('user_currency')
+        # context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
+        return context
+
+
+class IncomeFormView(LoginRequiredMixin, CreateView):
+    model = Income
+    template_name = 'expenses_tracker/add_income.html'
+    form_class = IncomeForm
+    success_url = '/income-data'
+
+    def form_valid(self, form):
+        form.instance.user_id = self.request.user.id
+        return super(IncomeFormView, self).form_valid(form)
 
 
 @login_required

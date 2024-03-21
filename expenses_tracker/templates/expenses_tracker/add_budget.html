@@ -41,11 +41,8 @@
                     </div>
                     
                     <div class="form-group">
-                        <label>
-                            <span class="element1">{{ form.description.label_tag }}</span>
-                            <span class="element2">*</span>
-                            {{ form.description.errors }}
-                        </label>
+                        {{ form.description.label_tag }}
+                        {{ form.description.errors }}
                         {{ form.description }}
                     </div>
                     
@@ -62,20 +59,6 @@
             </div>
         </section>
     </main>
-    
-    <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        var checkbox = document.getElementById('{{ form.durational.id_for_label }}');
-        var options = document.getElementById('recurring-options');
-
-        checkbox.addEventListener('change', function () {
-            options.style.display = checkbox.checked ? 'block' : 'none';
-        });
-
-        // Initial check to set the display
-        options.style.display = checkbox.checked ? 'block' : 'none';
-    });
-</script>
     
     {% include "expenses_tracker/include/footer.html" %}
 {% endblock %}

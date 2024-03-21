@@ -1,0 +1,51 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block page_title %} Track Finance - Income Data {% endblock %}
+
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/income_data.css' %}">
+{% endblock %}
+
+{% block content %}
+    <body>
+
+    <header>
+        <h1>Income Data</h1>
+    </header>
+    
+    <main>
+        <section class="income-list">
+            <div class="container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date</th>
+                            <th>Source</th>
+                            <th>Amount</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <!-- Income data will be dynamically populated here -->
+                        {% for field in income_data %}
+                        <tr>
+                            <td>{{ field.date.date }}</td>
+                            <td>{{ field.source }}</td>
+                            <td>{{ user_currency }}{{ field.amount|floatformat:"2g" }}</td>
+                            <td>{{ field.notes }}</td>
+                        </tr>
+                        {% endfor %}
+                        <!-- Add more rows as needed -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+    </main>
+    </body>
+    {% include "expenses_tracker/include/footer.html" %}
+    
+    
+{% endblock %}
+

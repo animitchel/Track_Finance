@@ -11,7 +11,6 @@ from django.contrib.auth.models import User
 # Create your models here.
 
 class Profile(models.Model):
-
     CURRENCY_CHOICES = [
         ('$', 'Dollar - USD'),
         ('€', 'Euro - EUR'),
@@ -67,7 +66,6 @@ class Profile(models.Model):
 
 
 class Transaction(models.Model):
-
     EXPENSE_CATEGORIES = [
         ('Housing', 'Housing'),
         ('Transportation', 'Transportation'),
@@ -101,6 +99,7 @@ class Transaction(models.Model):
     date = models.DateTimeField(default=timezone.now)
     next_occurrence = models.DateTimeField(null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction', null=True)
+
     # profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='transaction', null=True)
 
     def save(self, *args, **kwargs):
@@ -172,6 +171,7 @@ class Budget(models.Model):
     expiration_date = models.DateTimeField(null=True)
     date = models.DateTimeField(default=timezone.now, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='budget', null=True)
+
     # profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='budget', null=True)
 
     def save(self, *args, **kwargs):
@@ -198,3 +198,23 @@ class Budget(models.Model):
             self.expiration_date = timezone.now() + timedelta(weeks=validity_period)
 
         super(Budget, self).save(*args, **kwargs)
+
+
+class Income(models.Model):
+    INCOME_SOURCES = [
+        ("salary or wages", "Salary or Wages"),
+        ("business income", "Business Income"),
+        ("rental income", "Rental Income"),
+        ("investment income", "Investment Income"),
+        ("interest income", "Interest Income"),
+        ("pension or retirement income", "Pension or Retirement Income"),
+        ("social security benefits", "Social Security Benefits"),
+        ("alimony or child support", "Alimony or Child Support"),
+        ("royalties", "Royalties"),
+        ("gifts or inheritance", "Gifts or Inheritance")
+    ]
+    source = models.CharField(max_length=40, choices=INCOME_SOURCES)
+    amount = models.FloatField()
+    notes = models.TextField(max_length=50)
+    date = models.DateTimeField(default=timezone.now)
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="income_data")

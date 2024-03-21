@@ -28,6 +28,10 @@
                                 <p>Spent: <strong>{{ user_currency }}{{ field.spent|floatformat:"2g" }}</strong></p>
                             {% endif %}
                             <p>Remaining: <strong>{{ user_currency }}{{ field.amount|floatformat:"2g" }}</strong></p>
+                            <hr>
+                            {% if field.description %}
+                                <p id="desc"> Desc: <em>{{ field.description }}</em></p>
+                            {% endif %}
                         </div>
                         
                         <div class="transaction-date">
