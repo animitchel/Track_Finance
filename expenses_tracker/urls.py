@@ -27,6 +27,10 @@ urlpatterns = [
 
     path('expenses-report/', views.expenses_report, name='expenses_report_page'),
 
+    path('income-data/', views.IncomeData.as_view(), name='income_data_page'),
+
+    path('add-income/', views.IncomeFormView.as_view(), name='add_income_page'),
+
     path('income-report/', views.income_report, name='income_report_page'),
 
     path('expense-reports-form/', views.expense_report_form, name='expense_reports_form_page'),

@@ -1,5 +1,5 @@
 from django import forms
-from .models import Profile, Budget, Transaction
+from .models import Profile, Budget, Transaction, Income
 from django.contrib.auth.models import User
 
 
@@ -116,6 +116,7 @@ class TransactionForm(forms.ModelForm):
     transaction_title = forms.CharField(max_length=50, required=False)
     frequency = forms.ChoiceField(required=False, choices=FREQUENCY_CHOICES)
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=True)
 
 
 class BudgetForm(forms.ModelForm):
@@ -158,3 +159,16 @@ class BudgetForm(forms.ModelForm):
 
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10)
     duration = forms.ChoiceField(choices=DURATION_CHOICES)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows':4}), required=False)
+
+
+class IncomeForm(forms.ModelForm):
+    class Meta:
+        model = Income
+        exclude = ['user', 'date']
+
+        labels = {
+            'source': 'Source', 'amount': 'Amount', 'notes': 'Notes'
+        }
+
+    notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=True, max_length=50)

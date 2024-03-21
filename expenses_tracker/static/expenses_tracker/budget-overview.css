@@ -80,6 +80,11 @@ li:hover {
     justify-content: space-between; /* Space items horizontally */
 }
 
+em,
+#desc{
+    color: #1b1b1b;
+}
+
 .transaction-date p {
     color: #fff;
     margin: 0;
