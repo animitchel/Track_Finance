@@ -15,20 +15,20 @@
         <h1>Categories - Subtotal</h1>
     </header>
     
-        <main>
-            <section class="category-list">
-                <div class="container">
-                    <ul>
-                        {% for key, value in categories.items %}
-                            <li class="cat_display">
-                                <a class='dog_display' href="#">{{ key }}  <h4>{{ user_currency }}{{ value|floatformat:"2g" }}</h4>
-                                </a>
-                            </li>
-                        {% endfor %}
-                    </ul>
-                </div>
-            </section>
-        </main>
+    <main>
+        <section class="category-list">
+            <div class="container">
+                <ul>
+                    {% for key, value in categories.items %}
+                        <li class="cat_display">
+                            <a class='dog_display' href="#">{{ key }}  <h4>{{ user_currency }}{{ value|floatformat:"2g" }}</h4>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </section>
+    </main>
     
 {% include "expenses_tracker/include/footer.html" %}
 {% endblock %}

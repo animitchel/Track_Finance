@@ -1,118 +1,202 @@
-{% extends "base.html" %}
-{% load static %}
+{#{% extends "base.html" %}#}
+{#{% load static %}#}
+{##}
+{#{% block page_title %}#}
+{#    Track Finance - Income Report#}
+{#{% endblock %}#}
+{##}
+{#{% block css_file %}#}
+{#    <link rel="stylesheet" href="{% static 'expenses_tracker/income-report.css' %}">#}
+{#{% endblock %}#}
 
-{% block page_title %}
-    Track Finance - Income Report
-{% endblock %}
 
-{% block css_file %}
-    <link rel="stylesheet" href="{% static 'expenses_tracker/income-report.css' %}">
-{% endblock %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+   <style>
+   body {
+        font-family: 'Arial', sans-serif;
+        margin: 0;
+        padding: 0;
+        background-color: #fff;
+    }
+    
+    .container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    header {
+        text-align: center;
+        margin-bottom: 20px;
+    }
+    
+    main {
+        flex: 1;
+        margin-top: auto;
+    }
+    
+    .content {
+        display: flex;
+        flex-direction: column;
+        min-height: 100vh;
+    }
+    
+    header h1 {
+        margin: 0;
+        color: #007bff;
+        font-weight: bold;
+    }
+    
+    .employee-info, .report-period {
+        margin-bottom: 10px;
+    }
+    
+    .introduction, .expense-categories,
+    .total-expenses, .notes-comments,
+    .expense-details {
+        margin-bottom: 20px;
+    }
+    
+    ul {
+        list-style: none;
+        padding: 0;
+    }
+    
+    table {
+        width: 100%;
+        border-collapse: collapse;
+        margin-top: 10px;
+    }
+    
+    table, th, td {
+        border: 1px solid #ddd;
+    }
+    
+    th, td {
+        padding: 10px;
+        text-align: left;
+    }
+    
+    tfoot {
+        font-weight: bold;
+    }
 
-{% block content %}
-    <main>
-        <div class="container">
-            <header>
-              <h1>Income Report</h1>
-              <div class="employee-info">
-                <p><strong>Name:</strong> [Your Name]</p>
-                <p><strong>Position:</strong> [Your Position]</p>
-                <p><strong>Contact:</strong> [Your Email/Phone]</p>
-              </div>
-              <div class="report-period">
-                <p><strong>Report Period:</strong> [Start Date] to [End Date]</p>
-              </div>
-            </header>
+   </style> 
+  <title>Track Finance - Expenses Report</title>
+  
+</head>
+<main>
+    <div class="container">
+        <header>
+          <h1>Income Report</h1>
+          <div class="employee-info">
+            <p><strong>Name:</strong> {{ first_name }} {{ last_name }}</p>
+            <p><strong>Occupation:</strong> {{ occupation }}</p>
+            <p><strong>Contact:</strong> {{ email }}</p>
+          </div>
+          <div class="report-period">
+            <p><strong>Report Period:</strong> {{ start_date }} to {{ end_date }}</p>
+          </div>
+        </header>
+    
+        <section class="introduction">
+          <p>This report outlines the income received during the specified period for - {{ purpose }}.</p>
+        </section>
+    
+        <section class="income-sources">
+          <h2>Income Sources:</h2>
+          <ul>
+              {% for key, value in source.items %}
+                <li>{{ key }}</li>
+              {% endfor %}
+{#            <li>Client Invoices</li>#}
+{#            <li>Consulting Fees</li>#}
+{#            <li>Product Sales</li>#}
+{#            <li>Other</li>#}
+            <!-- Add any additional income sources here -->
+          </ul>
+        </section>
+    
+        <section class="income-details">
+          <h2>Income Details:</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Date</th>
+                <th>Source</th>
+                <th>Description</th>
+                <th>Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for field in income_data %}
+                  <tr>
+                    <td>{{ field.date.date }}</td>
+                    <td>{{ field.source }}</td>
+                    <td>{{ field.notes }}</td>
+                    <td>{{ user_currency }}{{ field.amount|floatformat:"2g" }}</td>
+                  </tr>
+                {% endfor %}
+{#              <tr>#}
+{#                <td>[Date 2]</td>#}
+{#                <td>[Source 2]</td>#}
+{#                <td>[Description 2]</td>#}
+{#                <td>[$XX]</td>#}
+{#              </tr>#}
+{#              <tr>#}
+{#                <td>[Date 3]</td>#}
+{#                <td>[Source 3]</td>#}
+{#                <td>[Description 3]</td>#}
+{#                <td>[$XX]</td>#}
+{#              </tr>#}
+              <!-- Add more rows as needed -->
+            </tbody>
+          </table>
+        </section>
+    
+        <section class="total-income">
+          <h2>Total Income:</h2>
+          <table>
+            <thead>
+              <tr>
+                <th>Source</th>
+                <th>Total Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+                {% for key, value in source.items %}
+                  <tr>
+                    <td>{{ key }}</td>
+                    <td>{{ user_currency }}{{ value|floatformat:"2g" }}</td>
+                  </tr>
+                {% endfor %}
+{#              <tr>#}
+{#                <td>[Source 1]</td>#}
+{#                <td>[$XX]</td>#}
+{#              </tr>#}
+{#              <tr>#}
+{#                <td>[Source 2]</td>#}
+{#                <td>[$XX]</td>#}
+{#              </tr>#}
+{#              <tr>#}
+{#                <td>[Source 3]</td>#}
+{#                <td>[$XX]</td>#}
+{#              </tr>#}
+              <!-- Add more rows as needed -->
+            </tbody>
+          </table>
+          <p><strong>Grand Total:</strong> Total Income: {{ user_currency }}{{ income_data_sum_total|floatformat:"2g" }}</p>
+        </section>
+    
+        <section class="notes-comments">
+          <h2>Notes or Comments:</h2>
+          <p>{{ note }}.</p>
+        </section>
         
-            <section class="introduction">
-              <p>This report outlines the income received during the specified period for [Purpose].</p>
-            </section>
-        
-            <section class="income-sources">
-              <h2>Income Sources:</h2>
-              <ul>
-                <li>Client Invoices</li>
-                <li>Consulting Fees</li>
-                <li>Product Sales</li>
-                <li>Other</li>
-                <!-- Add any additional income sources here -->
-              </ul>
-            </section>
-        
-            <section class="income-details">
-              <h2>Income Details:</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Source</th>
-                    <th>Description</th>
-                    <th>Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>[Date 1]</td>
-                    <td>[Source 1]</td>
-                    <td>[Description 1]</td>
-                    <td>[$XX]</td>
-                  </tr>
-                  <tr>
-                    <td>[Date 2]</td>
-                    <td>[Source 2]</td>
-                    <td>[Description 2]</td>
-                    <td>[$XX]</td>
-                  </tr>
-                  <tr>
-                    <td>[Date 3]</td>
-                    <td>[Source 3]</td>
-                    <td>[Description 3]</td>
-                    <td>[$XX]</td>
-                  </tr>
-                  <!-- Add more rows as needed -->
-                </tbody>
-              </table>
-            </section>
-        
-            <section class="total-income">
-              <h2>Total Income:</h2>
-              <table>
-                <thead>
-                  <tr>
-                    <th>Source</th>
-                    <th>Total Amount</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  <tr>
-                    <td>[Source 1]</td>
-                    <td>[$XX]</td>
-                  </tr>
-                  <tr>
-                    <td>[Source 2]</td>
-                    <td>[$XX]</td>
-                  </tr>
-                  <tr>
-                    <td>[Source 3]</td>
-                    <td>[$XX]</td>
-                  </tr>
-                  <!-- Add more rows as needed -->
-                </tbody>
-              </table>
-              <p><strong>Grand Total:</strong> Total Income: [$XXX]</p>
-            </section>
-        
-            <section class="notes-comments">
-              <h2>Notes or Comments:</h2>
-              <p>Add any necessary notes or comments here.</p>
-            </section>
-        
-            <section class="approval-signatures">
-              <h2>Approval and Signatures:</h2>
-              <p>Include space for signatures and approvals.</p>
-            </section>
-        </div>
-    </main>
-    {% include "expenses_tracker/include/footer.html" %}
-
-{% endblock %}
+    </div>
+</main>
+    

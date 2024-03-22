@@ -24,6 +24,12 @@
                 <h2>Total Expenses</h2>
                 <p><strong style="color: #007bff">{{ user_currency }}{{ transactions|floatformat:"2g" }}</strong></p>
             </div>
+            
+            <div class="card">
+                <h2>Total Income</h2>
+                <p><strong style="color: #007bff">{{ user_currency }}{{ total_income|floatformat:"2g" }}</strong></p>
+            </div>
+            
         
             <div class="card">
                 <h2> Ongoing Total Budgets</h2>
@@ -39,6 +45,17 @@
             <ul>
                 {% for field in recent_transactions %}
                 <li>{{ field.category }} - {{ user_currency }}{{ field.amount|floatformat:"2g" }}
+                <h4 style="text-align: end">{{ field.date|timesince }} ago</h4>
+                <hr>
+                </li>
+                {% endfor %}
+            </ul>
+        </section>
+        <section class="recent-transactions">
+            <a href="{% url 'income_data_page' %}"><h2 style="text-align: center">Recent Income Data</h2></a>
+            <ul>
+                {% for field in income_data %}
+                <li>{{ field.source }} - {{ user_currency }}{{ field.amount|floatformat:"2g" }}
                 <h4 style="text-align: end">{{ field.date|timesince }} ago</h4>
                 <hr>
                 </li>

@@ -116,7 +116,7 @@ class TransactionForm(forms.ModelForm):
     transaction_title = forms.CharField(max_length=50, required=False)
     frequency = forms.ChoiceField(required=False, choices=FREQUENCY_CHOICES)
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10)
-    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=True)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=True, max_length=400)
 
 
 class BudgetForm(forms.ModelForm):
@@ -159,7 +159,8 @@ class BudgetForm(forms.ModelForm):
 
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10)
     duration = forms.ChoiceField(choices=DURATION_CHOICES)
-    description = forms.CharField(widget=forms.Textarea(attrs={'rows':4}), required=False)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=False, max_length=500,
+                                  min_length=50)
 
 
 class IncomeForm(forms.ModelForm):
@@ -171,4 +172,14 @@ class IncomeForm(forms.ModelForm):
             'source': 'Source', 'amount': 'Amount', 'notes': 'Notes'
         }
 
-    notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=True, max_length=50)
+        error_messages = {
+            'source': {'required': 'please select a valid source'},
+            'amount': {'required': 'please enter a valid amount',
+                       'invalid': 'Please enter a valid amount'},
+            'notes': {'required': 'please enter a valid notes/description',
+                      'max_length': 'Please keep your notes 50 characters long and under',
+                      'min_length': 'Please keep your notes/description above 10 characters'}
+
+        }
+
+    notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=True, max_length=50, min_length=10)

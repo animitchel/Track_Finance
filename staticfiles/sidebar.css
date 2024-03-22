@@ -247,6 +247,29 @@ footer {
     margin: 0; /* Remove default margin */
 }
 
+.errorlist {
+  list-style: none;
+  margin: 0.5rem 0;
+  padding: 0;
+  color: #680000;
+}
+
+.errors input {
+  border-color: #680000;
+  background-color: #fde3e3;
+}
+
+.errors label {
+  color: #680000;
+}
+
+.error {
+  color: #680000;
+  /*margin: 0.5rem 0;*/
+  padding: 0;
+  margin-bottom: 6px;
+}
+
 
 
 
