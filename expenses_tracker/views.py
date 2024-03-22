@@ -23,6 +23,7 @@ from django.template.loader import render_to_string, get_template
 from django.utils import timezone
 
 from .filter_func import expenses_query_filter_func
+from expenses_tracker.form_models import ExpenseReportForm
 
 
 class IndexView(TemplateView):
@@ -55,6 +56,10 @@ def overview(request):
 
     date_now = timezone.now()
 
+    income_data = Income.objects.all().filter(user_id=request.user.id)
+    total_income = income_data.aggregate(amount=Sum('amount'))
+    recent_income_data = income_data.order_by('-date')[:3]
+
     # print(request.session.get('current_user'))
     user_currency = request.session.get('user_currency')
 
@@ -69,7 +74,9 @@ def overview(request):
                  'budget_remaining_total': budget_remaining_total['amount'],
                  'recur_transaction': recurring_transaction,
                  'date_now': date_now,
-                 'user_currency': user_currency
+                 'user_currency': user_currency,
+                 'total_income': total_income['amount'],
+                 'income_data': recent_income_data
                  }
     )
 
@@ -173,12 +180,6 @@ class CategoryView(LoginRequiredMixin, ListView):
         context = super(CategoryView, self).get_context_data(**kwargs)
         context['user_currency'] = self.request.session.get('user_currency')
         return context
-
-    def post(self, request, *args, **kwargs):
-        request.session['order_by'] = request.POST.get('order_by')
-        request.session['sort_order'] = request.POST.get('sort_order')
-
-        return HttpResponseRedirect('/categories')
 
 
 class RecurringTransactions(LoginRequiredMixin, ListView):
@@ -294,23 +295,15 @@ def expenses_report_decorator(func):
 
 @expenses_report_decorator
 @login_required
-def expenses_report(request):
+def expenses_report(request, *args, **kwargs):
     from .pdf import convert_html_to_pdf
     user = User.objects.get(id=request.user.id)
-    user_currency = user.profile.currency
+    user_currency = request.session.get('user_currency')
 
     start_date = request.session.pop('start_date')
     end_date = request.session.pop('end_date')
     purpose = request.session.pop('purpose')
     note = request.session.pop('note')
-
-    reports_transaction = Transaction.objects.filter(
-        user_id=user.id).filter(date__date__gte=start_date, date__date__lte=end_date)
-
-    transactions_sum_total = reports_transaction.aggregate(amount=Sum('amount'))
-
-    category = {field.category: reports_transaction.filter(category=field.category).aggregate(
-        sum=Sum('amount')).get('sum') for field in reports_transaction}
 
     context = {
         'first_name': user.profile.first_name,
@@ -319,34 +312,60 @@ def expenses_report(request):
         'email': user.email,
         'start_date': start_date,
         'end_date': end_date,
-        'user_status': request.user.is_authenticated,
-        'transactions': reports_transaction,
         'purpose': purpose,
         'note': note,
         'user_currency': user_currency,
-        'category': category,
-        'transactions_sum_total': transactions_sum_total['amount']
     }
+    id_the_report_form_to_pdf = request.session.get("id_the_report_form_to_pdf")
 
-    html_content = render_to_string('expenses_tracker/expenses-report.html', context)
+    if id_the_report_form_to_pdf:
+
+        income_data = Income.objects.filter(user_id=user.id).filter(date__date__gte=start_date,
+                                                                    date__date__lte=end_date)
+        income_data_sum_total = income_data.aggregate(amount=Sum('amount'))
+
+        source = {field.source: income_data.filter(source=field.source).aggregate(
+            sum=Sum('amount')).get('sum') for field in income_data}
+
+        context["source"] = source
+        context["income_data_sum_total"] = income_data_sum_total['amount']
+        context["income_data"] = income_data
+
+        html_content = render_to_string('expenses_tracker/income-report.html', context)
+        request.session.pop("id_the_report_form_to_pdf")
+
+    else:
+
+        reports_transaction = Transaction.objects.filter(
+            user_id=user.id).filter(date__date__gte=start_date, date__date__lte=end_date)
+
+        transactions_sum_total = reports_transaction.aggregate(amount=Sum('amount'))
+
+        category = {field.category: reports_transaction.filter(category=field.category).aggregate(
+            sum=Sum('amount')).get('sum') for field in reports_transaction}
+
+        context["category"] = category
+        context["transactions_sum_total"] = transactions_sum_total['amount']
+        context["transactions"] = reports_transaction
+
+        html_content = render_to_string('expenses_tracker/expenses-report.html', context)
 
     pdf_response = convert_html_to_pdf(html_content)
     return pdf_response
 
 
-@login_required
-def income_report(request):
-    return render(
-        request,
-        'expenses_tracker/income-report.html',
-        status=200,
-        context={'user_status': request.user.is_authenticated}
-    )
+# @login_required
+# def income_report(request):
+#     return render(
+#         request,
+#         'expenses_tracker/income-report.html',
+#         status=200,
+#         context={'user_status': request.user.is_authenticated}
+#     )
 
 
 @login_required
 def expense_report_form(request):
-    from expenses_tracker.form_models import ExpenseReportForm
     error = None
     if request.method == 'POST':
         form = ExpenseReportForm(request.POST or None)
@@ -385,6 +404,10 @@ class IncomeData(LoginRequiredMixin, ListView):
         # context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         return context
 
+    def get_queryset(self):
+        data = (super(IncomeData, self).get_queryset().filter(user_id=self.request.user.id)).order_by('-date')
+        return data
+
 
 class IncomeFormView(LoginRequiredMixin, CreateView):
     model = Income
@@ -395,6 +418,51 @@ class IncomeFormView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.user_id = self.request.user.id
         return super(IncomeFormView, self).form_valid(form)
+
+
+class IncomeCategoryView(LoginRequiredMixin, ListView):
+    model = Income
+    template_name = 'expenses_tracker/categories.html'
+    context_object_name = 'categories'
+
+    def get_queryset(self):
+        db = super(IncomeCategoryView, self).get_queryset().filter(user_id=self.request.user.id)
+
+        return {field.source: db.filter(source=field.source).aggregate(
+            sum=Sum('amount')).get('sum') for field in db.order_by("-date")}
+
+    def get_context_data(self, **kwargs):
+        context = super(IncomeCategoryView, self).get_context_data(**kwargs)
+        context['user_currency'] = self.request.session.get('user_currency')
+        return context
+
+
+@login_required
+def income_report_form(request):
+    error = None
+    if request.method == 'POST':
+        form = ExpenseReportForm(request.POST or None)
+
+        if form.is_valid():
+            for key, value in form.cleaned_data.items():
+
+                if key != 'csrfmiddlewaretoken':
+                    if key == 'start_date' or key == 'end_date':
+                        # Convert a date object to string
+                        serialized_date = value.isoformat()
+                        request.session[key] = serialized_date
+                    else:
+                        request.session[key] = value
+            request.session["id_the_report_form_to_pdf"] = "income-report"
+            return HttpResponseRedirect('/expenses-report')
+        else:
+            error = form.errors
+
+    return render(
+        request,
+        template_name='expenses_tracker/income_report_form.html',
+        status=200,
+    )
 
 
 @login_required

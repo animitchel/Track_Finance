@@ -14,7 +14,6 @@ header {
 }
 
 main {
-    padding: 20px;
     margin-top: auto; /* Push main content to the bottom */
     flex: 1
 }
@@ -30,9 +29,16 @@ main {
     margin: 0 auto;
 }
 
+
 table {
     width: 100%;
     border-collapse: collapse;
+    margin-top: 20px;
+    margin-bottom: 30px;
+}
+
+table, th, td {
+    border: 1px solid #ddd;
 }
 
 thead th {
@@ -40,15 +46,30 @@ thead th {
     color: #fff;
     padding: 10px;
     text-align: left;
+
 }
 
-/*tbody tr:nth-child(even) {*/
-/*    background-color: #f2f2f2;*/
-/*}*/
+tbody tr:nth-child(even) {
+    background-color: #f2f2f2;
+    color: slategray;
+}
 
 tbody td {
     padding: 10px;
     border-bottom: 1px solid #ccc;
 }
+
+@media screen and (max-width: 768px) {
+    .container {
+        max-width: 960px;
+        margin: 0 auto;
+    }
+    table {
+        margin-bottom: 30px;
+    }
+
+}
+
+
 
 

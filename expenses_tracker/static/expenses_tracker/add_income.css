@@ -24,6 +24,7 @@ main {
 }
 
 .form-group {
+    margin-top: 20px;
     margin-bottom: 20px;
     background-color: #fff;
     border-radius: 8px;
@@ -65,6 +66,13 @@ button:hover {
     display: flex;
     flex-direction: column;
     min-height: 100vh; /* Set minimum height to 100% of the viewport height */
+}
+
+.element1, .element2 {
+    display: inline-block; /* or inline-block */
+}
+.element2 {
+    color: darkred;
 }
 
 

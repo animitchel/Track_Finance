@@ -22,16 +22,19 @@
                 {% csrf_token %}
 
                 <div class="form-group">
-                    {{ form.source.label_tag }}
-                    {{ form.source.error }}
+                    <span class="element1">{{ form.source.label_tag }}</span>
+                    <span class="element2">*</span>
+                    {{ form.source.errors }}
                     {{ form.source }}
                     
-                    {{ form.amount.label_tag }}
-                    {{ form.amount.error }}
+                    <span class="element1">{{ form.amount.label_tag }}</span>
+                    <span class="element2">*</span>
+                    {{ form.amount.errors }}
                     {{ form.amount }}
                     
-                    {{ form.notes.label_tag }}
-                    {{ form.notes.error }}
+                    <span class="element1">{{ form.notes.label_tag }}</span>
+                    <span class="element2">*</span>
+                    {{ form.notes.errors }}
                     {{ form.notes }}
                     
                     <button type="submit">Add Income</button>
