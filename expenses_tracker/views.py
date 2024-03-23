@@ -1,5 +1,4 @@
 import logging
-import os
 
 from functools import wraps
 from django.contrib.auth.mixins import LoginRequiredMixin
@@ -11,7 +10,7 @@ from django.views.generic import CreateView, TemplateView
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView
 from django.db.models import Count, Sum, Avg
 
-from .form_models import ProfileForm, TransactionForm, BudgetForm, IncomeForm
+from .form_models import ProfileForm, TransactionForm, BudgetForm, IncomeForm, ContactForm
 from django.views import View
 from datetime import datetime, timedelta
 from .models import Transaction, Budget, Profile, Income
@@ -22,8 +21,9 @@ from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string, get_template
 from django.utils import timezone
 
-from .filter_func import expenses_query_filter_func
+from .filter_func import expenses_query_filter_func, expenses_query_filter_func_income
 from expenses_tracker.form_models import ExpenseReportForm
+from expenses_tracker.email_client import send_message
 
 
 class IndexView(TemplateView):
@@ -32,6 +32,7 @@ class IndexView(TemplateView):
     def get_context_data(self, **kwargs):
         context = super(IndexView, self).get_context_data(**kwargs)
         context['user_status'] = self.request.user.is_authenticated
+        context['current_year'] = datetime.now().year
         return context
 
 
@@ -75,8 +76,10 @@ def overview(request):
                  'recur_transaction': recurring_transaction,
                  'date_now': date_now,
                  'user_currency': user_currency,
+                 'user_status': request.user.is_authenticated,
                  'total_income': total_income['amount'],
-                 'income_data': recent_income_data
+                 'income_data': recent_income_data,
+                 'current_year': date_now.year
                  }
     )
 
@@ -113,7 +116,9 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
         context = super(AllTransactionsView, self).get_context_data(**kwargs)
         context['date_now'] = timezone.now()
         context['user_currency'] = self.request.session.get('user_currency')
+        context['user_status'] = self.request.user.is_authenticated
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
+        context['current_year'] = datetime.now().year
         return context
 
     def post(self, request, *args, **kwargs):
@@ -164,6 +169,12 @@ class AddTransactionView(LoginRequiredMixin, CreateView):
                 budget_calc(field=field, form_instance=form.instance)
         return super(AddTransactionView, self).form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super(AddTransactionView, self).get_context_data(**kwargs)
+        context['user_status'] = self.request.user.is_authenticated
+        context['current_year'] = datetime.now().year
+        return context
+
 
 class CategoryView(LoginRequiredMixin, ListView):
     template_name = 'expenses_tracker/categories.html'
@@ -179,6 +190,8 @@ class CategoryView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(CategoryView, self).get_context_data(**kwargs)
         context['user_currency'] = self.request.session.get('user_currency')
+        context['user_status'] = self.request.user.is_authenticated
+        context['current_year'] = datetime.now().year
         return context
 
 
@@ -209,7 +222,9 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(RecurringTransactions, self).get_context_data(**kwargs)
         context['user_currency'] = self.request.session.get('user_currency')
+        context['user_status'] = self.request.user.is_authenticated
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
+        context['current_year'] = datetime.now().year
         return context
 
     def post(self, request, *args, **kwargs):
@@ -254,7 +269,9 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(BudgetOverviewView, self).get_context_data(**kwargs)
         context['user_currency'] = self.request.session.get('user_currency')
+        context['user_status'] = self.request.user.is_authenticated
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
+        context['current_year'] = datetime.now().year
         return context
 
     def post(self, request, *args, **kwargs):
@@ -280,6 +297,12 @@ class AddBudgetView(LoginRequiredMixin, CreateView):
         form.instance.user_id = self.request.user.id
         return super(AddBudgetView, self).form_valid(form)
 
+    def get_context_data(self, **kwargs):
+        context = super(AddBudgetView, self).get_context_data(**kwargs)
+        context['user_status'] = self.request.user.is_authenticated
+        context['current_year'] = datetime.now().year
+        return context
+
 
 def expenses_report_decorator(func):
     @wraps(func)
@@ -297,6 +320,7 @@ def expenses_report_decorator(func):
 @login_required
 def expenses_report(request, *args, **kwargs):
     from .pdf import convert_html_to_pdf
+    is_expense_report = True
     user = User.objects.get(id=request.user.id)
     user_currency = request.session.get('user_currency')
 
@@ -316,9 +340,9 @@ def expenses_report(request, *args, **kwargs):
         'note': note,
         'user_currency': user_currency,
     }
-    id_the_report_form_to_pdf = request.session.get("id_the_report_form_to_pdf")
+    request_from_income_report = request.session.pop("request_from_income_report", default=None)
 
-    if id_the_report_form_to_pdf:
+    if request_from_income_report:
 
         income_data = Income.objects.filter(user_id=user.id).filter(date__date__gte=start_date,
                                                                     date__date__lte=end_date)
@@ -332,7 +356,7 @@ def expenses_report(request, *args, **kwargs):
         context["income_data"] = income_data
 
         html_content = render_to_string('expenses_tracker/income-report.html', context)
-        request.session.pop("id_the_report_form_to_pdf")
+        is_expense_report = False
 
     else:
 
@@ -350,18 +374,8 @@ def expenses_report(request, *args, **kwargs):
 
         html_content = render_to_string('expenses_tracker/expenses-report.html', context)
 
-    pdf_response = convert_html_to_pdf(html_content)
+    pdf_response = convert_html_to_pdf(source_html=html_content, is_expense_report=is_expense_report)
     return pdf_response
-
-
-# @login_required
-# def income_report(request):
-#     return render(
-#         request,
-#         'expenses_tracker/income-report.html',
-#         status=200,
-#         context={'user_status': request.user.is_authenticated}
-#     )
 
 
 @login_required
@@ -389,7 +403,8 @@ def expense_report_form(request):
         template_name='expenses_tracker/expenses_report_form.html',
         status=200,
         context={'user_status': request.user.is_authenticated,
-                 'errors': error}
+                 'errors': error,
+                 'current_year': datetime.now().year}
     )
 
 
@@ -401,12 +416,35 @@ class IncomeData(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(IncomeData, self).get_context_data(**kwargs)
         context['user_currency'] = self.request.session.get('user_currency')
-        # context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
+        context['user_status'] = self.request.user.is_authenticated
+        context['transaction_category'] = {cate_.source: None for cate_ in self.object_list}
+        context['current_year'] = datetime.now().year
         return context
 
     def get_queryset(self):
-        data = (super(IncomeData, self).get_queryset().filter(user_id=self.request.user.id)).order_by('-date')
-        return data
+        filter_category = self.request.session.get('filter_category')
+        sort_order = self.request.session.get('sort_order')
+        order_by = self.request.session.get('order_by')
+        data = (super(IncomeData, self).get_queryset().filter(user_id=self.request.user.id))
+
+        if filter_category:
+            return expenses_query_filter_func_income(sort_order=sort_order,
+                                                     filter_category=self.request.session.pop('filter_category'),
+                                                     order_by=self.request.session.pop('order_by'), query_db=data,
+                                                     sort_pop=self.request.session.pop('sort_order'))
+        return data.order_by('-date')
+
+    def post(self, request, *args, **kwargs):
+        income_data_id = request.POST.get('income_data_id')
+
+        if income_data_id:
+            Income.objects.get(id=income_data_id).delete()
+
+
+        request.session['filter_category'] = request.POST.get('filter_category')
+        request.session['order_by'] = request.POST.get('order_by')
+        request.session['sort_order'] = request.POST.get('sort_order')
+        return HttpResponseRedirect('/income-data')
 
 
 class IncomeFormView(LoginRequiredMixin, CreateView):
@@ -418,6 +456,12 @@ class IncomeFormView(LoginRequiredMixin, CreateView):
     def form_valid(self, form):
         form.instance.user_id = self.request.user.id
         return super(IncomeFormView, self).form_valid(form)
+
+    def get_context_data(self, **kwargs):
+        context = super(IncomeFormView, self).get_context_data(**kwargs)
+        context['user_status'] = self.request.user.is_authenticated
+        context['current_year'] = datetime.now().year
+        return context
 
 
 class IncomeCategoryView(LoginRequiredMixin, ListView):
@@ -434,6 +478,8 @@ class IncomeCategoryView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(IncomeCategoryView, self).get_context_data(**kwargs)
         context['user_currency'] = self.request.session.get('user_currency')
+        context['user_status'] = self.request.user.is_authenticated
+        context['current_year'] = datetime.now().year
         return context
 
 
@@ -453,7 +499,7 @@ def income_report_form(request):
                         request.session[key] = serialized_date
                     else:
                         request.session[key] = value
-            request.session["id_the_report_form_to_pdf"] = "income-report"
+            request.session["request_from_income_report"] = True
             return HttpResponseRedirect('/expenses-report')
         else:
             error = form.errors
@@ -462,6 +508,11 @@ def income_report_form(request):
         request,
         template_name='expenses_tracker/income_report_form.html',
         status=200,
+        context={
+            'errors': error,
+            'user_status': request.user.is_authenticated,
+            'current_year': datetime.now().year
+        }
     )
 
 
@@ -473,7 +524,8 @@ def profile_details(request):
         template_name='expenses_tracker/profile.html',
         status=200,
         context={'user_status': request.user.is_authenticated,
-                 'profile': profile}
+                 'profile': profile,
+                 'current_year': datetime.now().year}
     )
 
 
@@ -483,7 +535,8 @@ def notification(request):
         request,
         template_name='expenses_tracker/notification.html',
         status=200,
-        context={'user_status': request.user.is_authenticated}
+        context={'user_status': request.user.is_authenticated,
+                 'current_year': datetime.now().year}
     )
 
 
@@ -515,7 +568,8 @@ class AccountSettingsView(LoginRequiredMixin, View):
             request, self.template_name,
             context={'form': profile_form,
                      'user_status': request.user.is_authenticated,
-                     'profile_updated': profile_updated}
+                     'profile_updated': profile_updated,
+                     'current_year': datetime.now().year}
         )
 
     def post(self, request, *args, **kwargs):
@@ -534,7 +588,8 @@ class AccountSettingsView(LoginRequiredMixin, View):
         return render(
             request, self.template_name,
             context={'user_status': request.user.is_authenticated,
-                     'form': profile_form}
+                     'form': profile_form,
+                     'current_year': datetime.now().year}
         )
 
 
@@ -605,7 +660,8 @@ class RegisterView(View):
                       context={"form": form, "password_not_confirm": password_not_confirm,
                                'error_message': error_message,
                                'fields_to_display': fields_to_display,
-                               'user_status': request.user.is_authenticated
+                               'user_status': request.user.is_authenticated,
+                               'current_year': datetime.now().year
                                }
                       )
 
@@ -636,7 +692,8 @@ def login_user(request):
         status=200,
         context={
             "error_message": error_message,
-            'user_status': request.user.is_authenticated
+            'user_status': request.user.is_authenticated,
+            'current_year': datetime.now().year
         }
     )
 
@@ -652,7 +709,8 @@ def privacy_policy(request):
         request,
         template_name='expenses_tracker/privacy_policy.html',
         status=200,
-        context={'user_status': request.user.is_authenticated}
+        context={'user_status': request.user.is_authenticated,
+                 'current_year': datetime.now().year}
     )
 
 
@@ -661,14 +719,50 @@ def terms_of_service(request):
         request,
         template_name='expenses_tracker/terms_of_service.html',
         status=200,
-        context={'user_status': request.user.is_authenticated}
+        context={'user_status': request.user.is_authenticated,
+                 'current_year': datetime.now().year}
     )
 
 
 def contact_us(request):
+    """
+    Handle the contact form submission.
+
+    If the request method is POST, extract form data and send a message.
+    Display a confirmation message on successful submission.
+
+    Returns:
+        str: Rendered HTML template.
+
+    """
+
+    is_message_sent = request.session.pop('is_message_sent', False)
+
+    form = ContactForm(request.POST or None)
+
+    if form.is_valid():
+        # Extract form data
+        name = form.cleaned_data.get("name")
+        email = form.cleaned_data.get("email")
+        phone = form.cleaned_data.get("phone")
+        message = form.cleaned_data.get("message")
+
+        # Send the message
+        send_message(name, email, phone, message)
+
+        # Set a flag to indicate that the message has been sent
+        request.session['is_message_sent'] = True
+        # Render the template with the flag
+        return HttpResponseRedirect('/contact-us')
+        # return render_template("contact.html", msg_sent=sent)
+
+    # Render the contact form template for GET requests
     return render(
         request,
         template_name='expenses_tracker/contact_us.html',
         status=200,
-        context={'user_status': request.user.is_authenticated}
+        context={'user_status': request.user.is_authenticated,
+                 'is_message_sent': is_message_sent,
+                 'form': form,
+                 'current_year': datetime.now().year}
     )

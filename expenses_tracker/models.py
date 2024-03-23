@@ -217,4 +217,7 @@ class Income(models.Model):
     amount = models.FloatField()
     notes = models.TextField(max_length=50)
     date = models.DateTimeField(default=timezone.now)
+    # recurring_transaction = models.BooleanField(default=False, blank=True)
+    # frequency = models.CharField(max_length=10, blank=True)
+    # transaction_title = models.CharField(max_length=40, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="income_data")
