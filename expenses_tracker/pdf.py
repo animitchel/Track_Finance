@@ -26,10 +26,13 @@ from xhtml2pdf import pisa
 #     return result
 
 
-def convert_html_to_pdf(source_html):
+def convert_html_to_pdf(source_html, is_expense_report):
     # Initialize HttpResponse object to store the PDF result
     result = HttpResponse(content_type='application/pdf')
-    result['Content-Disposition'] = 'attachment; filename="Expenses_Report.pdf"'
+    if is_expense_report:
+        result['Content-Disposition'] = 'attachment; filename="Expenses_Report.pdf"'
+    else:
+        result['Content-Disposition'] = 'attachment; filename="Incomes_Report.pdf"'
 
     # Create a BytesIO object to capture the PDF content
     pdf_content = BytesIO()

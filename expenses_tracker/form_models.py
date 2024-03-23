@@ -1,4 +1,5 @@
 from django import forms
+from phonenumber_field.formfields import PhoneNumberField
 from .models import Profile, Budget, Transaction, Income
 from django.contrib.auth.models import User
 
@@ -21,11 +22,29 @@ from django.contrib.auth.models import User
 #             'password': {'required': 'Please enter a password'}
 #         }
 
+FREQUENCY_CHOICES = [
+        ('weekly', 'Weekly'),
+        ('monthly', 'Monthly'),
+        ('quarterly', 'Quarterly'),
+        ('yearly', 'Yearly'),
+        ('2 weeks', 'Biweekly'),
+        ('3 weeks', 'Every 3 weeks'),
+        ('2 months', 'Bimonthly'),
+        ('4 months', 'Every 4 months'),
+        ('5 months', 'Every 5 months'),
+        ('6 months', 'Semiannual'),
+        ('7 months', 'Every 7 months'),
+        ('8 months', 'Every 8 months'),
+        ('9 months', 'Every 9 months'),
+        ('10 months', 'Every 10 months'),
+        ('11 months', 'Every 11 months')
+    ]
+
 class ExpenseReportForm(forms.Form):
     purpose = forms.CharField(max_length=150, required=True)
     note = forms.CharField(max_length=400, required=True)
-    start_date = forms.DateField()
-    end_date = forms.DateField()
+    start_date = forms.DateField(required=True)
+    end_date = forms.DateField(required=True)
 
 
 class ProfileForm(forms.ModelForm):
@@ -81,23 +100,7 @@ class ProfileForm(forms.ModelForm):
 
 
 class TransactionForm(forms.ModelForm):
-    FREQUENCY_CHOICES = [
-        ('weekly', 'Weekly'),
-        ('monthly', 'Monthly'),
-        ('quarterly', 'Quarterly'),
-        ('yearly', 'Yearly'),
-        ('2 weeks', 'Biweekly'),
-        ('3 weeks', 'Every 3 weeks'),
-        ('2 months', 'Bimonthly'),
-        ('4 months', 'Every 4 months'),
-        ('5 months', 'Every 5 months'),
-        ('6 months', 'Semiannual'),
-        ('7 months', 'Every 7 months'),
-        ('8 months', 'Every 8 months'),
-        ('9 months', 'Every 9 months'),
-        ('10 months', 'Every 10 months'),
-        ('11 months', 'Every 11 months')
-    ]
+
 
     class Meta:
         model = Transaction
@@ -183,3 +186,41 @@ class IncomeForm(forms.ModelForm):
         }
 
     notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=True, max_length=50, min_length=10)
+    # frequency = forms.ChoiceField(required=False, choices=FREQUENCY_CHOICES)
+
+
+class ContactForm(forms.Form):
+    name = forms.CharField(
+        max_length=30,
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Please enter your name'}),
+        error_messages={'required': 'Please enter your name.'}
+    )
+    email = forms.EmailField(
+        required=True,
+        max_length=100,
+        widget=forms.EmailInput(attrs={'placeholder': 'Please enter your email address'}),
+        error_messages={'required': 'Please enter your email address.'}
+    )
+    message = forms.CharField(
+        required=True,
+        widget=forms.Textarea(attrs={'rows': 4, 'placeholder': 'Please enter a message'}),
+        max_length=500,
+        min_length=10,
+        error_messages={
+            'required': 'Please enter a message.',
+            'min_length': 'Message must be at least 10 characters long.',
+            'max_length': 'Message must be less than 500 characters long'
+        }
+    )
+    phone = PhoneNumberField(
+        required=True,
+        widget=forms.TextInput(attrs={'placeholder': 'Enter your phone number e.g +12125552368'}),
+        max_length=15,
+        min_length=10,
+        error_messages={
+            'required': 'Please enter your phone number.',
+            'min_length': 'Phone number must be at least 10 digits long.',
+            'max_length': 'Phone number must be less than 15 digits long.'
+        }
+    )

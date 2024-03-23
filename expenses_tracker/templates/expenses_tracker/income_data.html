@@ -35,6 +35,13 @@
                             <td>{{ field.source }}</td>
                             <td>{{ user_currency }}{{ field.amount|floatformat:"2g" }}</td>
                             <td>{{ field.notes }}</td>
+                            <td>
+                                <form method="POST" action="{% url 'income_data_page' %}">
+                                    {% csrf_token %}
+                                    <input type="hidden" name="income_data_id" value="{{ field.id }}">
+                                    <button type="submit">delete</button>
+                                </form>
+                            </td>
                         </tr>
                         {% endfor %}
                         <!-- Add more rows as needed -->
@@ -42,6 +49,9 @@
                 </table>
             </div>
         </section>
+    <form method="post" action="{% url 'income_data_page' %}">
+        {% include "expenses_tracker/include/right_sidebar.html" with url='income_data_page' %}
+    </form>
     </main>
     </body>
     {% include "expenses_tracker/include/footer.html" %}

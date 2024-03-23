@@ -31,10 +31,11 @@ main {
 
 
 table {
-    width: 100%;
+    width: 90%;
     border-collapse: collapse;
     margin-top: 20px;
     margin-bottom: 30px;
+
 }
 
 table, th, td {
@@ -68,6 +69,19 @@ tbody td {
         margin-bottom: 30px;
     }
 
+}
+
+label {
+    color: #1b1b1b;
+}
+
+td button {
+    color: #2c3e50;
+}
+
+td button:hover {
+    color: darkred;
+    transform: scale(1.02);
 }
 
 

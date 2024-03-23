@@ -68,6 +68,26 @@ button:hover {
     min-height: 100vh; /* Set minimum height to 100% of the viewport height */
 }
 
+/* Ensure consistent styling for checkboxes across browsers */
+input[type="checkbox"] {
+    -webkit-appearance: none; /* Remove default checkbox styles in WebKit browsers */
+    -moz-appearance: none; /* Remove default checkbox styles in Firefox */
+    appearance: none;
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    border: 1px solid #ccc;
+    border-radius: 3px;
+    margin-right: 5px;
+    position: relative;
+}
+
+input[type="checkbox"]:checked {
+    background-color: #007bff; /* Change background color when checked */
+    border-color: #007bff; /* Change border color when checked */
+    color: #fff; /* Change text color when checked */
+}
+
 .element1, .element2 {
     display: inline-block; /* or inline-block */
 }
