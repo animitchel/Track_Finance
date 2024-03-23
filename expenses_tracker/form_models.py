@@ -1,6 +1,7 @@
 from django import forms
 from phonenumber_field.formfields import PhoneNumberField
 from .models import Profile, Budget, Transaction, Income
+from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
 
 
@@ -190,6 +191,9 @@ class IncomeForm(forms.ModelForm):
 
 
 class ContactForm(forms.Form):
+    phone_regex = RegexValidator(regex=r'^\+?1?\d{9,15}$',
+                                 message="Phone number must be entered in the format: '+999999999'. Up to 15 digits "
+                                         "allowed.")
     name = forms.CharField(
         max_length=30,
         required=True,
@@ -222,5 +226,6 @@ class ContactForm(forms.Form):
             'required': 'Please enter your phone number.',
             'min_length': 'Phone number must be at least 10 digits long.',
             'max_length': 'Phone number must be less than 15 digits long.'
-        }
+        },
+        validators=[phone_regex]
     )
