@@ -24,7 +24,7 @@ def send_message(name, email, phone, message) -> None:
         connection.starttls()
 
         # Login to the email account
-        connection.login(user='jeremylawrence112@gmail.com', password=os.getenv("PASSWORD"))
+        connection.login(user=os.getenv("EMAIL_USER"), password=os.getenv("PASSWORD"))
 
         # Send the email message
         connection.sendmail(from_addr='jeremylawrence112@gmail.com',
