@@ -10,6 +10,24 @@ from django.contrib.auth.models import User
 
 # Create your models here.
 
+_frequency = {
+            'weekly': 1,
+            'monthly': 4.4286,
+            'quarterly': 13.4286,
+            'yearly': 54.2857,
+            '2 weeks': 2,
+            '3 weeks': 3,
+            '2 months': 9.0000,
+            '4 months': 17.8571,
+            '5 months': 22.5714,
+            '6 months': 27.0000,
+            '7 months': 31.4286,
+            '8 months': 36.1429,
+            '9 months': 40.5714,
+            '10 months': 45.0000,
+            '11 months': 49.5714,
+        }
+
 class Profile(models.Model):
     CURRENCY_CHOICES = [
         ('$', 'Dollar - USD'),
@@ -104,24 +122,6 @@ class Transaction(models.Model):
 
     def save(self, *args, **kwargs):
 
-        _frequency = {
-            'weekly': 1,
-            'monthly': 4.4286,
-            'quarterly': 13.4286,
-            'yearly': 54.2857,
-            '2 weeks': 2,
-            '3 weeks': 3,
-            '2 months': 9.0000,
-            '4 months': 17.8571,
-            '5 months': 22.5714,
-            '6 months': 27.0000,
-            '7 months': 31.4286,
-            '8 months': 36.1429,
-            '9 months': 40.5714,
-            '10 months': 45.0000,
-            '11 months': 49.5714,
-        }
-
         if self.recurring_transaction:
             frequency = next(_frequency[key] for key in _frequency if key == self.frequency)
             self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
@@ -213,11 +213,26 @@ class Income(models.Model):
         ("royalties", "Royalties"),
         ("gifts or inheritance", "Gifts or Inheritance")
     ]
-    source = models.CharField(max_length=40, choices=INCOME_SOURCES)
+    category = models.CharField(max_length=40, choices=INCOME_SOURCES)
     amount = models.FloatField()
     notes = models.TextField(max_length=50)
     date = models.DateTimeField(default=timezone.now)
-    # recurring_transaction = models.BooleanField(default=False, blank=True)
-    # frequency = models.CharField(max_length=10, blank=True)
-    # transaction_title = models.CharField(max_length=40, blank=True)
+    recurring_transaction = models.BooleanField(default=False)
+    frequency = models.CharField(max_length=10, blank=True, null=True)
+    transaction_title = models.CharField(max_length=40, blank=True, null=True)
+    next_occurrence = models.DateTimeField(null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="income_data")
+
+    def save(self, *args, **kwargs):
+        if self.recurring_transaction:
+            frequency = next(_frequency[key] for key in _frequency if key == self.frequency)
+            self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
+
+            if not self.transaction_title:
+                self.transaction_title = self.category
+
+        else:
+            self.frequency = None
+            self.transaction_title = None
+
+        super(Income, self).save(*args, **kwargs)

@@ -1,0 +1,32 @@
+{% load static %}
+<section class="transaction-list">
+    <div class="container">
+        <ul>
+            {% for field in recurring_transactions_incomes %}
+            <li class="list_display">
+                <div class="transaction-info">
+                    <h2>{{ field.transaction_title|title }}</h2>
+                    <hr>
+                    <p>Amount: <strong>{{ user_currency }}{{ field.amount|floatformat:"2g" }}</strong></p>
+                    <p>Category: {{ field.category }}</p>
+                    <p>Frequency: {{ field.frequency }}</p>
+                </div>
+                <div class="transaction-date">
+                    <div class="delete-button">
+                        <form method="POST" action="{% url url_recur %}">
+                            {% csrf_token %}
+                            <input type="hidden" name="recurring_transaction_id" value="{{ field.id }}">
+                            <button type="submit"><img src="{% static 'expenses_tracker/images/delete-189.png' %}" alt="Delete"></button>
+                        </form>
+                    </div>
+                    <div class="date-info">
+{#                                <p>Next Occurrence: {{ field.next_occurrence|date:"D, d M Y | H:i:s" }}</p>#}
+                        <p>Next occurrence in: {{ field.next_occurrence|timeuntil }}</p>
+                    </div>
+                </div>
+                
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+</section>

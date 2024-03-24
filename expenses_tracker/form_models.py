@@ -170,14 +170,15 @@ class BudgetForm(forms.ModelForm):
 class IncomeForm(forms.ModelForm):
     class Meta:
         model = Income
-        exclude = ['user', 'date']
+        exclude = ['user', 'date', 'next_occurrence']
 
         labels = {
-            'source': 'Source', 'amount': 'Amount', 'notes': 'Notes'
+            'category': 'Source', 'amount': 'Amount', 'notes': 'Notes', 'recurring_transaction': 'Recurring Income',
+            'transaction_title': 'Income Title'
         }
 
         error_messages = {
-            'source': {'required': 'please select a valid source'},
+            'category': {'required': 'please select a valid source'},
             'amount': {'required': 'please enter a valid amount',
                        'invalid': 'Please enter a valid amount'},
             'notes': {'required': 'please enter a valid notes/description',
@@ -187,7 +188,8 @@ class IncomeForm(forms.ModelForm):
         }
 
     notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=True, max_length=50, min_length=10)
-    # frequency = forms.ChoiceField(required=False, choices=FREQUENCY_CHOICES)
+    frequency = forms.ChoiceField(required=False, choices=FREQUENCY_CHOICES)
+    amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10, required=True)
 
 
 class ContactForm(forms.Form):
