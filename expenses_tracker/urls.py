@@ -21,6 +21,8 @@ urlpatterns = [
 
     path('recurring-transactions/', views.RecurringTransactions.as_view(), name='recurring_transactions_page'),
 
+    path('recurring-incomes/', views.RecurringIncomes.as_view(), name='recurring_income_page'),
+
     path('budget-overview/', views.BudgetOverviewView.as_view(), name='budget-overview_page'),
 
     path('add-budget/', views.AddBudgetView.as_view(), name='add_budget_page'),

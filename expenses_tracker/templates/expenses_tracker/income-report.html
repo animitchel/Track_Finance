@@ -1,14 +1,3 @@
-{#{% extends "base.html" %}#}
-{#{% load static %}#}
-{##}
-{#{% block page_title %}#}
-{#    Track Finance - Income Report#}
-{#{% endblock %}#}
-{##}
-{#{% block css_file %}#}
-{#    <link rel="stylesheet" href="{% static 'expenses_tracker/income-report.css' %}">#}
-{#{% endblock %}#}
-
 
 <!DOCTYPE html>
 <html lang="en">
@@ -113,11 +102,6 @@
               {% for key, value in source.items %}
                 <li>{{ key }}</li>
               {% endfor %}
-{#            <li>Client Invoices</li>#}
-{#            <li>Consulting Fees</li>#}
-{#            <li>Product Sales</li>#}
-{#            <li>Other</li>#}
-            <!-- Add any additional income sources here -->
           </ul>
         </section>
     
@@ -136,24 +120,11 @@
                 {% for field in income_data %}
                   <tr>
                     <td>{{ field.date.date }}</td>
-                    <td>{{ field.source }}</td>
+                    <td>{{ field.category }}</td>
                     <td>{{ field.notes }}</td>
                     <td>{{ user_currency }}{{ field.amount|floatformat:"2g" }}</td>
                   </tr>
                 {% endfor %}
-{#              <tr>#}
-{#                <td>[Date 2]</td>#}
-{#                <td>[Source 2]</td>#}
-{#                <td>[Description 2]</td>#}
-{#                <td>[$XX]</td>#}
-{#              </tr>#}
-{#              <tr>#}
-{#                <td>[Date 3]</td>#}
-{#                <td>[Source 3]</td>#}
-{#                <td>[Description 3]</td>#}
-{#                <td>[$XX]</td>#}
-{#              </tr>#}
-              <!-- Add more rows as needed -->
             </tbody>
           </table>
         </section>
@@ -174,19 +145,6 @@
                     <td>{{ user_currency }}{{ value|floatformat:"2g" }}</td>
                   </tr>
                 {% endfor %}
-{#              <tr>#}
-{#                <td>[Source 1]</td>#}
-{#                <td>[$XX]</td>#}
-{#              </tr>#}
-{#              <tr>#}
-{#                <td>[Source 2]</td>#}
-{#                <td>[$XX]</td>#}
-{#              </tr>#}
-{#              <tr>#}
-{#                <td>[Source 3]</td>#}
-{#                <td>[$XX]</td>#}
-{#              </tr>#}
-              <!-- Add more rows as needed -->
             </tbody>
           </table>
           <p><strong>Grand Total:</strong> Total Income: {{ user_currency }}{{ income_data_sum_total|floatformat:"2g" }}</p>

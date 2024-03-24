@@ -21,7 +21,7 @@ from django.contrib.auth.decorators import login_required
 from django.template.loader import render_to_string, get_template
 from django.utils import timezone
 
-from .filter_func import expenses_query_filter_func, expenses_query_filter_func_income
+from .filter_func import expenses_query_filter_func
 from expenses_tracker.form_models import ExpenseReportForm
 from expenses_tracker.email_client import send_message
 
@@ -59,6 +59,7 @@ def overview(request):
 
     income_data = Income.objects.all().filter(user_id=request.user.id)
     total_income = income_data.aggregate(amount=Sum('amount'))
+
     recent_income_data = income_data.order_by('-date')[:3]
 
     # print(request.session.get('current_user'))
@@ -119,6 +120,7 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
         context['user_status'] = self.request.user.is_authenticated
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         context['current_year'] = datetime.now().year
+        context["category_source"] = "Category"
         return context
 
     def post(self, request, *args, **kwargs):
@@ -198,7 +200,7 @@ class CategoryView(LoginRequiredMixin, ListView):
 class RecurringTransactions(LoginRequiredMixin, ListView):
     template_name = 'expenses_tracker/recurring-transactions.html'
     model = Transaction
-    context_object_name = 'recurring_transactions'
+    context_object_name = 'recurring_transactions_incomes'
 
     def get_queryset(self):
         filter_category = self.request.session.get('filter_category')
@@ -225,6 +227,7 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
         context['user_status'] = self.request.user.is_authenticated
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         context['current_year'] = datetime.now().year
+        context["category_source"] = "Category"
         return context
 
     def post(self, request, *args, **kwargs):
@@ -272,6 +275,7 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
         context['user_status'] = self.request.user.is_authenticated
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         context['current_year'] = datetime.now().year
+        context["category_source"] = "Category"
         return context
 
     def post(self, request, *args, **kwargs):
@@ -348,7 +352,7 @@ def expenses_report(request, *args, **kwargs):
                                                                     date__date__lte=end_date)
         income_data_sum_total = income_data.aggregate(amount=Sum('amount'))
 
-        source = {field.source: income_data.filter(source=field.source).aggregate(
+        source = {field.category: income_data.filter(source=field.category).aggregate(
             sum=Sum('amount')).get('sum') for field in income_data}
 
         context["source"] = source
@@ -417,8 +421,9 @@ class IncomeData(LoginRequiredMixin, ListView):
         context = super(IncomeData, self).get_context_data(**kwargs)
         context['user_currency'] = self.request.session.get('user_currency')
         context['user_status'] = self.request.user.is_authenticated
-        context['transaction_category'] = {cate_.source: None for cate_ in self.object_list}
+        context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         context['current_year'] = datetime.now().year
+        context["category_source"] = "Source"
         return context
 
     def get_queryset(self):
@@ -428,10 +433,10 @@ class IncomeData(LoginRequiredMixin, ListView):
         data = (super(IncomeData, self).get_queryset().filter(user_id=self.request.user.id))
 
         if filter_category:
-            return expenses_query_filter_func_income(sort_order=sort_order,
-                                                     filter_category=self.request.session.pop('filter_category'),
-                                                     order_by=self.request.session.pop('order_by'), query_db=data,
-                                                     sort_pop=self.request.session.pop('sort_order'))
+            return expenses_query_filter_func(sort_order=sort_order,
+                                              filter_category=self.request.session.pop('filter_category'),
+                                              order_by=self.request.session.pop('order_by'), query_db=data,
+                                              sort_pop=self.request.session.pop('sort_order'))
         return data.order_by('-date')
 
     def post(self, request, *args, **kwargs):
@@ -439,7 +444,6 @@ class IncomeData(LoginRequiredMixin, ListView):
 
         if income_data_id:
             Income.objects.get(id=income_data_id).delete()
-
 
         request.session['filter_category'] = request.POST.get('filter_category')
         request.session['order_by'] = request.POST.get('order_by')
@@ -472,7 +476,7 @@ class IncomeCategoryView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         db = super(IncomeCategoryView, self).get_queryset().filter(user_id=self.request.user.id)
 
-        return {field.source: db.filter(source=field.source).aggregate(
+        return {field.category: db.filter(category=field.category).aggregate(
             sum=Sum('amount')).get('sum') for field in db.order_by("-date")}
 
     def get_context_data(self, **kwargs):
@@ -481,6 +485,55 @@ class IncomeCategoryView(LoginRequiredMixin, ListView):
         context['user_status'] = self.request.user.is_authenticated
         context['current_year'] = datetime.now().year
         return context
+
+
+class RecurringIncomes(LoginRequiredMixin, ListView):
+    template_name = 'expenses_tracker/income-recur.html'
+    model = Income
+    context_object_name = 'recurring_transactions_incomes'
+
+    def get_queryset(self):
+        filter_category = self.request.session.get('filter_category')
+        sort_order = self.request.session.get('sort_order')
+
+        data = (super(RecurringIncomes, self).get_queryset().filter(
+            user_id=self.request.user.id).filter(recurring_transaction=True))
+
+        for recurring_income in data.all():
+            if timezone.now() > recurring_income.next_occurrence:
+                recurring_income.date = timezone.now()
+                recurring_income.save()
+
+        if filter_category:
+            return expenses_query_filter_func(sort_order=sort_order,
+                                              filter_category=self.request.session.pop('filter_category'),
+                                              order_by=self.request.session.pop('order_by'), query_db=data,
+                                              sort_pop=self.request.session.pop('sort_order'))
+        return data.order_by('next_occurrence')
+
+    def get_context_data(self, **kwargs):
+        context = super(RecurringIncomes, self).get_context_data(**kwargs)
+        context['user_currency'] = self.request.session.get('user_currency')
+        context['user_status'] = self.request.user.is_authenticated
+        context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
+        context['current_year'] = datetime.now().year
+        context["category_source"] = "Category"
+        return context
+
+    def post(self, request, *args, **kwargs):
+        income_id = request.POST.get('recurring_transaction_id')
+        if income_id:
+            transaction_obj = Income.objects.get(id=income_id)
+            transaction_obj.recurring_transaction = False
+            transaction_obj.frequency = None
+            transaction_obj.transaction_title = None
+            transaction_obj.next_occurrence = None
+            transaction_obj.save()
+        else:
+            request.session['filter_category'] = request.POST.get('filter_category')
+            request.session['order_by'] = request.POST.get('order_by')
+            request.session['sort_order'] = request.POST.get('sort_order')
+        return HttpResponseRedirect('/recurring-incomes')
 
 
 @login_required

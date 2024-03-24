@@ -1,0 +1,29 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+    Track Finance - Recurring-incomes
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/recurring-transactions.css' %}">
+{% endblock %}
+
+{% block content %}
+
+<header>
+    <h1>Recurring Incomes</h1>
+</header>
+
+<main>
+        
+    {% include 'expenses_tracker/include/recurring_transactions_incomes.html' with url_recur='recurring_income_page' %}
+    
+    <form method="post" action="{% url 'recurring_income_page' %}">
+        {% include "expenses_tracker/include/right_sidebar.html" with url='recurring_income_page' %}
+    </form>
+</main> 
+    
+    {% include "expenses_tracker/include/footer.html" %}
+
+{% endblock %}

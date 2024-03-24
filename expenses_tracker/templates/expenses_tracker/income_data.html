@@ -32,7 +32,7 @@
                         {% for field in income_data %}
                         <tr>
                             <td>{{ field.date.date }}</td>
-                            <td>{{ field.source }}</td>
+                            <td>{{ field.category }}</td>
                             <td>{{ user_currency }}{{ field.amount|floatformat:"2g" }}</td>
                             <td>{{ field.notes }}</td>
                             <td>

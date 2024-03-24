@@ -95,5 +95,9 @@ input[type="checkbox"]:checked {
     color: darkred;
 }
 
+.form-group {
+    margin-bottom: 20px;
+}
+
 
 

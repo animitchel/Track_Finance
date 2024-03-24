@@ -8,7 +8,7 @@
         <!-- Add filtering and ordering options here -->
             {% csrf_token %}
             <div class="filter-options">
-                <label for="filter_category">Category:</label>
+                <label for="filter_category">{{ category_source }}:</label>
                 <select id="filter_category" name="filter_category">
 {#                        <option value="" selected="">---------</option>#}
                     {% for field, value in transaction_category.items %}

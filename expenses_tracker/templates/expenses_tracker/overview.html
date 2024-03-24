@@ -55,7 +55,7 @@
             <a href="{% url 'income_data_page' %}"><h2 style="text-align: center">Recent Income Data</h2></a>
             <ul>
                 {% for field in income_data %}
-                <li>{{ field.source }} - {{ user_currency }}{{ field.amount|floatformat:"2g" }}
+                <li>{{ field.category }} - {{ user_currency }}{{ field.amount|floatformat:"2g" }}
                 <h4 style="text-align: end">{{ field.date|timesince }} ago</h4>
                 <hr>
                 </li>
