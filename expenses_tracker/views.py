@@ -352,7 +352,7 @@ def expenses_report(request, *args, **kwargs):
                                                                     date__date__lte=end_date)
         income_data_sum_total = income_data.aggregate(amount=Sum('amount'))
 
-        source = {field.category: income_data.filter(source=field.category).aggregate(
+        source = {field.category: income_data.filter(category=field.category).aggregate(
             sum=Sum('amount')).get('sum') for field in income_data}
 
         context["source"] = source
