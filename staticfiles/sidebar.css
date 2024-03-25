@@ -124,6 +124,31 @@ body {
 
 }
 
+@media screen and (max-width: 900px) {
+    div .sidebar2{
+        width: 70%;
+        text-align: center;
+        padding: 30px;
+        position: relative;
+        margin-bottom: 30px;
+        border-radius: 8px;
+        margin-top: 0;
+        box-shadow: none;
+
+    }
+
+    div .filter_header {
+        padding: 5px;
+        margin-bottom: 8px;
+    }
+    div .filter-options,
+    div .order-options {
+        margin-bottom: 5px;
+    }
+}
+
+
+
 .sidebar2 {
     width: 15%;
     background-color: #fff;
