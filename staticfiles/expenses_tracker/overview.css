@@ -33,7 +33,7 @@ main {
 
 .overview-section {
     display: flex;
-    justify-content: space-around;
+    justify-content: center;
     padding: 20px;
 }
 
@@ -44,6 +44,7 @@ main {
     padding: 20px;
     text-align: center;
     transition: transform 0.3s; /* Add transition for scale effect */
+    margin: 20px;
 }
 
 .card:hover {
@@ -71,8 +72,6 @@ main {
     color: #007bff;
 }
 
-
-
 .container {
     width: 50%;
     margin: 0 auto;
@@ -85,6 +84,25 @@ main {
     padding-top: 20px;
 }
 
+/*Media Queries for responsiveness*/
+@media screen and (max-width: 1200px) {
+    .container {
+        width: 70%;
+    }
+    .container1 {
+        width: 80%;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    .container {
+        width: 80%;
+    }
+    .container1 {
+        width: 90%;
+    }
+}
+
 @media screen and (max-width: 768px) {
     .container {
         width: 90%;
@@ -92,7 +110,44 @@ main {
     .container1 {
         width: 90%;
     }
+
+    .card {
+        width: 100%; /* Make cards take up full width */
+        margin-bottom: 20px; /* Add spacing between cards */
+
+    }
+
+    .overview-section {
+        flex-direction: column; /* Stack items vertically */
+        align-items: center; /* Center items horizontally */
+    }
 }
+
+@media screen and (max-width: 576px) {
+    .container {
+        width: 95%;
+    }
+    .container1 {
+        width: 95%;
+    }
+}
+
+@media screen and (max-width: 576px) {
+    .card {
+        width: 100%; /* Make cards take up full width */
+        margin-bottom: 20px; /* Add spacing between cards */
+
+    }
+
+    .overview-section {
+        flex-direction: column; /* Stack items vertically */
+        align-items: center; /* Center items horizontally */
+    }
+
+}
+
+
+
 
 
 

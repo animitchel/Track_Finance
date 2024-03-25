@@ -1,88 +1,91 @@
 
-body {
-    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
-    margin: 0;
-    padding: 0;
-    background-color: slategray;
-    color: #495057;
-}
-
-header {
-    background-color: #2c3e50;
-    color: #fff;
-    padding: 20px;
-    text-align: center;
-}
-
-main {
-    flex: 1;
-    margin-top: auto; /* Push main content to the bottom */
-}
-
 .content {
     display: flex;
     flex-direction: column;
     min-height: 100vh; /* Set minimum height to 100% of the viewport height */
 }
 
-h1 {
+body {
+    font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
     margin: 0;
+    padding: 0;
+    background-color: slategray; /* Light gray background */
+    color: #343a40; /* Dark text color */
+}
+
+header {
+    background-color: #2c3e50; /* Primary color */
+    color: #fff;
+    text-align: center;
+    /*font-size: 2rem; !* Larger header text *!*/
 }
 
 main {
     flex: 1;
+    display: flex;
+    justify-content: center; /* Center main content horizontally */
+    align-items: center; /* Center main content vertically */
 }
 
 .container {
     width: 70%;
-    margin: 0 auto;
+    margin: 40px auto; /* Add some margin for spacing */
+    background-color: lightsteelblue; /* White background */
+    border-radius: 10px; /* Rounded corners */
+    padding: 40px; /* Add some padding */
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); /* Add shadow for depth */
 }
 
 .profile-section {
-    padding: 40px 0;
+    text-align: center; /* Center profile section content */
 }
 
 .profile-header {
     display: flex;
     align-items: center;
+    /*margin-bottom: 30px; !* Add some space below the header *!*/
 }
 
 .profile-picture {
-    width: 100px;
-    height: 100px;
+    width: 150px; /* Larger profile picture */
+    height: 150px; /* Larger profile picture */
     overflow: hidden;
     border-radius: 50%;
-    margin-right: 20px;
+    margin-right: 40px; /* Add some space between picture and details */
 }
 
 .profile-picture img {
     width: 100%;
     height: 100%;
     object-fit: cover;
+    border-radius: 50%; /* Ensure image is rounded within container */
 }
 
 .user-details {
-    flex: 1;
+    text-align: left; /* Align user details text to the left */
 }
 
 h2 {
-    color: #343a40;
     margin-bottom: 10px;
 }
 
 .user-details p {
-    font-size: 18px;
-    color: whitesmoke;
+    font-size: 1.5rem; /* Larger text */
+    color: #495057; /* Dark text color */
     margin: 0;
 }
 
 .user-info {
     list-style: none;
     padding: 0;
+    text-align: left; /* Align user info text to the left */
 }
 
 .user-info li {
     margin-bottom: 10px;
+    font-size: 1.2rem; /* Larger text */
+    color: #6c757d; /* Slightly lighter text color */
 }
+
 
 

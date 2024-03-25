@@ -84,6 +84,27 @@ td button:hover {
     transform: scale(1.02);
 }
 
+@media screen and (max-width: 1600px) {
+    table {
+        width: 80%;
+    }
+}
+
+@media screen and (max-width: 1320px) {
+    table {
+        width: 70%;
+    }
+}
+
+@media screen and (max-width: 992px) {
+    table {
+        width: 60%;
+    }
+}
+
+
+
+
 
 
 
