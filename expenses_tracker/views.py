@@ -106,16 +106,17 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
         query = super(AllTransactionsView, self).get_queryset().filter(user_id=self.request.user.id).order_by('-date')
 
         if filter_category:
-            return expenses_query_filter_func(sort_order=sort_order,
-                                              filter_category=self.request.session.pop('filter_category'),
-                                              order_by=self.request.session.pop('order_by'), query_db=query,
-                                              sort_pop=self.request.session.pop('sort_order'))
+            filtered_query = expenses_query_filter_func(sort_order=sort_order,
+                                                        filter_category=self.request.session.pop('filter_category'),
+                                                        order_by=self.request.session.pop('order_by'), query_db=query,
+                                                        sort_pop=self.request.session.pop('sort_order'))
+            return filtered_query
 
         return query
 
     def get_context_data(self, **kwargs):
         context = super(AllTransactionsView, self).get_context_data(**kwargs)
-        context['date_now'] = timezone.now()
+        context['thirty_days_earlier'] = timezone.now() - timedelta(days=30)
         context['user_currency'] = self.request.session.get('user_currency')
         context['user_status'] = self.request.user.is_authenticated
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
@@ -228,6 +229,7 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         context['current_year'] = datetime.now().year
         context["category_source"] = "Category"
+        context['thirty_days_later'] = timezone.now() + timedelta(days=30)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -272,6 +274,7 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
     def get_context_data(self, **kwargs):
         context = super(BudgetOverviewView, self).get_context_data(**kwargs)
         context['user_currency'] = self.request.session.get('user_currency')
+        context['thirty_days_later'] = timezone.now() + timedelta(days=30)
         context['user_status'] = self.request.user.is_authenticated
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         context['current_year'] = datetime.now().year
@@ -349,7 +352,7 @@ def expenses_report(request, *args, **kwargs):
     if request_from_income_report:
 
         income_data = Income.objects.filter(user_id=user.id).filter(date__date__gte=start_date,
-                                                                    date__date__lte=end_date)
+                                                                    date__date__lte=end_date).order_by('date')
         income_data_sum_total = income_data.aggregate(amount=Sum('amount'))
 
         source = {field.category: income_data.filter(category=field.category).aggregate(
@@ -365,7 +368,7 @@ def expenses_report(request, *args, **kwargs):
     else:
 
         reports_transaction = Transaction.objects.filter(
-            user_id=user.id).filter(date__date__gte=start_date, date__date__lte=end_date)
+            user_id=user.id).filter(date__date__gte=start_date, date__date__lte=end_date).order_by('date')
 
         transactions_sum_total = reports_transaction.aggregate(amount=Sum('amount'))
 
@@ -424,6 +427,7 @@ class IncomeData(LoginRequiredMixin, ListView):
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         context['current_year'] = datetime.now().year
         context["category_source"] = "Source"
+        context['thirty_days_earlier'] = timezone.now() - timedelta(days=30)
         return context
 
     def get_queryset(self):
@@ -518,6 +522,7 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         context['current_year'] = datetime.now().year
         context["category_source"] = "Category"
+        context['thirty_days_later'] = timezone.now() + timedelta(days=30)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -584,6 +589,7 @@ def profile_details(request):
 
 @login_required
 def notification(request):
+
     return render(
         request,
         template_name='expenses_tracker/notification.html',
@@ -698,7 +704,6 @@ class RegisterView(View):
 
                     form.save()
 
-                    # current_user = User.objects.get(username=form.cleaned_data["username"])
                     request.session["current_user"] = user.id
 
                     login(request, user)

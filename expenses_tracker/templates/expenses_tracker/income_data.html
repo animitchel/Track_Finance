@@ -31,7 +31,11 @@
                         <!-- Income data will be dynamically populated here -->
                         {% for field in income_data %}
                         <tr>
-                            <td>{{ field.date.date }}</td>
+                            {% if field.date.date < thirty_days_earlier.date %}
+                                <td>{{ field.date.date }}</td>
+                            {% else %}
+                                <td>{{ field.date|timesince }} ago</td>
+                            {% endif %}
                             <td>{{ field.category }}</td>
                             <td>{{ user_currency }}{{ field.amount|floatformat:"2g" }}</td>
                             <td>{{ field.notes }}</td>

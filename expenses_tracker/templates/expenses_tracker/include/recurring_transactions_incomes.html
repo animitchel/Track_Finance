@@ -20,7 +20,12 @@
                         </form>
                     </div>
                     <div class="date-info">
-                        <p>Next occurrence in: {{ field.next_occurrence|timeuntil }}</p>
+                        {% if field.next_occurrence.date > thirty_days_later.date %}
+                            <p> Next occurrence: {{ field.next_occurrence.date }}</p>
+                        {% else %}
+                            <p>Next occurrence in: {{ field.next_occurrence|timeuntil }}</p>
+                        {% endif %}
+                        
                     </div>
                 </div>
                 

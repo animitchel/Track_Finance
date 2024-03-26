@@ -120,7 +120,7 @@ class TransactionForm(forms.ModelForm):
     transaction_title = forms.CharField(max_length=50, required=False)
     frequency = forms.ChoiceField(required=False, choices=FREQUENCY_CHOICES)
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10)
-    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=True, max_length=400)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=True, max_length=100)
 
 
 class BudgetForm(forms.ModelForm):
@@ -187,7 +187,7 @@ class IncomeForm(forms.ModelForm):
 
         }
 
-    notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=True, max_length=50, min_length=10)
+    notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=True, max_length=50, min_length=10)
     frequency = forms.ChoiceField(required=False, choices=FREQUENCY_CHOICES)
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10, required=True)
 
