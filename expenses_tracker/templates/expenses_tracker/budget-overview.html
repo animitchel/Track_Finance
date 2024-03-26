@@ -43,8 +43,11 @@
                                 </form>
                             </div>
                             <div class="date-info">
-{#                                <p>Expiration Date: {{ field.expiration_date|date:"D, d M Y | H:i:s" }}</p>#}
-                                <p>Expiring in: {{ field.expiration_date|timeuntil }}</p>
+                                {% if field.expiration_date.date > thirty_days_later.date %}
+                                    <p> Expiration Date: {{ field.expiration_date.date }}</p>
+                                {% else %}
+                                    <p>Expiring in: {{ field.expiration_date|timeuntil }}</p>
+                                {% endif %}
                             </div>
                         </div>
                         

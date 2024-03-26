@@ -62,9 +62,6 @@ class Profile(models.Model):
 
     ]
 
-    # username = models.CharField(max_length=100, unique=True, null=False)
-    # email_address = models.EmailField(max_length=150, null=False, unique=True)
-    # password = models.CharField(max_length=20, null=False, blank=False)
     currency = models.CharField(max_length=20, null=True, choices=CURRENCY_CHOICES)
     first_name = models.CharField(max_length=100, null=True)
     last_name = models.CharField(max_length=100, null=True)
@@ -84,6 +81,7 @@ class Profile(models.Model):
 
 
 class Transaction(models.Model):
+
     EXPENSE_CATEGORIES = [
         ('Housing', 'Housing'),
         ('Transportation', 'Transportation'),
@@ -110,7 +108,7 @@ class Transaction(models.Model):
 
     category = models.CharField(max_length=20, choices=EXPENSE_CATEGORIES, null=False)
     amount = models.FloatField()
-    description = models.TextField(null=True, max_length=400)
+    description = models.TextField(null=True, max_length=100)
     recurring_transaction = models.BooleanField(default=False)
     frequency = models.CharField(max_length=10, null=True)
     transaction_title = models.CharField(max_length=40, null=True)
@@ -215,7 +213,7 @@ class Income(models.Model):
     ]
     category = models.CharField(max_length=40, choices=INCOME_SOURCES)
     amount = models.FloatField()
-    notes = models.TextField(max_length=50)
+    notes = models.TextField(max_length=100)
     date = models.DateTimeField(default=timezone.now)
     recurring_transaction = models.BooleanField(default=False)
     frequency = models.CharField(max_length=10, blank=True, null=True)
