@@ -4,7 +4,6 @@ from .models import Profile, Budget, Transaction, Income
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
 
-
 # class UserForm(forms.ModelForm):
 #     class Meta:
 #         model = User
@@ -24,26 +23,27 @@ from django.contrib.auth.models import User
 #         }
 
 FREQUENCY_CHOICES = [
-        ('weekly', 'Weekly'),
-        ('monthly', 'Monthly'),
-        ('quarterly', 'Quarterly'),
-        ('yearly', 'Yearly'),
-        ('2 weeks', 'Biweekly'),
-        ('3 weeks', 'Every 3 weeks'),
-        ('2 months', 'Bimonthly'),
-        ('4 months', 'Every 4 months'),
-        ('5 months', 'Every 5 months'),
-        ('6 months', 'Semiannual'),
-        ('7 months', 'Every 7 months'),
-        ('8 months', 'Every 8 months'),
-        ('9 months', 'Every 9 months'),
-        ('10 months', 'Every 10 months'),
-        ('11 months', 'Every 11 months')
-    ]
+    ('weekly', 'Weekly'),
+    ('monthly', 'Monthly'),
+    ('quarterly', 'Quarterly'),
+    ('yearly', 'Yearly'),
+    ('2 weeks', 'Biweekly'),
+    ('3 weeks', 'Every 3 weeks'),
+    ('2 months', 'Bimonthly'),
+    ('4 months', 'Every 4 months'),
+    ('5 months', 'Every 5 months'),
+    ('6 months', 'Semiannual'),
+    ('7 months', 'Every 7 months'),
+    ('8 months', 'Every 8 months'),
+    ('9 months', 'Every 9 months'),
+    ('10 months', 'Every 10 months'),
+    ('11 months', 'Every 11 months')
+]
+
 
 class ExpenseReportForm(forms.Form):
-    purpose = forms.CharField(max_length=150, required=True)
-    note = forms.CharField(max_length=400, required=True)
+    purpose = forms.CharField(max_length=150, required=True, min_length=10)
+    note = forms.CharField(max_length=400, required=True, min_length=10)
     start_date = forms.DateField(required=True)
     end_date = forms.DateField(required=True)
 
@@ -80,11 +80,11 @@ class ProfileForm(forms.ModelForm):
                           'phone_number': {'required': 'Please enter your phone number'},
                           }
 
-    first_name = forms.CharField(required=False, max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Enter '
-                                                                                                              'your '
-                                                                                                              'first '
-                                                                                                              'name'}))
-    last_name = forms.CharField(required=False, max_length=100,
+    first_name = forms.CharField(required=False, max_length=50, widget=forms.TextInput(attrs={'placeholder': 'Enter '
+                                                                                                             'your '
+                                                                                                             'first '
+                                                                                                             'name'}))
+    last_name = forms.CharField(required=False, max_length=80,
                                 widget=forms.TextInput(attrs={'placeholder': 'Enter your last name'}))
     occupation = forms.CharField(required=False, max_length=100,
                                  widget=forms.TextInput(attrs={'placeholder': 'Enter your occupation'}))
@@ -101,8 +101,6 @@ class ProfileForm(forms.ModelForm):
 
 
 class TransactionForm(forms.ModelForm):
-
-
     class Meta:
         model = Transaction
         # fields = '__all__'
@@ -120,7 +118,8 @@ class TransactionForm(forms.ModelForm):
     transaction_title = forms.CharField(max_length=50, required=False)
     frequency = forms.ChoiceField(required=False, choices=FREQUENCY_CHOICES)
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10)
-    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=True, max_length=100)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=True, max_length=100,
+                                  min_length=10)
 
 
 class BudgetForm(forms.ModelForm):
@@ -163,8 +162,8 @@ class BudgetForm(forms.ModelForm):
 
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10)
     duration = forms.ChoiceField(choices=DURATION_CHOICES)
-    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=False, max_length=500,
-                                  min_length=50)
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=False, max_length=400,
+                                  min_length=10)
 
 
 class IncomeForm(forms.ModelForm):
