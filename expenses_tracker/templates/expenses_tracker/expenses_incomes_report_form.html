@@ -1,0 +1,73 @@
+{% extends "base.html" %}
+{% load static %}
+
+{% block page_title %}
+    Track Finance - Expenses Report Form
+{% endblock %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/expenses_incomes_report_form.css' %}">
+{% endblock %}
+    
+
+{% block content %}
+    <header>
+        <h1>Expenses/Incomes Report Form</h1>
+    </header>
+    
+    <main>
+    <form action="{% url 'expense_reports_form_page' %}" method="POST">
+        {% csrf_token %}
+        {% if errors %}
+            <em style="color: darkred">{{ errors }}</em>
+        {% endif %}
+    
+        <div class="form-group">
+            <span class="element1"><label for="purpose">Purpose:</label></span>
+            <span class="element2">*</span>
+            <input type="text" id="purpose" name="purpose" required>
+        </div>
+
+        <div class="form-group">
+            <span class="element1"><label for="notes">Notes or Comments:</label></span>
+            <span class="element2">*</span>
+            <textarea id="notes" name="note" rows="4" required></textarea>
+        </div>
+
+        <div class="form-group">
+            <span class="element1"><label for="start_date">Report Period:</label></span>
+            <span class="element2">*</span>
+            <br>
+            <input type="date" id="start_date" name="start_date" required>
+            <span>to</span>
+            <input type="date" id="end_date" name="end_date" required>
+        </div>
+        <hr>
+        <div class="form-group">
+            <label for="income_data">Report for Incomes Data:</label>
+            <input type="checkbox" id="income_data" name="income_data" value="true">
+        </div>
+        <br>
+        <button type="submit" id="generateBtn">Generate Expenses Report PDF</button>
+    </form>
+    
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const checkbox = document.getElementById("income_data");
+            const button = document.getElementById("generateBtn");
+
+            checkbox.addEventListener("change", function() {
+                if (checkbox.checked) {
+                    button.textContent = "Generate Incomes Report PDF";
+                } else {
+                  button.textContent = "Generate Expenses Report PDF";
+                }
+            });
+        });
+    </script>
+</main>
+
+{% include "expenses_tracker/include/footer.html" %}
+
+{% endblock %}
+

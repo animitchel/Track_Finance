@@ -35,11 +35,7 @@ urlpatterns = [
 
     path('income-category/', views.IncomeCategoryView.as_view(), name='income_category_page'),
 
-    # path('income-report/', views.income_report, name='income_report_page'),
-
-    path('income-report-form/', views.income_report_form, name='income_report_form_page'),
-
-    path('expense-reports-form/', views.expense_report_form, name='expense_reports_form_page'),
+    path('expense-reports-form/', views.expense_income_report_form, name='expense_reports_form_page'),
 
     path('profile-details/', views.profile_details, name='profile_page'),
 

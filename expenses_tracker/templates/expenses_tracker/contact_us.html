@@ -22,6 +22,8 @@
                 {% csrf_token %}
                 {% if is_message_sent %}
                     <p style="color: red"><strong>MESSAGE SUCCESSFULLY SENT</strong></p>
+                {% elif error_message %} 
+                    <p style="color: darkred"><strong>{{ error_message }}</strong></p>
                 {% else %}
                     <p>Want to get in touch?
                         Fill out the form below to send me a message, 
