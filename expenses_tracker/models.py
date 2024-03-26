@@ -63,8 +63,8 @@ class Profile(models.Model):
     ]
 
     currency = models.CharField(max_length=20, null=True, choices=CURRENCY_CHOICES)
-    first_name = models.CharField(max_length=100, null=True)
-    last_name = models.CharField(max_length=100, null=True)
+    first_name = models.CharField(max_length=50, null=True)
+    last_name = models.CharField(max_length=80, null=True)
     image = models.ImageField(upload_to='images', null=True, blank=True)
     occupation = models.CharField(max_length=100, null=True)
     city = models.CharField(max_length=100, null=True)
@@ -103,7 +103,9 @@ class Transaction(models.Model):
         ('Clothing', 'Clothing'),
         ('Dining Out', 'Dining Out'),
         ('Fitness', 'Fitness'),
-        ('Food', 'Food')
+        ('Food', 'Food'),
+        ('Business', 'Business'),
+        ('My Girl', 'My Girl')
     ]
 
     category = models.CharField(max_length=20, choices=EXPENSE_CATEGORIES, null=False)
@@ -157,14 +159,16 @@ class Budget(models.Model):
         ('Clothing', 'Clothing'),
         ('Dining Out', 'Dining Out'),
         ('Fitness', 'Fitness'),
-        ('Food', 'Food')
+        ('Food', 'Food'),
+        ('Business', 'Business'),
+        ('My Girl', 'My Girl')
     ]
 
     category = models.CharField(max_length=20, choices=BUDGET_CATEGORIES)
     amount = models.FloatField()
     budget = models.FloatField(null=True)
     spent = models.FloatField(default=0.0)
-    description = models.TextField(max_length=500)
+    description = models.TextField(max_length=400)
     duration = models.CharField(max_length=20, null=True, blank=True)
     expiration_date = models.DateTimeField(null=True)
     date = models.DateTimeField(default=timezone.now, null=True)
