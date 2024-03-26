@@ -48,6 +48,7 @@ form {
 label {
     display: block;
     margin-bottom: 8px;
+
 }
 
 input[type="text"],
@@ -83,4 +84,24 @@ button:hover {
     background-color: #2980b9;
 }
 
+
+/* Style for the checkbox and its label */
+.form-group input[type="checkbox"],
+.form-group label.checkbox-label {
+    display: inline-block;
+    vertical-align: middle; /* Align the checkbox and label vertically */
+    margin-bottom: 0;
+}
+
+.element1, .element2 {
+    display: inline-block; /* or inline-block */
+}
+.element2 {
+    color: darkred;
+}
+
+.element2 {
+    margin: 0;
+    padding: 0;
+}
 

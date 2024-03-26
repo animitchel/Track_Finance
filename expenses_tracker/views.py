@@ -2,6 +2,7 @@ import logging
 
 from functools import wraps
 from django.contrib.auth.mixins import LoginRequiredMixin
+from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.http import HttpResponse
 from django.shortcuts import render, HttpResponseRedirect
@@ -22,7 +23,7 @@ from django.template.loader import render_to_string, get_template
 from django.utils import timezone
 
 from .filter_func import expenses_query_filter_func
-from expenses_tracker.form_models import ExpenseReportForm
+from expenses_tracker.form_models import ExpenseIncomeReportForm
 from expenses_tracker.email_client import send_message
 
 
@@ -386,10 +387,10 @@ def expenses_report(request, *args, **kwargs):
 
 
 @login_required
-def expense_report_form(request):
+def expense_income_report_form(request):
     error = None
     if request.method == 'POST':
-        form = ExpenseReportForm(request.POST or None)
+        form = ExpenseIncomeReportForm(request.POST or None)
 
         if form.is_valid():
             for key, value in form.cleaned_data.items():
@@ -401,13 +402,14 @@ def expense_report_form(request):
                         request.session[key] = serialized_date
                     else:
                         request.session[key] = value
+            request.session["request_from_income_report"] = request.POST.get('income_data')
             return HttpResponseRedirect('/expenses-report')
         else:
             error = form.errors
 
     return render(
         request,
-        template_name='expenses_tracker/expenses_report_form.html',
+        template_name='expenses_tracker/expenses_incomes_report_form.html',
         status=200,
         context={'user_status': request.user.is_authenticated,
                  'errors': error,
@@ -539,39 +541,6 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
         return HttpResponseRedirect('/recurring-incomes')
-
-
-@login_required
-def income_report_form(request):
-    error = None
-    if request.method == 'POST':
-        form = ExpenseReportForm(request.POST or None)
-
-        if form.is_valid():
-            for key, value in form.cleaned_data.items():
-
-                if key != 'csrfmiddlewaretoken':
-                    if key == 'start_date' or key == 'end_date':
-                        # Convert a date object to string
-                        serialized_date = value.isoformat()
-                        request.session[key] = serialized_date
-                    else:
-                        request.session[key] = value
-            request.session["request_from_income_report"] = True
-            return HttpResponseRedirect('/expenses-report')
-        else:
-            error = form.errors
-
-    return render(
-        request,
-        template_name='expenses_tracker/income_report_form.html',
-        status=200,
-        context={
-            'errors': error,
-            'user_status': request.user.is_authenticated,
-            'current_year': datetime.now().year
-        }
-    )
 
 
 @login_required
@@ -795,24 +764,31 @@ def contact_us(request):
     """
 
     is_message_sent = request.session.pop('is_message_sent', False)
+    validation_error = None
 
     form = ContactForm(request.POST or None)
 
     if form.is_valid():
-        # Extract form data
-        name = form.cleaned_data.get("name")
-        email = form.cleaned_data.get("email")
-        phone = form.cleaned_data.get("phone")
-        message = form.cleaned_data.get("message")
+        try:
+            ContactForm.clean_your_field(form)
+        except ValidationError:
+            validation_error = ("Message or Name: Please refrain from using Non-ASCII characters such as 😁 and "
+                                "others. Kindly write your message without emojis or symbols.")
+        else:
+            # Extract form data
+            name = form.cleaned_data.get("name")
+            email = form.cleaned_data.get("email")
+            phone = form.cleaned_data.get("phone")
+            message = form.cleaned_data.get("message")
 
-        # Send the message
-        send_message(name, email, phone, message)
+            # Send the message
+            send_message(name, email, phone, message)
 
-        # Set a flag to indicate that the message has been sent
-        request.session['is_message_sent'] = True
-        # Render the template with the flag
-        return HttpResponseRedirect('/contact-us')
-        # return render_template("contact.html", msg_sent=sent)
+            # Set a flag to indicate that the message has been sent
+            request.session['is_message_sent'] = True
+            # Render the template with the flag
+            return HttpResponseRedirect('/contact-us')
+            # return render_template("contact.html", msg_sent=sent)
 
     # Render the contact form template for GET requests
     return render(
@@ -822,5 +798,6 @@ def contact_us(request):
         context={'user_status': request.user.is_authenticated,
                  'is_message_sent': is_message_sent,
                  'form': form,
+                 'error_message': validation_error,
                  'current_year': datetime.now().year}
     )

@@ -3,6 +3,7 @@ from phonenumber_field.formfields import PhoneNumberField
 from .models import Profile, Budget, Transaction, Income
 from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
+from django.utils.translation import gettext_lazy as _
 
 # class UserForm(forms.ModelForm):
 #     class Meta:
@@ -41,7 +42,7 @@ FREQUENCY_CHOICES = [
 ]
 
 
-class ExpenseReportForm(forms.Form):
+class ExpenseIncomeReportForm(forms.Form):
     purpose = forms.CharField(max_length=150, required=True, min_length=10)
     note = forms.CharField(max_length=400, required=True, min_length=10)
     start_date = forms.DateField(required=True)
@@ -230,3 +231,15 @@ class ContactForm(forms.Form):
         },
         validators=[phone_regex]
     )
+
+    def clean_your_field(self):
+        data_message = self.cleaned_data['message']
+        data_name = self.cleaned_data['name']
+        # Check if the input contains non-ASCII characters
+        if any(ord(char) > 127 for char in data_message):
+            raise forms.ValidationError(_("Non-ASCII characters are not allowed."))
+        elif any(ord(char) > 127 for char in data_name):
+            raise forms.ValidationError(_("Non-ASCII characters are not allowed."))
+
+        return data_message and data_name
+
