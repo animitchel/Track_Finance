@@ -546,6 +546,9 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
 @login_required
 def profile_details(request):
     profile = Profile.objects.get(user=request.user)
+    if not profile.image:
+        profile.image = 'images/c0749b7cc401421662ae901ec8f9f660.jpg'
+        profile.save()
     return render(
         request,
         template_name='expenses_tracker/profile.html',
