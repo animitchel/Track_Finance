@@ -105,17 +105,19 @@ class Transaction(models.Model):
         ('Fitness', 'Fitness'),
         ('Food', 'Food'),
         ('Business', 'Business'),
-        ('My Girl', 'My Girl')
+        ('My Girl', 'My Girl'),
+        ('Family', 'Family'),
+        ('Other', 'Other'),
     ]
 
     category = models.CharField(max_length=20, choices=EXPENSE_CATEGORIES, null=False)
     amount = models.FloatField()
     description = models.TextField(null=True, max_length=100)
     recurring_transaction = models.BooleanField(default=False)
-    frequency = models.CharField(max_length=10, null=True)
-    transaction_title = models.CharField(max_length=40, null=True)
+    frequency = models.CharField(max_length=10, null=True, blank=True)
+    transaction_title = models.CharField(max_length=40, null=True, blank=True)
     date = models.DateTimeField(default=timezone.now)
-    next_occurrence = models.DateTimeField(null=True)
+    next_occurrence = models.DateTimeField(null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction', null=True)
 
     # profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='transaction', null=True)
@@ -161,7 +163,8 @@ class Budget(models.Model):
         ('Fitness', 'Fitness'),
         ('Food', 'Food'),
         ('Business', 'Business'),
-        ('My Girl', 'My Girl')
+        ('My Girl', 'My Girl'),
+        ('Family', 'Family')
     ]
 
     category = models.CharField(max_length=20, choices=BUDGET_CATEGORIES)
