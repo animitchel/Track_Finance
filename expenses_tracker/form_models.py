@@ -5,23 +5,31 @@ from django.core.validators import RegexValidator
 from django.contrib.auth.models import User
 from django.utils.translation import gettext_lazy as _
 
-# class UserForm(forms.ModelForm):
-#     class Meta:
-#         model = User
-#         fields = ['username', 'email', 'password']
-#
-#         labels = {'username': 'Username', 'email': 'Email', 'password': 'Password'}
-#
-#         widgets = {'password': forms.PasswordInput(attrs={'placeholder': 'Enter a password'}),
-#                    'username': forms.TextInput(attrs={'placeholder': 'Enter a username'}),
-#                    'email': forms.EmailInput(attrs={'placeholder': 'Enter an email address'})
-#                    }
-#
-#         error_messages = {
-#             'username': {'required': 'Please enter a username'},
-#             'email': {'required': 'Please enter a valid email address'},
-#             'password': {'required': 'Please enter a password'}
-#         }
+
+class UserForm(forms.ModelForm):
+    class Meta:
+        model = User
+        fields = ['username', 'email', 'password']
+
+        labels = {'username': 'Username', 'email': 'Email', 'password': 'Password'}
+
+        widgets = {'password': forms.PasswordInput(attrs={'placeholder': 'Enter a password',
+                                                          'required': True}),
+                   'username': forms.TextInput(attrs={'placeholder': 'Enter a username',
+                                                      'required': True}),
+                   'email': forms.EmailInput(attrs={'placeholder': 'Enter an email address',
+                                                    'required': True})
+                   }
+
+        error_messages = {
+            'username': {'required': 'Please enter a username'},
+            'email': {'required': 'Please enter a valid email address'},
+            'password': {'required': 'Please enter a password'}
+        }
+    email = forms.EmailField(max_length=250, widget=forms.EmailInput(
+        attrs={'placeholder': 'Enter an email address',
+               'required': 'Please enter a valid email address'}), required=True)
+
 
 FREQUENCY_CHOICES = [
     ('weekly', 'Weekly'),
@@ -242,4 +250,3 @@ class ContactForm(forms.Form):
             raise forms.ValidationError(_("Non-ASCII characters are not allowed."))
 
         return data_message and data_name
-

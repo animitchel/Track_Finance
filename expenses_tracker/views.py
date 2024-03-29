@@ -1,5 +1,3 @@
-import logging
-
 from functools import wraps
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.exceptions import ValidationError
@@ -11,7 +9,7 @@ from django.views.generic import CreateView, TemplateView
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView
 from django.db.models import Count, Sum, Avg
 
-from .form_models import ProfileForm, TransactionForm, BudgetForm, IncomeForm, ContactForm
+from .form_models import ProfileForm, TransactionForm, BudgetForm, IncomeForm, ContactForm, UserForm
 from django.views import View
 from datetime import datetime, timedelta
 from .models import Transaction, Budget, Profile, Income
@@ -25,6 +23,8 @@ from django.utils import timezone
 from .filter_func import expenses_query_filter_func
 from expenses_tracker.form_models import ExpenseIncomeReportForm
 from expenses_tracker.email_client import send_message
+from django.contrib.auth import get_user_model
+from django.contrib.auth.models import User
 
 
 class IndexView(TemplateView):
@@ -561,7 +561,6 @@ def profile_details(request):
 
 @login_required
 def notification(request):
-
     return render(
         request,
         template_name='expenses_tracker/notification.html',
@@ -629,6 +628,7 @@ class RegisterView(View):
     def get(self, request):
         password_not_confirm = None
         form = ProfileForm()
+        user_form = UserForm(request.POST or None)
         fields_to_display = ['Currency']
 
         return render(
@@ -638,60 +638,47 @@ class RegisterView(View):
                 "password_not_confirm": password_not_confirm,
                 "fields_to_display": fields_to_display,
                 'user_status': request.user.is_authenticated,
+                'user_form': user_form,
             }
         )
 
     def post(self, request):
-        password_not_confirm = None
-        error_message = None
-        continue_to_form = True
+        user_form = UserForm(request.POST or None)
 
         fields_to_display = ['Currency']
 
         form = ProfileForm(request.POST or None)
 
-        for key, value in form.data.items():
-            if not value:
-                # print(key, value)
-                continue_to_form = False
+        if form.is_valid() and user_form.is_valid():
 
-        if form.is_valid() and continue_to_form:
-            if form.data.get("confirm-password") == form.data.get("password"):
-                try:
-                    user = User.objects.create_user(username=form.data.get('username'),
-                                                    password=form.data.get('password'),
-                                                    email=form.data.get('email'))
-                except IntegrityError:
-                    # messages.error()
-                    error_message = "Username is already taken. Please try another"
+            user_form.save(commit=False)
 
-                else:
-                    user.save()
+            user_form.instance.set_password(user_form.cleaned_data['password'])
 
-                    form.instance.user = user
-                    # adding the default blank image
-                    form.instance.image = 'images/c0749b7cc401421662ae901ec8f9f660.jpg'
+            form.instance.user = user_form.instance
 
-                    self.request.session['user_currency'] = form.instance.currency
+            # adding the default blank image
+            form.instance.image = 'images/c0749b7cc401421662ae901ec8f9f660.jpg'
 
-                    form.save()
+            self.request.session['user_currency'] = form.instance.currency
 
-                    request.session["current_user"] = user.id
+            user_form.save()
+            form.save()
 
-                    login(request, user)
+            user = User.objects.get(username=user_form.instance.username)
 
-                    return HttpResponseRedirect('/')
-            else:
-                password_not_confirm = "Password must be the same on both fields"
-        else:
-            error_message = "Please fill out all the required fields"
+            request.session["current_user"] = user.id
+
+            login(request, user)
+
+            return HttpResponseRedirect('/')
 
         return render(request, template_name="expenses_tracker/signup.html",
-                      context={"form": form, "password_not_confirm": password_not_confirm,
-                               'error_message': error_message,
+                      context={"form": form,
                                'fields_to_display': fields_to_display,
                                'user_status': request.user.is_authenticated,
-                               'current_year': datetime.now().year
+                               'current_year': datetime.now().year,
+                               'user_form': user_form,
                                }
                       )
 
@@ -705,7 +692,6 @@ def login_user(request):
         user = authenticate(username=username, password=password)
 
         if user is not None:
-            logging.info(msg='Authentication successful')
             request.session["current_user"] = user.id
 
             request.session['user_currency'] = user.profile.currency
@@ -713,7 +699,6 @@ def login_user(request):
             login(request, user)
             return HttpResponseRedirect('/')
         else:
-            logging.info(msg='Authentication failed')
             error_message = "Username or password incorrect"
 
     return render(

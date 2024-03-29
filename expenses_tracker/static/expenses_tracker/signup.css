@@ -142,6 +142,11 @@ footer {
     text-decoration: underline;
 }
 
+.disabled-button {
+    opacity: 0.5; /* reduce opacity to visually indicate disabled state */
+    pointer-events: none; /* disable pointer events */
+}
+
 
 
 
