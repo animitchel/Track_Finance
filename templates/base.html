@@ -73,16 +73,28 @@
             <li><a href="{% url 'contact_us_page' %}">Contact Support</a></li>
 
             {% if user_status %}
-                <li><a href="{% url 'logout' %}">Logout/Sign Out</a></li>
+                <li><a href="#" onclick="confirmLogout()">Logout/Sign Out</a></li>
             {% endif %}
+
         </ul>
     </div>
 
 
     <div class="content">
-
         {% block content %} {% endblock %}
     </div>
+
+    <script>
+    function confirmLogout() {
+        if (confirm("Are you sure you want to logout?")) {
+            // User clicked "OK", proceed with the logout action
+            window.location.href = "{% url 'logout' %}";  // Redirect to the logout URL
+        } else {
+            // User clicked "Cancel" or closed the dialog
+            // Optionally, you can perform some other action here
+        }
+    }
+    </script>
 
 
 </body>

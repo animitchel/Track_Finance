@@ -6,6 +6,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'expenses_tracker/signup.css' %}">
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{% static 'expenses_tracker/images/39050859.jpg' %}"
+    />
     <title>Sign Up</title>
 </head>
 <body>
@@ -16,35 +21,27 @@
     <main>
         <div class="container">
             <div class="form-container">
-                <form  method="POST" class="signup-form">
+                <form id="signup-form" method="POST" class="signup-form">
                     {% csrf_token %}
-                
-                    
                 
                     <div class="form-group">
                     
-{#                        {% if field.errors %} error" {% endif %}#}
-                        <label for="username">Username:</label>
+                        {{ user_form.username.label_tag }}
+                        {{ user_form.username.errors }}
+                        {{ user_form.username }}
                     
-                        {% if error_message %}
-                            <div class="error">{{ error_message }}</div>
-                        {% endif %}
+                        {{ user_form.email.label_tag }}
+                        {{ user_form.email.errors }}
+                        {{ user_form.email }}
                     
-                        <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                        {{ user_form.password.label_tag }}
+                        {{ user_form.password.errors }}
+                        {{ user_form.password }}
                     
-                        <label for="email">Email:</label>
-                        <input type="text" id="email" name="email" placeholder="Enter an email address" required>
-                    
-                        <label for="password">Password:</label>
-                        <input type="password" id="password" name="password" placeholder="Enter a password" required>
-                    
+                        <div style="color: red" id="password-match-message"></div>
                         <label for="confirm-password">Confirm Password:</label>
+                        <input type="password" id="confirm-password" name="confirm-password" placeholder="Enter the same password as before" required>
                         
-                        {% if password_not_confirm  %}
-                            <div class="error">{{ password_not_confirm }}</div>
-                        {% endif %}
-                            
-                        <input type="password" id="confirm-password" name="confirm-password" placeholder="Confirm your password" required>
                     
                         {% for field in form %}
                             {% if field.label in fields_to_display %}
@@ -56,7 +53,7 @@
                    
                     </div>
                 
-                    <button type="submit">Sign Up</button>
+                    <button type="submit" id="signup-button" class="disabled-button" disabled>Sign Up</button>
                 
                     <hr>
                     <p><a href="{% url 'login_page' %}">Already have an Account?</a></p>
@@ -66,6 +63,36 @@
                 </form>
             </div>
         </div>
+        <script>
+            const passwordInput = document.getElementById('id_password');
+            const confirmPasswordInput = document.getElementById('confirm-password');
+            const passwordMatchMessage = document.getElementById('password-match-message');
+            const signUpButton = document.getElementById('signup-button');
+            const signUpForm = document.getElementById('signup-form');
+        
+            function checkPasswordMatch() {
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    passwordMatchMessage.textContent = 'Passwords do not match';
+                    signUpButton.disabled = true;
+                    signUpButton.classList.add('disabled-button');
+                } else {
+                    passwordMatchMessage.textContent = '';
+                    signUpButton.disabled = false;
+                    signUpButton.classList.remove('disabled-button');
+                }
+            }
+        
+            confirmPasswordInput.addEventListener('input', checkPasswordMatch);
+        
+            signUpForm.addEventListener('submit', function(event) {
+                if (passwordInput.value !== confirmPasswordInput.value) {
+                    passwordMatchMessage.textContent = 'Passwords do not match';
+                    signUpButton.disabled = true;
+                    signUpButton.classList.add('disabled-button');
+                    event.preventDefault(); // Prevent form submission
+                }
+            });
+        </script>
     </main>
 
     <footer>

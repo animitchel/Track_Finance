@@ -5,6 +5,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="{% static 'expenses_tracker/login.css' %}">
+    <link
+      rel="icon"
+      type="image/x-icon"
+      href="{% static 'expenses_tracker/images/39050859.jpg' %}"
+    />
     <title>Login</title>
 </head>
 <body>
@@ -17,7 +22,7 @@
             <div class="form-container">
                 <form class="login-form" method="post" action="{% url 'login_page' %}">
                     {% csrf_token %}
-{#                    <form class="login-form">#}
+
                     <div class="{% if error_message  %} error {% endif %}" > 
                         {% if error_message %}
                             {{ error_message }}
