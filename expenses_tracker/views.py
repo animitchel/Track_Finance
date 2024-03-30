@@ -100,7 +100,6 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
     context_object_name = 'transactions'
 
     def get_queryset(self):
-
         filter_category = self.request.session.get('filter_category')
         sort_order = self.request.session.get('sort_order')
 
@@ -111,6 +110,10 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
                                                         filter_category=self.request.session.pop('filter_category'),
                                                         order_by=self.request.session.pop('order_by'), query_db=query,
                                                         sort_pop=self.request.session.pop('sort_order'))
+
+            total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
+
+            self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
             return filtered_query
 
         return query
@@ -123,6 +126,7 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
         context['transaction_category'] = {cate_.category: None for cate_ in self.object_list}
         context['current_year'] = datetime.now().year
         context["category_source"] = "Category"
+        context["total_trans_queried_amount"] = self.request.session.pop('total_trans_queried_amount', None)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -430,6 +434,7 @@ class IncomeData(LoginRequiredMixin, ListView):
         context['current_year'] = datetime.now().year
         context["category_source"] = "Source"
         context['thirty_days_earlier'] = timezone.now() - timedelta(days=30)
+        context['total_trans_queried_amount'] = self.request.session.pop('total_trans_queried_amount', None)
         return context
 
     def get_queryset(self):
@@ -439,10 +444,16 @@ class IncomeData(LoginRequiredMixin, ListView):
         data = (super(IncomeData, self).get_queryset().filter(user_id=self.request.user.id))
 
         if filter_category:
-            return expenses_query_filter_func(sort_order=sort_order,
-                                              filter_category=self.request.session.pop('filter_category'),
-                                              order_by=self.request.session.pop('order_by'), query_db=data,
-                                              sort_pop=self.request.session.pop('sort_order'))
+            filtered_query = expenses_query_filter_func(sort_order=sort_order,
+                                                        filter_category=self.request.session.pop('filter_category'),
+                                                        order_by=self.request.session.pop('order_by'), query_db=data,
+                                                        sort_pop=self.request.session.pop('sort_order'))
+
+            total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
+
+            self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
+
+            return filtered_query
         return data.order_by('-date')
 
     def post(self, request, *args, **kwargs):
@@ -650,7 +661,6 @@ class RegisterView(View):
         form = ProfileForm(request.POST or None)
 
         if form.is_valid() and user_form.is_valid():
-
             user_form.save(commit=False)
 
             user_form.instance.set_password(user_form.cleaned_data['password'])

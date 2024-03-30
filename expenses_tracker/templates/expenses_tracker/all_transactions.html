@@ -49,6 +49,18 @@
                         {% endfor %}
                         <!-- Add more rows as needed -->
                     </tbody>
+                    {% if total_trans_queried_amount %}
+                    <tbody>
+                        <tr>
+                            <td>
+                                <h4 style="margin: 0; padding: 0; text-align: center; color: gold">TOTAL</h4>
+                            </td>
+                            <td>
+                                <h4 style="margin: 0; padding: 0; color: gold; text-align: center;">{{ user_currency }}{{ total_trans_queried_amount|floatformat:"2g" }}</h4>
+                            </td>
+                        </tr>
+                    </tbody>
+                    {% endif %}
                 </table>
             </div>
         </section>
