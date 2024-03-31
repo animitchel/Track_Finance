@@ -67,6 +67,11 @@
                         {{ form.transaction_title.label_tag }}
                         {{ form.transaction_title }}
                     </div>
+                    <hr>
+                    <div class="form-group">
+                        <label for="all_transaction_budget">All Transaction Budget:</label>
+                        <input type="checkbox" id="all_transaction_budget" name="all_transaction_budget" value="True">
+                    </div>
                 </div>
                
                 <button type="submit" class="btn">Add Transaction</button>
@@ -88,20 +93,7 @@
         options.style.display = checkbox.checked ? 'block' : 'none';
     });
 </script>
-
-{#<script>#}
-{#    function showOptions() {#}
-{#        var checkbox = document.getElementById('{{ form.recurring_transaction.id_for_label }}');#}
-{#        var options = document.getElementById('id_recurring_transaction-options');#}
-{##}
-{#        if (checkbox.checked) {#}
-{#            options.style.display = 'block';#}
-{#        } else {#}
-{#            options.style.display = 'none';#}
-{#        }#}
-{#    }#}
-{#</script>#}
-
+    
 
 
     

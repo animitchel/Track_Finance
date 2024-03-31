@@ -113,7 +113,7 @@ class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
         # fields = '__all__'
-        exclude = ['user', 'next_occurrence', 'date']
+        exclude = ['user', 'next_occurrence', 'date', 'is_all_trans_bud']
 
         labels = {'category': 'Category', 'amount': 'Amount', 'description': 'Description',
                   'recurring_transaction': 'Recurring Transaction', 'frequency': 'Frequency',

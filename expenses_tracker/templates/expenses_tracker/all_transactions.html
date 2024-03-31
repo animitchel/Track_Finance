@@ -14,6 +14,13 @@
         <h1>All Transactions</h1>
     </header>
     
+    <form class="search-form" action="{% url 'all_transactions_page' %}" method="POST">
+        {% csrf_token %}
+        <input type="text" name="search" id="search" placeholder="Search...">
+        <button type="submit">Search</button>
+    </form>
+
+    
     <main>
         <section class="income-list">
             <div class="container">
@@ -48,16 +55,17 @@
                         </tr>
                         {% endfor %}
                         <!-- Add more rows as needed -->
-                    </tbody>
+                    </tbody> 
+                
                     {% if total_trans_queried_amount %}
                     <tbody>
                         <tr>
-                            <td>
-                                <h4 style="margin: 0; padding: 0; text-align: center; color: gold">TOTAL</h4>
-                            </td>
-                            <td>
-                                <h4 style="margin: 0; padding: 0; color: gold; text-align: center;">{{ user_currency }}{{ total_trans_queried_amount|floatformat:"2g" }}</h4>
-                            </td>
+                            <th colspan="2" scope="row">
+                                <h4 style="margin: 5px; padding: 5px; text-align: center; color: gold">TOTAL</h4>
+                            </th>
+                            <th>
+                                <h4 style="margin: 3px; padding: 3px; color: gold; text-align: center;">{{ user_currency }}{{ total_trans_queried_amount|floatformat:"2g" }}</h4>
+                            </th>
                         </tr>
                     </tbody>
                     {% endif %}

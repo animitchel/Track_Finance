@@ -7,26 +7,26 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.contrib.auth.models import User
 
-
 # Create your models here.
 
 _frequency = {
-            'weekly': 1,
-            'monthly': 4.4286,
-            'quarterly': 13.4286,
-            'yearly': 54.2857,
-            '2 weeks': 2,
-            '3 weeks': 3,
-            '2 months': 9.0000,
-            '4 months': 17.8571,
-            '5 months': 22.5714,
-            '6 months': 27.0000,
-            '7 months': 31.4286,
-            '8 months': 36.1429,
-            '9 months': 40.5714,
-            '10 months': 45.0000,
-            '11 months': 49.5714,
-        }
+    'weekly': 1,
+    'monthly': 4.4286,
+    'quarterly': 13.4286,
+    'yearly': 54.2857,
+    '2 weeks': 2,
+    '3 weeks': 3,
+    '2 months': 9.0000,
+    '4 months': 17.8571,
+    '5 months': 22.5714,
+    '6 months': 27.0000,
+    '7 months': 31.4286,
+    '8 months': 36.1429,
+    '9 months': 40.5714,
+    '10 months': 45.0000,
+    '11 months': 49.5714,
+}
+
 
 class Profile(models.Model):
     CURRENCY_CHOICES = [
@@ -81,7 +81,6 @@ class Profile(models.Model):
 
 
 class Transaction(models.Model):
-
     EXPENSE_CATEGORIES = [
         ('Housing', 'Housing'),
         ('Transportation', 'Transportation'),
@@ -118,9 +117,8 @@ class Transaction(models.Model):
     transaction_title = models.CharField(max_length=40, null=True, blank=True)
     date = models.DateTimeField(default=timezone.now)
     next_occurrence = models.DateTimeField(null=True, blank=True)
+    is_all_trans_bud = models.BooleanField(default=False, null=True, blank=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction', null=True)
-
-    # profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='transaction', null=True)
 
     def save(self, *args, **kwargs):
 
@@ -176,8 +174,6 @@ class Budget(models.Model):
     expiration_date = models.DateTimeField(null=True)
     date = models.DateTimeField(default=timezone.now, null=True)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='budget', null=True)
-
-    # profile = models.ForeignKey(Profile, on_delete=models.CASCADE, related_name='budget', null=True)
 
     def save(self, *args, **kwargs):
         _duration = {
