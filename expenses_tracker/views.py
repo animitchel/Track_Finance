@@ -102,21 +102,32 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         filter_category = self.request.session.get('filter_category')
         sort_order = self.request.session.get('sort_order')
+        search_query = self.request.session.get('search_query')
 
-        query = super(AllTransactionsView, self).get_queryset().filter(user_id=self.request.user.id).order_by('-date')
+        query = super(AllTransactionsView, self).get_queryset().filter(user_id=self.request.user.id)
 
         if filter_category:
-            filtered_query = expenses_query_filter_func(sort_order=sort_order,
-                                                        filter_category=self.request.session.pop('filter_category'),
-                                                        order_by=self.request.session.pop('order_by'), query_db=query,
-                                                        sort_pop=self.request.session.pop('sort_order'))
+            filtered_query = expenses_query_filter_func(
+                sort_order=sort_order,
+                filter_category=self.request.session.pop('filter_category'),
+                order_by=self.request.session.pop('order_by'), query_db=query,
+                sort_pop=self.request.session.pop('sort_order')
+            )
 
             total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
 
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
+
             return filtered_query
 
-        return query
+        elif search_query:
+            filtered_query = query.filter(description__icontains=search_query)
+            total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
+            self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
+            self.request.session.pop('search_query')
+            return filtered_query
+
+        return query.order_by('-date')
 
     def get_context_data(self, **kwargs):
         context = super(AllTransactionsView, self).get_context_data(**kwargs)
@@ -131,6 +142,8 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
 
     def post(self, request, *args, **kwargs):
         transaction_id = request.POST.get('all_transaction_id')
+        search_query = request.POST.get('search')
+
         if transaction_id:
             transaction_obj = Transaction.objects.get(id=transaction_id)
 
@@ -138,14 +151,18 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
             budget_objects_categories = budget_objects.filter(category=transaction_obj.category).filter(
                 date__lte=transaction_obj.date)
 
-            all_transactions_budget = budget_objects.filter(category="All Transactions").filter(
-                date__lte=transaction_obj.date)
+            all_transactions_budget = budget_objects.filter(
+                category="All Transactions").filter(date__lte=transaction_obj.date)
 
             budget_calculation(budget_objs=budget_objects_categories, transaction_obj=transaction_obj)
 
-            budget_calculation(budget_objs=all_transactions_budget, transaction_obj=transaction_obj)
+            if transaction_obj.is_all_trans_bud:
+                budget_calculation(budget_objs=all_transactions_budget, transaction_obj=transaction_obj)
 
             transaction_obj.delete()
+
+        if search_query:
+            self.request.session['search_query'] = search_query
 
         request.session['filter_category'] = request.POST.get('filter_category')
         request.session['order_by'] = request.POST.get('order_by')
@@ -168,13 +185,21 @@ class AddTransactionView(LoginRequiredMixin, CreateView):
     context_object_name = 'transactions'
 
     def form_valid(self, form):
+        all_transaction_budget = self.request.POST.get('all_transaction_budget')
+
         form.instance.user_id = self.request.user.id
+        form.instance.is_all_trans_bud = all_transaction_budget
+
         for field in Budget.objects.all().filter(user_id=self.request.user.id):
-            if field.category == 'All Transactions':
+
+            if all_transaction_budget:
+
+                if field.category == 'All Transactions':
+                    budget_calc(field=field, form_instance=form.instance)
+
+            if field.category == form.instance.category:
                 budget_calc(field=field, form_instance=form.instance)
 
-            elif field.category == form.instance.category:
-                budget_calc(field=field, form_instance=form.instance)
         return super(AddTransactionView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -221,10 +246,12 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
                 recurring_transaction.save()
 
         if filter_category:
-            return expenses_query_filter_func(sort_order=sort_order,
-                                              filter_category=self.request.session.pop('filter_category'),
-                                              order_by=self.request.session.pop('order_by'), query_db=data,
-                                              sort_pop=self.request.session.pop('sort_order'))
+            return expenses_query_filter_func(
+                sort_order=sort_order,
+                filter_category=self.request.session.pop('filter_category'),
+                order_by=self.request.session.pop('order_by'), query_db=data,
+                sort_pop=self.request.session.pop('sort_order')
+            )
         return data.order_by('next_occurrence')
 
     def get_context_data(self, **kwargs):
@@ -261,7 +288,6 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
     def get_queryset(self):
         filter_category = self.request.session.get('filter_category')
         sort_order = self.request.session.get('sort_order')
-        order_by = self.request.session.get('order_by')
 
         db = super(BudgetOverviewView, self).get_queryset().filter(user_id=self.request.user.id)
         for field in db:
@@ -440,31 +466,47 @@ class IncomeData(LoginRequiredMixin, ListView):
     def get_queryset(self):
         filter_category = self.request.session.get('filter_category')
         sort_order = self.request.session.get('sort_order')
-        order_by = self.request.session.get('order_by')
+        search_query = self.request.session.get('search_query')
+
         data = (super(IncomeData, self).get_queryset().filter(user_id=self.request.user.id))
 
         if filter_category:
-            filtered_query = expenses_query_filter_func(sort_order=sort_order,
-                                                        filter_category=self.request.session.pop('filter_category'),
-                                                        order_by=self.request.session.pop('order_by'), query_db=data,
-                                                        sort_pop=self.request.session.pop('sort_order'))
+            filtered_query = expenses_query_filter_func(
+                sort_order=sort_order,
+                filter_category=self.request.session.pop('filter_category'),
+                order_by=self.request.session.pop('order_by'), query_db=data,
+                sort_pop=self.request.session.pop('sort_order')
+            )
 
             total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
 
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
 
             return filtered_query
+
+        elif search_query:
+            filtered_query = data.filter(notes__icontains=search_query)
+            total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
+            self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
+            self.request.session.pop('search_query')
+            return filtered_query
+
         return data.order_by('-date')
 
     def post(self, request, *args, **kwargs):
         income_data_id = request.POST.get('income_data_id')
+        search_query = request.POST.get('search')
 
         if income_data_id:
             Income.objects.get(id=income_data_id).delete()
 
-        request.session['filter_category'] = request.POST.get('filter_category')
-        request.session['order_by'] = request.POST.get('order_by')
-        request.session['sort_order'] = request.POST.get('sort_order')
+        elif search_query:
+            self.request.session['search_query'] = search_query
+        else:
+            request.session['filter_category'] = request.POST.get('filter_category')
+            request.session['order_by'] = request.POST.get('order_by')
+            request.session['sort_order'] = request.POST.get('sort_order')
+
         return HttpResponseRedirect('/income-data')
 
 
