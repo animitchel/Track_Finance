@@ -26,6 +26,7 @@ class UserForm(forms.ModelForm):
             'email': {'required': 'Please enter a valid email address'},
             'password': {'required': 'Please enter a password'}
         }
+
     email = forms.EmailField(max_length=250, widget=forms.EmailInput(
         attrs={'placeholder': 'Enter an email address',
                'required': 'Please enter a valid email address'}), required=True)
@@ -105,8 +106,6 @@ class ProfileForm(forms.ModelForm):
                                    widget=forms.TextInput(
                                        attrs={'placeholder': 'Enter your phone number e.g +999999999'}
                                    ))
-    # image = forms.ImageField(required=False)
-    # username = forms.CharField(max_length=100, widget=forms.TextInput(attrs={'placeholder': 'Enter a username'}))
 
 
 class TransactionForm(forms.ModelForm):

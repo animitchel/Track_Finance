@@ -318,10 +318,11 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
 
         if budget_id:
             Budget.objects.get(id=budget_id).delete()
+        else:
+            request.session['filter_category'] = request.POST.get('filter_category')
+            request.session['order_by'] = request.POST.get('order_by')
+            request.session['sort_order'] = request.POST.get('sort_order')
 
-        request.session['filter_category'] = request.POST.get('filter_category')
-        request.session['order_by'] = request.POST.get('order_by')
-        request.session['sort_order'] = request.POST.get('sort_order')
         return HttpResponseRedirect('/budget-overview')
 
 
@@ -565,10 +566,13 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
                 recurring_income.save()
 
         if filter_category:
-            return expenses_query_filter_func(sort_order=sort_order,
-                                              filter_category=self.request.session.pop('filter_category'),
-                                              order_by=self.request.session.pop('order_by'), query_db=data,
-                                              sort_pop=self.request.session.pop('sort_order'))
+            return expenses_query_filter_func(
+                sort_order=sort_order,
+                filter_category=self.request.session.pop('filter_category'),
+                order_by=self.request.session.pop('order_by'), query_db=data,
+                sort_pop=self.request.session.pop('sort_order')
+            )
+
         return data.order_by('next_occurrence')
 
     def get_context_data(self, **kwargs):
@@ -594,6 +598,7 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
             request.session['filter_category'] = request.POST.get('filter_category')
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
+
         return HttpResponseRedirect('/recurring-incomes')
 
 
