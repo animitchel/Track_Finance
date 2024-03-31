@@ -24,15 +24,15 @@ def send_message(name, email, phone, message) -> None:
         connection.starttls()
 
         # Login to the email account
-        connection.login(user=os.getenv("EMAIL_USER"), password=os.getenv("PASSWORD"))
+        connection.login(user=os.getenv("EMAIL_USER_FROM"), password=os.getenv("PASSWORD"))
 
         encoded_message = message.encode('utf-8')
         decoded_message = encoded_message.decode('utf-8')
 
         # Send the email message
-        connection.sendmail(from_addr='jeremylawrence112@gmail.com',
-                            to_addrs='animitchel24@gmail.com',
-                            msg=f"Subject:Mitchel's Blog!\n\n "
+        connection.sendmail(from_addr=os.getenv('EMAIL_USER_FROM'),
+                            to_addrs=os.getenv('EMAIL_USER_TO'),
+                            msg=f"Subject:Track-Finance!\n\n "
                                 f"Name: {name}\n\n "
                                 f"Email: {email}\n\n "
                                 f"Phone: {phone}\n\n "
