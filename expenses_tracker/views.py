@@ -161,12 +161,13 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
 
             transaction_obj.delete()
 
-        if search_query:
+        elif search_query:
             self.request.session['search_query'] = search_query
 
-        request.session['filter_category'] = request.POST.get('filter_category')
-        request.session['order_by'] = request.POST.get('order_by')
-        request.session['sort_order'] = request.POST.get('sort_order')
+        else:
+            request.session['filter_category'] = request.POST.get('filter_category')
+            request.session['order_by'] = request.POST.get('order_by')
+            request.session['sort_order'] = request.POST.get('sort_order')
 
         return HttpResponseRedirect('/all_transactions')
 
