@@ -40,6 +40,7 @@ ALLOWED_HOSTS = [
 INSTALLED_APPS = [
     'expenses_tracker',
     'phonenumber_field',
+    'storages',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -143,3 +144,20 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 # Authentication settings
 LOGIN_URL = '/login/'  # URL where login form is located
 LOGIN_REDIRECT_URL = '/overview/'  # URL to redirect to after successful login
+
+# Set AWS credentials
+AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID_ENV')
+AWS_SECRET_ACCESS_KEY = os.getenv('AWS_SECRET_ACCESS_KEY_ENV')
+AWS_STORAGE_BUCKET_NAME = 'track-finance'
+AWS_S3_REGION_NAME = 'us-east-1'
+
+# Set AWS S3 custom domain (optional)
+AWS_S3_CUSTOM_DOMAIN = f'{AWS_STORAGE_BUCKET_NAME}.s3.amazonaws.com'
+
+STATICFILES_FOLDER = 'static'
+MEDIAFILES_FOLDER = 'media'
+
+# Set static and media file storage
+STATICFILES_STORAGE = 'custom_storages.StaticFileStorage'
+
+DEFAULT_FILE_STORAGE = 'custom_storages.MediaFileStorage'

@@ -24,6 +24,7 @@
                 {% if not user_status %}
                     <p>Start managing your expenses today! Sign up for an account and take control of your finances.</p>
                     <a href="{% url 'register_page' %}" class="btn">Sign Up</a>
+                    <a href="{% url 'login_page' %}" class="btn">Login</a>
                 {% else %}
                     <p>Welcome back! Start managing your expenses today! Take control of your finances and explore all the features of our application.</p>
                 {% endif %}
