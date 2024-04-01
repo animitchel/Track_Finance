@@ -74,6 +74,8 @@
 
             {% if user_status %}
                 <li><a href="#" onclick="confirmLogout()">Logout/Sign Out</a></li>
+            {% else %}
+                <li><a href="{% url 'home' %}">Login/Sign Up</a></li>
             {% endif %}
 
         </ul>
