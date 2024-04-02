@@ -19,16 +19,11 @@
     <main>
         <div class="container">
             <ul class="notification-list">
-            {% if not transactions_instances_next_24_hours and budgets_instances_next_24_hours and incomes_instances_next_24_hours %}
-                <li>
-                    <div class="notification-content">
-                        <p class="notification-text">No new notifications as of this time, please check back later, thanks.</p>
-{#                        <span class="notification-time">Now</span>#}
-                    </div>
-                </li>
-            {% else %}
+            {% if  transactions_instances_next_24_hours or budgets_instances_next_24_hours or incomes_instances_next_24_hours %}
                 
+                {% if transactions_instances_next_24_hours %}
                 <h1 style="margin: 10px">TRANSACTION</h1>
+                {% endif %}
                 {% for field in transactions_instances_next_24_hours %}
                 <li>
                     <div class="notification-content">
@@ -41,7 +36,10 @@
                 </li>
                 {% endfor %}
                 
+                {% if incomes_instances_next_24_hours %}
                 <h1 style="text-align: center; margin: 10px">INCOME</h1>
+                {% endif %}
+                
                 {% for field in incomes_instances_next_24_hours %}
                 <li>
                     <div class="notification-content">
@@ -54,7 +52,10 @@
                 </li>
                 {% endfor %}
                 
+                {% if budgets_instances_next_24_hours %}
                 <h1 style="text-align: right; margin: 10px">BUDGET</h1>
+                {% endif %}
+                
                 {% for field in budgets_instances_next_24_hours %}
                 <li>
                     <div class="notification-content">
@@ -67,6 +68,13 @@
                     </div>
                 </li>
                 {% endfor %}
+                {% else %}
+                <li style="margin: 30px">
+                    <div class="notification-content">
+                        <p class="notification-text" style="margin: 5px; text-align: center">No new notifications as of this time, please check back later, thanks.</p>
+                    </div>
+                </li>
+            
             {% endif %}
                 
             </ul>
