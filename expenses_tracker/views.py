@@ -125,7 +125,8 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
             total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
             self.request.session.pop('search_query')
-            return filtered_query
+
+            return filtered_query.order_by('date')
 
         return query.order_by('-date')
 
@@ -491,7 +492,8 @@ class IncomeData(LoginRequiredMixin, ListView):
             total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
             self.request.session.pop('search_query')
-            return filtered_query
+
+            return filtered_query.order_by('date')
 
         return data.order_by('-date')
 
@@ -620,12 +622,35 @@ def profile_details(request):
 
 @login_required
 def notification(request):
+    current_datetime = timezone.now()
+
+    # Calculate datetime 24 hours from now
+    next_24_hours = current_datetime + timedelta(hours=24)
+
+    # Query your model for instances where the date is within the next 24 hours
+    transactions_instances_next_24_hours = Transaction.objects.filter(
+        next_occurrence__gt=current_datetime, next_occurrence__lte=next_24_hours
+    ).order_by('next_occurrence')
+
+    incomes_instances_next_24_hours = Income.objects.filter(
+        next_occurrence__gt=current_datetime, next_occurrence__lte=next_24_hours
+    ).order_by('next_occurrence')
+
+    budgets_instances_next_24_hours = Budget.objects.filter(
+        expiration_date__gt=current_datetime, expiration_date__lte=next_24_hours
+    ).order_by('expiration_date')
+
     return render(
         request,
         template_name='expenses_tracker/notification.html',
         status=200,
         context={'user_status': request.user.is_authenticated,
-                 'current_year': datetime.now().year}
+                 'current_year': datetime.now().year,
+                 'transactions_instances_next_24_hours': transactions_instances_next_24_hours,
+                 'user_currency': request.session.get('user_currency'),
+                 'incomes_instances_next_24_hours': incomes_instances_next_24_hours,
+                 'budgets_instances_next_24_hours': budgets_instances_next_24_hours,
+                 }
     )
 
 

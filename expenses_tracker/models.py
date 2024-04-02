@@ -135,6 +135,9 @@ class Transaction(models.Model):
 
         super(Transaction, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return f"{self.category} - {self.amount}"
+
 
 class Budget(models.Model):
     BUDGET_CATEGORIES = [
@@ -200,6 +203,9 @@ class Budget(models.Model):
 
         super(Budget, self).save(*args, **kwargs)
 
+    def __str__(self):
+        return f"{self.category} - {self.amount}"
+
 
 class Income(models.Model):
     INCOME_SOURCES = [
@@ -237,3 +243,6 @@ class Income(models.Model):
             self.transaction_title = None
 
         super(Income, self).save(*args, **kwargs)
+
+    def __str__(self):
+        return f"{self.category} - {self.amount}"
