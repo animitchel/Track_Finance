@@ -19,24 +19,56 @@
     <main>
         <div class="container">
             <ul class="notification-list">
+            {% if not transactions_instances_next_24_hours and budgets_instances_next_24_hours and incomes_instances_next_24_hours %}
                 <li>
                     <div class="notification-content">
-                        <p class="notification-text">You have a new message from John Doe.</p>
-                        <span class="notification-time">2 hours ago</span>
+                        <p class="notification-text">No new notifications as of this time, please check back later, thanks.</p>
+{#                        <span class="notification-time">Now</span>#}
                     </div>
                 </li>
+            {% else %}
+                
+                <h1 style="margin: 10px">TRANSACTION</h1>
+                {% for field in transactions_instances_next_24_hours %}
                 <li>
                     <div class="notification-content">
-                        <p class="notification-text">Your expense report has been approved.</p>
-                        <span class="notification-time">Yesterday</span>
+                        <p class="notification-text">New Transaction Scheduled: {{ field.category }} - Amount: {{ user_currency }}{{ field.amount|floatformat:"2g" }} - Please Review  </p>
+                        <hr>
+                        <p class="notification-text">Reoccurring in the next - {{ field.next_occurrence|timeuntil }} from now! </p>
+                        <hr>
+                        <span class="notification-time"><em style="color: #007bff">Avoiding this action? Remove the corresponding transaction by clicking <a href="{% url 'recurring_transactions_page' %}">here</a></em>. </span>
                     </div>
                 </li>
+                {% endfor %}
+                
+                <h1 style="text-align: center; margin: 10px">INCOME</h1>
+                {% for field in incomes_instances_next_24_hours %}
                 <li>
                     <div class="notification-content">
-                        <p class="notification-text">Reminder: Budget review due tomorrow.</p>
-                        <span class="notification-time">3 days ago</span>
+                        <p class="notification-text">New Income Scheduled: {{ field.category|title }} - Amount: {{ user_currency }}{{ field.amount|floatformat:"2g" }} - Please Review  </p>
+                        <hr>
+                        <p class="notification-text">Reoccurring in the next - {{ field.next_occurrence|timeuntil }} from now! </p>
+                        <hr>
+                        <span class="notification-time"><em style="color: #007bff">Avoiding this action? Remove the corresponding income by clicking <a href="{% url 'recurring_income_page' %}">here</a></em>. </span>
                     </div>
                 </li>
+                {% endfor %}
+                
+                <h1 style="text-align: right; margin: 10px">BUDGET</h1>
+                {% for field in budgets_instances_next_24_hours %}
+                <li>
+                    <div class="notification-content">
+                        <p class="notification-text">Your budget : {{ field.category }} - Budget: {{ user_currency }}{{ field.budget|floatformat:"2g" }}, is expiring soon</p>
+                        <hr>
+                        <p class="notification-text">Expiring in the next - {{ field.expiration_date|timeuntil }} from now! </p>
+                        <hr>
+                        <span class="notification-time"><em style="color: #007bff">Take action now to review it <a href="{% url 'budget-overview_page' %}">here</a></em>. </span>
+                        
+                    </div>
+                </li>
+                {% endfor %}
+            {% endif %}
+                
             </ul>
         </div>
     </main>
