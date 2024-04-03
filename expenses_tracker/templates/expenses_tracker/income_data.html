@@ -24,6 +24,9 @@
     <main>
         <section class="income-list">
             <div class="container">
+            {% if search_query %}
+                <em>Showing search results for {{ search_query|title }} ...</em>
+            {% endif %}
                 <table>
                     <thead>
                         <tr>

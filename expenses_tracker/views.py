@@ -118,13 +118,12 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
 
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
 
-            return filtered_query
+            return filtered_query.order_by('date')
 
         elif search_query:
             filtered_query = query.filter(description__icontains=search_query)
             total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
-            self.request.session.pop('search_query')
 
             return filtered_query.order_by('date')
 
@@ -139,6 +138,7 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
         context['current_year'] = datetime.now().year
         context["category_source"] = "Category"
         context["total_trans_queried_amount"] = self.request.session.pop('total_trans_queried_amount', None)
+        context["search_query"] = self.request.session.pop('search_query', None)
         return context
 
     def post(self, request, *args, **kwargs):
@@ -464,6 +464,7 @@ class IncomeData(LoginRequiredMixin, ListView):
         context["category_source"] = "Source"
         context['thirty_days_earlier'] = timezone.now() - timedelta(days=30)
         context['total_trans_queried_amount'] = self.request.session.pop('total_trans_queried_amount', None)
+        context["search_query"] = self.request.session.pop('search_query', None)
         return context
 
     def get_queryset(self):
@@ -485,13 +486,13 @@ class IncomeData(LoginRequiredMixin, ListView):
 
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
 
-            return filtered_query
+            return filtered_query.order_by('date')
 
         elif search_query:
             filtered_query = data.filter(notes__icontains=search_query)
             total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
-            self.request.session.pop('search_query')
+            # self.request.session.pop('search_query')
 
             return filtered_query.order_by('date')
 
