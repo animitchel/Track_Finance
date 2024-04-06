@@ -18,6 +18,8 @@
             <section class="transaction-list">
             <div class="container">
                 <ul>
+                {% if budget %}
+                    
                     {% for field in budget %}
                     <li class="list_display">
                         <div class="transaction-info">
@@ -50,9 +52,15 @@
                                 {% endif %}
                             </div>
                         </div>
-                        
                     </li>
                     {% endfor %}
+                {% else %}
+                <li style="margin: 30px">
+                <div class="notification-content">
+                    <p class="notification-text" style="margin: 10px; text-align: center">There are no budgets to display at the moment. Please add budget data and check back later. Thank you.</p>
+                </div>
+                </li>
+                {% endif %}
                 </ul>
             </div>
         </section>

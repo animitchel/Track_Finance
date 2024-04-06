@@ -16,7 +16,7 @@
     </header>
         <main>
         
-            {% include 'expenses_tracker/include/recurring_transactions_incomes.html' with url_recur='recurring_transactions_page' %}
+            {% include 'expenses_tracker/include/recurring_transactions_incomes.html' with url_recur='recurring_transactions_page' trans='recurring transactions' add_trans='transactions'%}
             
             <form method="post" action="{% url 'recurring_transactions_page' %}">
                 {% include "expenses_tracker/include/right_sidebar.html" with url='recurring_transactions_page' %}

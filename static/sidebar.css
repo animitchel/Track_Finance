@@ -295,6 +295,24 @@ footer {
   margin-bottom: 6px;
 }
 
+.container li {
+    list-style: none;
+}
+
+.notification-text {
+    font-size: 18px;
+    color: #333;
+    margin: 0;
+    list-style: none;
+
+    background-color: #fff;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    overflow: hidden;
+    transition: transform 0.3s;
+    padding: 15px;
+}
+
 
 
 

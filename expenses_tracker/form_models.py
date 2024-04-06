@@ -64,36 +64,21 @@ class ProfileForm(forms.ModelForm):
 
         # fields = "__all__"
         exclude = ["user"]
+        labels = {'currency': 'Currency'}
 
-        labels = {'username': 'Username', 'email_address': 'Email', 'password': 'Password', 'currency': 'Currency'}
 
-        widgets = {'username': forms.TextInput(attrs={'placeholder': 'Enter a username'}),
-                   'email_address': forms.EmailInput(attrs={'placeholder': 'Enter an email address'}),
-                   'password': forms.PasswordInput(attrs={'placeholder': 'Enter a password'}),
-                   'first_name': forms.TextInput(attrs={'placeholder': 'Enter your first name'}),
-                   'last_name': forms.TextInput(attrs={'placeholder': 'Enter your last name'}),
-                   'occupation': forms.TextInput(attrs={'placeholder': 'Enter your occupation'}),
-                   'city': forms.TextInput(attrs={'placeholder': 'Enter your city name'}),
-                   'country': forms.TextInput(attrs={'placeholder': 'Enter your country'}),
-                   'phone_number': forms.TextInput(attrs={'placeholder': 'Enter your phone number e.g +999999999'}),
-                   }
+        widgets = {
+            'first_name': forms.TextInput(attrs={'placeholder': 'Enter your first name'}),
+            'last_name': forms.TextInput(attrs={'placeholder': 'Enter your last name'}),
+            'occupation': forms.TextInput(attrs={'placeholder': 'Enter your occupation'}),
+            'city': forms.TextInput(attrs={'placeholder': 'Enter your city name'}),
+            'country': forms.TextInput(attrs={'placeholder': 'Enter your country'}),
+            'phone_number': forms.TextInput(attrs={'placeholder': 'Enter your phone number e.g +999999999'}),
+        }
 
-        error_messages = {'username': {'required': 'Please enter a username'},
-                          'email_address': {'required': 'Please enter an email'},
-                          'password': {'required': 'Please enter a password'},
-                          'first_name': {'required': 'Please enter your first name'},
-                          'last_name': {'required': 'Please enter your last'},
-                          'occupation': {'required': 'Please enter your occupation'},
-                          'city': {'required': 'Please enter your city'},
-                          'country': {'required': 'Please enter your country'},
-                          'currency': {'required': 'Please choose your currency'},
-                          'phone_number': {'required': 'Please enter your phone number'},
-                          }
-
-    first_name = forms.CharField(required=False, max_length=50, widget=forms.TextInput(attrs={'placeholder': 'Enter '
-                                                                                                             'your '
-                                                                                                             'first '
-                                                                                                             'name'}))
+    first_name = forms.CharField(required=False, max_length=50, widget=forms.TextInput(attrs={
+        'placeholder': 'Enter your first name'},
+    ))
     last_name = forms.CharField(required=False, max_length=80,
                                 widget=forms.TextInput(attrs={'placeholder': 'Enter your last name'}))
     occupation = forms.CharField(required=False, max_length=100,
@@ -106,6 +91,16 @@ class ProfileForm(forms.ModelForm):
                                    widget=forms.TextInput(
                                        attrs={'placeholder': 'Enter your phone number e.g +999999999'}
                                    ))
+
+    # error_messages = {
+    #     'first_name': {'required': 'Please enter your first name'},
+    #     'last_name': {'required': 'Please enter your last'},
+    #     'occupation': {'required': 'Please enter your occupation'},
+    #     'city': {'required': 'Please enter your city'},
+    #     'country': {'required': 'Please enter your country'},
+    #     'currency': {'required': 'Please choose your currency'},
+    #     'phone_number': {'required': 'Please enter your phone number'},
+    # }
 
 
 class TransactionForm(forms.ModelForm):

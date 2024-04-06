@@ -170,7 +170,7 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
 
-        return HttpResponseRedirect('/all_transactions')
+        return HttpResponseRedirect(reverse('all_transactions_page'))
 
 
 def budget_calc(field, form_instance):
@@ -227,6 +227,8 @@ class CategoryView(LoginRequiredMixin, ListView):
         context['user_currency'] = self.request.session.get('user_currency')
         context['user_status'] = self.request.user.is_authenticated
         context['current_year'] = datetime.now().year
+        context['categories_pace_holder'] = 'transaction categories'
+        context['transaction_income_pace_holder'] = 'transaction'
         return context
 
 
@@ -279,7 +281,8 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
             request.session['filter_category'] = request.POST.get('filter_category')
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
-        return HttpResponseRedirect('/recurring-transactions')
+
+        return HttpResponseRedirect(reverse('recurring_transactions_page'))
 
 
 class BudgetOverviewView(LoginRequiredMixin, ListView):
@@ -324,7 +327,7 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
 
-        return HttpResponseRedirect('/budget-overview')
+        return HttpResponseRedirect(reverse('budget-overview_page'))
 
 
 class AddBudgetView(LoginRequiredMixin, CreateView):
@@ -436,7 +439,7 @@ def expense_income_report_form(request):
                     else:
                         request.session[key] = value
             request.session["request_from_income_report"] = request.POST.get('income_data')
-            return HttpResponseRedirect('/expenses-report')
+            return HttpResponseRedirect(reverse('expenses_report_page'))
         else:
             error = form.errors
 
@@ -492,7 +495,6 @@ class IncomeData(LoginRequiredMixin, ListView):
             filtered_query = data.filter(notes__icontains=search_query)
             total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
-            # self.request.session.pop('search_query')
 
             return filtered_query.order_by('date')
 
@@ -512,7 +514,7 @@ class IncomeData(LoginRequiredMixin, ListView):
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
 
-        return HttpResponseRedirect('/income-data')
+        return HttpResponseRedirect(reverse('income_data_page'))
 
 
 class IncomeFormView(LoginRequiredMixin, CreateView):
@@ -548,6 +550,8 @@ class IncomeCategoryView(LoginRequiredMixin, ListView):
         context['user_currency'] = self.request.session.get('user_currency')
         context['user_status'] = self.request.user.is_authenticated
         context['current_year'] = datetime.now().year
+        context['categories_pace_holder'] = 'income categories'
+        context['transaction_income_pace_holder'] = 'income'
         return context
 
 
@@ -602,7 +606,7 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
 
-        return HttpResponseRedirect('/recurring-incomes')
+        return HttpResponseRedirect(reverse('recurring_income_page'))
 
 
 @login_required
@@ -698,7 +702,7 @@ class AccountSettingsView(LoginRequiredMixin, View):
 
             request.session['message'] = 'Profile updated successfully'
 
-            return HttpResponseRedirect('/account-settings')
+            return HttpResponseRedirect(reverse('account_settings_page'))
 
         return render(
             request, self.template_name,
@@ -755,7 +759,7 @@ class RegisterView(View):
 
             login(request, user)
 
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect(reverse('home'))
 
         return render(request, template_name="expenses_tracker/signup.html",
                       context={"form": form,
@@ -781,7 +785,7 @@ def login_user(request):
             request.session['user_currency'] = user.profile.currency
 
             login(request, user)
-            return HttpResponseRedirect('/')
+            return HttpResponseRedirect(reverse('home'))
         else:
             error_message = "Username or password incorrect"
 
@@ -800,7 +804,7 @@ def login_user(request):
 def logout_user(request):
     request.session.delete()
     logout(request)
-    return HttpResponseRedirect('/login')
+    return HttpResponseRedirect(reverse('login_page'))
 
 
 def privacy_policy(request):
@@ -859,7 +863,7 @@ def contact_us(request):
             # Set a flag to indicate that the message has been sent
             request.session['is_message_sent'] = True
             # Render the template with the flag
-            return HttpResponseRedirect('/contact-us')
+            return HttpResponseRedirect(reverse('contact_us_page'))
             # return render_template("contact.html", msg_sent=sent)
 
     # Render the contact form template for GET requests

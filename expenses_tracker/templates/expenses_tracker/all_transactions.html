@@ -27,6 +27,7 @@
             {% if search_query %}
             <em>Showing search results for {{ search_query|title }} ...</em>
             {% endif %}
+            {% if transactions  %}
                 <table>
                     <thead>
                         <tr>
@@ -57,7 +58,6 @@
                             </td>
                         </tr>
                         {% endfor %}
-                        <!-- Add more rows as needed -->
                     </tbody> 
                 
                     {% if total_trans_queried_amount %}
@@ -73,6 +73,13 @@
                     </tbody>
                     {% endif %}
                 </table>
+            {% else %}
+            <li style="margin: 30px">
+                <div class="notification-content">
+                    <p class="notification-text" style="margin: 10px; text-align: center">There are no transactions to display at the moment. Please add transaction data and check back later. Thank you.</p>
+                </div>
+            </li>
+            {% endif %}
             </div>
         </section>
         <form method="post" action="{% url 'all_transactions_page' %}">
