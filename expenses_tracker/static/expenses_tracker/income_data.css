@@ -85,8 +85,17 @@ td button:hover {
     transform: scale(1.02);
 }
 
-@media screen and (max-width: 1600px) {
+@media screen and (max-width: 1800px) {
     table {
+        width: 80%;
+    }
+    .notification-content {
+        width: 90%;
+    }
+}
+
+@media screen and (max-width: 1460px) {
+    .notification-content {
         width: 80%;
     }
 }
@@ -95,12 +104,20 @@ td button:hover {
     table {
         width: 70%;
     }
+    .notification-content {
+        width: 70%;
+    }
 }
 
-@media screen and (max-width: 992px) {
+@media screen and (max-width: 900px) {
     table {
         width: 60%;
     }
+    .notification-content {
+        width: 100%;
+        /*text-align: center;*/
+    }
+
 }
 
 
@@ -137,6 +154,8 @@ td button:hover {
 .search-form button:hover {
     background-color: #0056b3;
 }
+
+
 
 
 

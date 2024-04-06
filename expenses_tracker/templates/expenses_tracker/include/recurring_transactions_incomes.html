@@ -2,6 +2,7 @@
 <section class="transaction-list">
     <div class="container">
         <ul>
+        {% if recurring_transactions_incomes %}
             {% for field in recurring_transactions_incomes %}
             <li class="list_display">
                 <div class="transaction-info">
@@ -31,6 +32,13 @@
                 
             </li>
             {% endfor %}
+        {% else %}
+        <li style="margin: 30px">
+            <div class="notification-content">
+                <p class="notification-text" style="margin: 10px; text-align: center">There are no {{ trans }} to display at the moment. Please add {{ add_trans }} data and check back later. Thank you.</p>
+            </div>
+        </li>
+        {% endif %}
         </ul>
     </div>
 </section>

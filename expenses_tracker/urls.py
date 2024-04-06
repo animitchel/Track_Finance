@@ -1,6 +1,7 @@
 from django.urls import path
 from . import views
 
+# app_name = 'expenses_tracker'
 
 urlpatterns = [
     path('', views.IndexView.as_view(), name='home'),

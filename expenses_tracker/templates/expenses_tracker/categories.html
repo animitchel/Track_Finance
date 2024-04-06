@@ -19,12 +19,21 @@
         <section class="category-list">
             <div class="container">
                 <ul>
+                {% if categories %}
                     {% for key, value in categories.items %}
                         <li class="cat_display">
                             <a class='dog_display' href="#">{{ key }}  <h4>{{ user_currency }}{{ value|floatformat:"2g" }}</h4>
                             </a>
                         </li>
                     {% endfor %}
+                {% else %}
+                <li style="margin: 30px">
+                    <div class="notification-content">
+                        <p class="notification-text" style="margin: 10px; text-align: center">There are no {{ categories_pace_holder }} to display at the moment. Please add
+                            {{ transaction_income_pace_holder }} data and check back later. Thank you.</p>
+                    </div>
+                </li>
+                {% endif %}
                 </ul>
             </div>
         </section>

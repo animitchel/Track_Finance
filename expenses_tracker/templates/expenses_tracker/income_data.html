@@ -27,6 +27,7 @@
             {% if search_query %}
                 <em>Showing search results for {{ search_query|title }} ...</em>
             {% endif %}
+            {% if income_data %}
                 <table>
                     <thead>
                         <tr>
@@ -72,6 +73,13 @@
                     </tbody>
                     {% endif %}
                 </table>
+            {% else %}
+                <li style="margin: 30px">
+                <div class="notification-content">
+                    <p class="notification-text" style="margin: 10px; text-align: center">There are no incomes to display at the moment. Please add income data and check back later. Thank you.</p>
+                </div>
+                </li>
+            {% endif %}
             </div>
         </section>
     <form method="post" action="{% url 'income_data_page' %}">
