@@ -36,7 +36,7 @@ class ContactFormTest(TestCase):
         self.assertTrue(form.is_valid())
 
         # Test non-ASCII characters in message and name
-        form.cleaned_data['message'] = 'This is a test message with non-ASCII character é.'
+        form.cleaned_data['message'] = 'This is a test message with non-ASCII character 😊.'
         form.cleaned_data['name'] = 'John Doe é'
         with self.assertRaises(ValidationError):
             form.clean_your_field()

@@ -1,7 +1,9 @@
-from django.test import TestCase
+from django.test import TestCase, Client
 from django.contrib.auth import get_user_model
 from expenses_tracker.models import Profile
 from django.db.utils import IntegrityError
+from django.urls import reverse
+from expenses_tracker.form_models import UserForm
 
 
 def create_user(**params):
@@ -10,6 +12,9 @@ def create_user(**params):
 
 class PublicUserModelTests(TestCase):
     """Test unauthenticated user"""
+
+    def setUp(self):
+        self.client = Client()
 
     def test_user_create(self):
         payload = {
@@ -78,9 +83,3 @@ class TestGetUserModel(TestCase):
         self.assertTrue(User.objects.filter(username=username).exists())
         self.assertTrue(User.objects.filter(email=email).exists())
         self.assertTrue(user.check_password(password))
-
-
-
-
-
-

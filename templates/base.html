@@ -61,6 +61,13 @@
                 </div>
             </li>
             <li class="dropdown">
+                <a href="#" class="dropbtn">Data Visualization</a>
+                <div class="dropdown-content">
+                    <a href="#">Graphical Insights</a>
+                    <a href="{% url 'line_chart_page' %}">Line Chart</a>
+                </div>
+            </li>
+            <li class="dropdown">
                 <a href="#" class="dropbtn">Settings</a>
                 <div class="dropdown-content">
                     <a href="{% url 'profile_page' %}">Profile</a>
@@ -93,7 +100,6 @@
             window.location.href = "{% url 'logout' %}";  // Redirect to the logout URL
         } else {
             // User clicked "Cancel" or closed the dialog
-            // Optionally, you can perform some other action here
         }
     }
     </script>

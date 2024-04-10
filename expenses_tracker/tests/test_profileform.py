@@ -34,3 +34,23 @@ class TestProfileForm(TestCase):
 
         # Test error messages
         self.assertIn('currency', form.errors)
+
+    def test_form_invalid_currency(self):
+        """test currency is required"""
+        form_data = {
+            'first_name': 'John',
+            'last_name': 'Doe',
+            'occupation': 'Software Engineer',
+            'city': 'New York',
+            'country': 'USA',
+            'phone_number': '+1234567890',
+        }
+
+        # Create form instance with invalid test data
+        form = ProfileForm(data=form_data)
+
+        # Test form validation
+        self.assertFalse(form.is_valid())
+
+        # Test error messages
+        self.assertIn('currency', form.errors)

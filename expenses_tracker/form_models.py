@@ -15,6 +15,7 @@ class UserForm(forms.ModelForm):
 
         widgets = {'password': forms.PasswordInput(attrs={'placeholder': 'Enter a password',
                                                           'required': True}),
+
                    'username': forms.TextInput(attrs={'placeholder': 'Enter a username',
                                                       'required': True}),
                    'email': forms.EmailInput(attrs={'placeholder': 'Enter an email address',
@@ -22,7 +23,7 @@ class UserForm(forms.ModelForm):
                    }
 
         error_messages = {
-            'username': {'required': 'Please enter a username'},
+            'username': {'required': 'Please a enter username'},
             'email': {'required': 'Please enter a valid email address'},
             'password': {'required': 'Please enter a password'}
         }
@@ -30,6 +31,9 @@ class UserForm(forms.ModelForm):
     email = forms.EmailField(max_length=250, widget=forms.EmailInput(
         attrs={'placeholder': 'Enter an email address',
                'required': 'Please enter a valid email address'}), required=True)
+
+    password = forms.CharField(widget=forms.PasswordInput(
+        attrs={'placeholder': 'Enter a password'}), required=True, min_length=10)
 
 
 FREQUENCY_CHOICES = [
@@ -62,18 +66,11 @@ class ProfileForm(forms.ModelForm):
     class Meta:
         model = Profile
 
-        # fields = "__all__"
         exclude = ["user"]
         labels = {'currency': 'Currency'}
 
-
-        widgets = {
-            'first_name': forms.TextInput(attrs={'placeholder': 'Enter your first name'}),
-            'last_name': forms.TextInput(attrs={'placeholder': 'Enter your last name'}),
-            'occupation': forms.TextInput(attrs={'placeholder': 'Enter your occupation'}),
-            'city': forms.TextInput(attrs={'placeholder': 'Enter your city name'}),
-            'country': forms.TextInput(attrs={'placeholder': 'Enter your country'}),
-            'phone_number': forms.TextInput(attrs={'placeholder': 'Enter your phone number e.g +999999999'}),
+        error_messages = {
+            'currency': {'required': 'Please choose your currency'},
         }
 
     first_name = forms.CharField(required=False, max_length=50, widget=forms.TextInput(attrs={
@@ -91,16 +88,6 @@ class ProfileForm(forms.ModelForm):
                                    widget=forms.TextInput(
                                        attrs={'placeholder': 'Enter your phone number e.g +999999999'}
                                    ))
-
-    # error_messages = {
-    #     'first_name': {'required': 'Please enter your first name'},
-    #     'last_name': {'required': 'Please enter your last'},
-    #     'occupation': {'required': 'Please enter your occupation'},
-    #     'city': {'required': 'Please enter your city'},
-    #     'country': {'required': 'Please enter your country'},
-    #     'currency': {'required': 'Please choose your currency'},
-    #     'phone_number': {'required': 'Please enter your phone number'},
-    # }
 
 
 class TransactionForm(forms.ModelForm):
@@ -244,3 +231,8 @@ class ContactForm(forms.Form):
             raise forms.ValidationError(_("Non-ASCII characters are not allowed."))
 
         return data_message and data_name
+
+
+class DateForm(forms.Form):
+    start = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
+    end = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
