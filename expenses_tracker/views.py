@@ -25,6 +25,7 @@ from expenses_tracker.form_models import ExpenseIncomeReportForm
 from expenses_tracker.email_client import send_message
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
+from expenses_tracker.graphical_insights import linechart
 
 
 class IndexView(TemplateView):
@@ -695,6 +696,7 @@ class AccountSettingsView(LoginRequiredMixin, View):
 
         profile = Profile.objects.get(user_id=request.user.id)
         profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
+
         if profile_form.is_valid():
             self.request.session['user_currency'] = profile_form.instance.currency
 
@@ -773,6 +775,7 @@ class RegisterView(View):
 
 def login_user(request):
     error_message = None
+    redirect_to = request.GET.get('next', '')
     if request.method == 'POST':
         username = request.POST.get('username')
         password = request.POST.get('password')
@@ -785,6 +788,11 @@ def login_user(request):
             request.session['user_currency'] = user.profile.currency
 
             login(request, user)
+
+            # Redirect to the next parameter if it exists, otherwise redirect to the default URL
+            if redirect_to:
+                return HttpResponseRedirect(redirect_to)
+
             return HttpResponseRedirect(reverse('home'))
         else:
             error_message = "Username or password incorrect"
@@ -796,7 +804,8 @@ def login_user(request):
         context={
             "error_message": error_message,
             'user_status': request.user.is_authenticated,
-            'current_year': datetime.now().year
+            'current_year': datetime.now().year,
+            'next': redirect_to,
         }
     )
 
@@ -877,3 +886,36 @@ def contact_us(request):
                  'error_message': validation_error,
                  'current_year': datetime.now().year}
     )
+
+
+def line_chart(request):
+    from expenses_tracker.form_models import DateForm
+
+    date_form = DateForm(request.POST or None)
+
+    if date_form.is_valid():
+        start_date = date_form.cleaned_data.get('start')
+        end_date = date_form.cleaned_data.get('end')
+
+        transaction = Transaction.objects.all().filter(user=request.user).filter(date__date__gte=start_date,
+                                                                                 date__date__lte=end_date)
+
+        if request.POST.get('toggle_state') == 'True':
+            income = Income.objects.all().filter(user=request.user).filter(date__date__gte=start_date,
+                                                                           date__date__lte=end_date)
+        else:
+            income = Income.objects.all().filter(user=request.user)
+    else:
+        transaction = Transaction.objects.all().filter(user=request.user)
+
+        income = Income.objects.all().filter(user=request.user)
+
+    chart = linechart(request_obj=request, object=transaction, obj_name='Transaction')
+    chart2 = linechart(request_obj=request, object=income, obj_name='Income')
+
+    context = {'chart': chart,
+               'chart2': chart2,
+               'form': date_form
+               }
+
+    return render(request, 'expenses_tracker/line_chart.html', context)

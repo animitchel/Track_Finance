@@ -49,4 +49,7 @@ urlpatterns = [
     path('terms_of_service/', views.terms_of_service, name='terms_of_service_page'),
 
     path('contact-us/', views.contact_us, name='contact_us_page'),
+
+    path('linechart/', views.line_chart, name='line_chart_page'),
+
 ]

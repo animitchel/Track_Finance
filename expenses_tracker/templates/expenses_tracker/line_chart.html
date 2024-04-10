@@ -1,0 +1,69 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/line_chart.css' %}">
+{% endblock %}
+
+{% block page_title %}
+    Track Finance - Transactions & Incomes Line Chart
+{% endblock %}
+
+{% block content %}
+    
+    <div class="form-container">
+        <form method="post" action="{% url 'line_chart_page' %}">
+            {% csrf_token %}
+            
+            <label for="id_start_date">Start Date:</label>
+            {{ form.start.errors }}
+            {{ form.start }}
+            
+            <label for="id_end_date">End Date:</label>
+            {{ form.end.errors }}
+            {{ form.end }}
+            
+            <input type="hidden" name="toggle_state" id="toggle-state" value="True" >
+            
+            <label style="margin-top: 8px" for="toggle">Include Income:</label>
+            <label class="toggle-switch">
+                <input type="checkbox" checked onchange="updateToggleState(this)">>
+                <span class="toggle-slider"></span>
+            </label>
+            
+            <button type="submit">Submit</button>
+            <a class="reset" href="{% url 'line_chart_page' %}">Reset</a>
+            
+            <script>
+                function updateToggleState(checkbox) {
+                    // Get the value of the toggle switch
+                    var toggleValue = checkbox.checked ? "True" : "False";
+                    
+                    // Set the value of the hidden input field
+                    document.getElementById('toggle-state').value = toggleValue;
+                }
+            </script>
+
+        </form>
+    
+    </div>
+    
+    <br>
+        
+    {{ chart|safe }}
+    {{ chart2|safe }}
+    
+{#    <script>#}
+{#        document.getElementById('toggle').addEventListener('change', function() {#}
+{#            if (this.checked) {#}
+{#                // Toggle is ON#}
+{#                document.getElementById('toggle-state').value = "true";#}
+{#            } else {#}
+{#                // Toggle is OFF#}
+{#                document.getElementById('toggle-state').value = "false";#}
+{#            }#}
+{#        });#}
+{#    </script>#}
+  
+{% endblock %}
+
