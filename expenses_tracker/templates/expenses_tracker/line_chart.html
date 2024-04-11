@@ -34,15 +34,7 @@
             <button type="submit">Submit</button>
             <a class="reset" href="{% url 'line_chart_page' %}">Reset</a>
             
-            <script>
-                function updateToggleState(checkbox) {
-                    // Get the value of the toggle switch
-                    var toggleValue = checkbox.checked ? "True" : "False";
-                    
-                    // Set the value of the hidden input field
-                    document.getElementById('toggle-state').value = toggleValue;
-                }
-            </script>
+            
 
         </form>
     
@@ -53,17 +45,17 @@
     {{ chart|safe }}
     {{ chart2|safe }}
     
-{#    <script>#}
-{#        document.getElementById('toggle').addEventListener('change', function() {#}
-{#            if (this.checked) {#}
-{#                // Toggle is ON#}
-{#                document.getElementById('toggle-state').value = "true";#}
-{#            } else {#}
-{#                // Toggle is OFF#}
-{#                document.getElementById('toggle-state').value = "false";#}
-{#            }#}
-{#        });#}
-{#    </script>#}
-  
+    <script>
+        function updateToggleState(checkbox) {
+            // Get the value of the toggle switch
+            var toggleValue = checkbox.checked ? "True" : "False";
+            
+            // Set the value of the hidden input field
+            document.getElementById('toggle-state').value = toggleValue;
+        }
+    </script>
+    
+    {% include "expenses_tracker/include/footer.html" %}
+    
 {% endblock %}
 

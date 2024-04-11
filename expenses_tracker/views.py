@@ -9,7 +9,9 @@ from django.views.generic import CreateView, TemplateView
 from django.views.generic import ListView, DetailView, UpdateView, DeleteView
 from django.db.models import Count, Sum, Avg
 
-from .form_models import ProfileForm, TransactionForm, BudgetForm, IncomeForm, ContactForm, UserForm
+from .form_models import (
+    ProfileForm, TransactionForm, BudgetForm, IncomeForm, ContactForm, UserForm, LoginForm
+)
 from django.views import View
 from datetime import datetime, timedelta
 from .models import Transaction, Budget, Profile, Income
@@ -26,6 +28,8 @@ from expenses_tracker.email_client import send_message
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
 from expenses_tracker.graphical_insights import linechart
+from expenses_tracker.redirect_endpoints import url_has_allowed_host_and_scheme_func
+from django.conf import settings
 
 
 class IndexView(TemplateView):
@@ -755,13 +759,8 @@ class RegisterView(View):
             user_form.save()
             form.save()
 
-            user = User.objects.get(username=user_form.instance.username)
-
-            request.session["current_user"] = user.id
-
-            login(request, user)
-
-            return HttpResponseRedirect(reverse('home'))
+            request.session["login_msg"] = f"Now login as - {user_form.instance.username}"
+            return HttpResponseRedirect(reverse('login_page'))
 
         return render(request, template_name="expenses_tracker/signup.html",
                       context={"form": form,
@@ -775,27 +774,36 @@ class RegisterView(View):
 
 def login_user(request):
     error_message = None
-    redirect_to = request.GET.get('next', '')
+    login_form = LoginForm(request.POST or None)
+
+    redirect_ = request.GET.get('next', '')
+
     if request.method == 'POST':
-        username = request.POST.get('username')
-        password = request.POST.get('password')
+        if login_form.is_valid():
+            username = login_form.cleaned_data['username']
+            password = login_form.cleaned_data['password']
 
-        user = authenticate(username=username, password=password)
+            user = authenticate(username=username, password=password)
 
-        if user is not None:
-            request.session["current_user"] = user.id
+            if user is not None:
+                request.session["current_user"] = user.id
 
-            request.session['user_currency'] = user.profile.currency
+                request.session['user_currency'] = user.profile.currency
 
-            login(request, user)
+                login(request, user)
 
-            # Redirect to the next parameter if it exists, otherwise redirect to the default URL
-            if redirect_to:
-                return HttpResponseRedirect(redirect_to)
+                # Redirect to the next parameter if it exists, otherwise redirect to the default URL
+                if redirect_:
+                    allow_hosts = settings.ALLOWED_HOSTS
+                    redirect_to = url_has_allowed_host_and_scheme_func(redirect=redirect_, allowed_hosts=allow_hosts)
 
-            return HttpResponseRedirect(reverse('home'))
-        else:
-            error_message = "Username or password incorrect"
+                    if redirect_to:
+                        return HttpResponseRedirect(redirect_to)
+
+                return HttpResponseRedirect(reverse('home'))
+
+            else:
+                error_message = "Username or password is incorrect"
 
     return render(
         request,
@@ -805,7 +813,9 @@ def login_user(request):
             "error_message": error_message,
             'user_status': request.user.is_authenticated,
             'current_year': datetime.now().year,
-            'next': redirect_to,
+            'next': redirect_,
+            'login_msg': request.session.pop('login_msg', None),
+            'login_form': login_form
         }
     )
 
@@ -888,6 +898,7 @@ def contact_us(request):
     )
 
 
+@login_required
 def line_chart(request):
     from expenses_tracker.form_models import DateForm
 
@@ -910,12 +921,13 @@ def line_chart(request):
 
         income = Income.objects.all().filter(user=request.user)
 
-    chart = linechart(request_obj=request, object=transaction, obj_name='Transaction')
-    chart2 = linechart(request_obj=request, object=income, obj_name='Income')
+    chart = linechart(request_obj=request, object_inst=transaction, obj_name='Transaction')
+    chart2 = linechart(request_obj=request, object_inst=income, obj_name='Income')
 
     context = {'chart': chart,
                'chart2': chart2,
-               'form': date_form
+               'form': date_form,
+               'user_status': request.user.is_authenticated
                }
 
     return render(request, 'expenses_tracker/line_chart.html', context)

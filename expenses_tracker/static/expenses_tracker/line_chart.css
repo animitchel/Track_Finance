@@ -1,6 +1,6 @@
 /* Form Container */
 .form-container {
-    max-width: 300px;
+    max-width: 250px;
     margin: 0 auto;
     padding: 20px;
     background-color: #f9f9f9;
@@ -42,6 +42,12 @@
         max-width: 400px;
     }
 }
+
+/*@media screen and (max-width: 900px) {*/
+/*    .form-container {*/
+/*        max-width: 400px;*/
+/*    }*/
+/*}*/
 
 .reset {
     color: #2980b9;

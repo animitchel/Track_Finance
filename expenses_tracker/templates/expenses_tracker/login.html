@@ -20,7 +20,11 @@
     <main>
         <div class="container">
             <div class="form-container">
+                
                 <form class="login-form" method="post" action="{% url 'login_page' %}?next={{ next }}">
+                    {% if login_msg %}
+                        <span style="color: darkred; padding: 0; margin: 0.5rem 0;">{{ login_msg }}</span>
+                    {% endif %}
                     {% csrf_token %}
 
                     <div class="{% if error_message  %} error {% endif %}" > 
@@ -28,11 +32,14 @@
                             {{ error_message }}
                         {% endif %}
                     </div>
-                    <label for="username">Username:</label>
-                    <input type="text" id="username" name="username" placeholder="Enter your username or email" required>
-
-                    <label for="password">Password:</label>
-                    <input type="password" id="password" name="password" placeholder="Enter your password" required>
+                    
+                    {{ login_form.username.label_tag }}
+                    {{ login_form.username.errors }}
+                    {{ login_form.username }}
+                
+                    {{ login_form.password.label_tag }}
+                    {{ login_form.password.errors }}
+                    {{ login_form.password }}
 
                     <button type="submit">Login</button>
                     <hr>

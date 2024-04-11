@@ -4,11 +4,11 @@ import pandas as pd
 from django.db.models import Count, Sum, Avg
 
 
-def linechart(object, request_obj, obj_name):
+def linechart(object_inst, request_obj, obj_name):
     df = pd.DataFrame(dict(
-        Date=[field.date.date() for field in object],
-        Amount=[object.filter(
-            date__date=field.date.date()).aggregate(sum=Sum('amount')).get('sum') for field in object],
+        Date=[field.date.date() for field in object_inst],
+        Amount=[object_inst.filter(
+            date__date=field.date.date()).aggregate(sum=Sum('amount')).get('sum') for field in object_inst],
     ))
 
     df.sort_values(by='Date', ascending=False, inplace=True)
