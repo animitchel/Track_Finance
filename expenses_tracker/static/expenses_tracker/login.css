@@ -33,6 +33,7 @@ main {
     width: 100%;
 }
 
+
 .form-container {
     max-width: 400px;
     width: 100%;
@@ -54,6 +55,7 @@ form {
 label {
     display: block;
     margin-bottom: 8px;
+    font-weight: bold;
 }
 
 input {

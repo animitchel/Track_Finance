@@ -236,3 +236,22 @@ class ContactForm(forms.Form):
 class DateForm(forms.Form):
     start = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
     end = forms.DateField(widget=forms.DateInput(attrs={'type': 'date'}), required=True)
+
+
+class LoginForm(forms.Form):
+    username = forms.CharField(
+        widget=forms.TextInput(
+            attrs={'type': 'text',
+                   'placeholder': 'Please enter your username'}),
+
+        error_messages={'required': 'Please enter your username'},
+
+        required=True)
+
+    password = forms.CharField(
+        widget=forms.PasswordInput(
+            attrs={'type': 'password',
+                   'placeholder': 'Please enter your password'}),
+
+        error_messages={'required': 'Please enter your password'},
+        required=True)
