@@ -29,6 +29,7 @@ _frequency = {
 
 
 class Profile(models.Model):
+    # Choices for currency selection
     CURRENCY_CHOICES = [
         ('$', 'Dollar - USD'),
         ('€', 'Euro - EUR'),
@@ -59,9 +60,9 @@ class Profile(models.Model):
         ('₲', 'Guarani - PYG'),
         ('₪', 'Sheqel - ILS'),
         ('₰', 'Penny - GBP')
-
     ]
 
+    # Define fields for the Profile model
     currency = models.CharField(max_length=20, null=True, choices=CURRENCY_CHOICES)
     first_name = models.CharField(max_length=50, null=True)
     last_name = models.CharField(max_length=80, null=True)
@@ -70,17 +71,21 @@ class Profile(models.Model):
     city = models.CharField(max_length=100, null=True)
     country = models.CharField(max_length=100, null=True)
 
+    # Define phone_number field with validation
     phone_number = models.CharField(max_length=15,
                                     null=True,
                                     validators=[
                                         RegexValidator(r'^\+?1?\d{9,15}$',
                                                        message="Phone number must be entered in the format: "
-                                                               "'+999999999'"
-                                                               ". Up to 15 digits allowed.")])
+                                                               "'+999999999'. Up to 15 digits allowed.")
+                                    ])
+
+    # Define user field as a OneToOneField to User model
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='profile', null=True)
 
 
 class Transaction(models.Model):
+    # Choices for expense categories
     EXPENSE_CATEGORIES = [
         ('Housing', 'Housing'),
         ('Transportation', 'Transportation'),
@@ -109,6 +114,7 @@ class Transaction(models.Model):
         ('Other', 'Other'),
     ]
 
+    # Define fields for the Transaction model
     category = models.CharField(max_length=20, choices=EXPENSE_CATEGORIES, null=False)
     amount = models.FloatField()
     description = models.TextField(null=True, max_length=100)
@@ -121,25 +127,28 @@ class Transaction(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='transaction', null=True)
 
     def save(self, *args, **kwargs):
-
+        # If the transaction is recurring, calculate the next occurrence based on the frequency
         if self.recurring_transaction:
             frequency = next(_frequency[key] for key in _frequency if key == self.frequency)
             self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
 
+            # If transaction title is not provided, set it as the category
             if not self.transaction_title:
                 self.transaction_title = self.category
-
         else:
+            # Reset frequency and transaction title if not recurring
             self.frequency = None
             self.transaction_title = None
 
         super(Transaction, self).save(*args, **kwargs)
 
     def __str__(self):
+        # Return string representation of the transaction
         return f"{self.category} - {self.amount}"
 
 
 class Budget(models.Model):
+    # Choices for budget categories
     BUDGET_CATEGORIES = [
         ('All Transactions', 'Budget for All Transactions'),
         ('Housing', 'Housing'),
@@ -168,6 +177,7 @@ class Budget(models.Model):
         ('Family', 'Family')
     ]
 
+    # Define fields for the Budget model
     category = models.CharField(max_length=20, choices=BUDGET_CATEGORIES)
     amount = models.FloatField()
     budget = models.FloatField(null=True)
@@ -179,6 +189,7 @@ class Budget(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name='budget', null=True)
 
     def save(self, *args, **kwargs):
+        # Duration for budget validity
         _duration = {
             '1 week': 1,
             '2 weeks': 2,
@@ -197,17 +208,19 @@ class Budget(models.Model):
             '1 year': 54.2857,
         }
 
+        # Set expiration date if spent is zero
         if self.spent == 0.0:
-            validity_period = next(_duration[key] for key in _duration if key == self.duration)
+            validity_period = _duration.get(self.duration)
             self.expiration_date = timezone.now() + timedelta(weeks=validity_period)
 
         super(Budget, self).save(*args, **kwargs)
 
     def __str__(self):
+        # Return string representation of the budget
         return f"{self.category} - {self.amount}"
 
-
 class Income(models.Model):
+    # Choices for income sources
     INCOME_SOURCES = [
         ("salary or wages", "Salary or Wages"),
         ("business income", "Business Income"),
@@ -220,6 +233,7 @@ class Income(models.Model):
         ("royalties", "Royalties"),
         ("gifts or inheritance", "Gifts or Inheritance")
     ]
+    # Define fields for the Income model
     category = models.CharField(max_length=40, choices=INCOME_SOURCES)
     amount = models.FloatField()
     notes = models.TextField(max_length=100)
@@ -231,18 +245,23 @@ class Income(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="income_data")
 
     def save(self, *args, **kwargs):
+        # Set next occurrence if recurring
+
         if self.recurring_transaction:
             frequency = next(_frequency[key] for key in _frequency if key == self.frequency)
             self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
 
+            # Set transaction title if not provided
             if not self.transaction_title:
                 self.transaction_title = self.category
-
         else:
+            # Reset frequency and transaction title if not recurring
             self.frequency = None
             self.transaction_title = None
 
         super(Income, self).save(*args, **kwargs)
 
     def __str__(self):
+        # Return string representation of the income
         return f"{self.category} - {self.amount}"
+

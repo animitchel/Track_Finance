@@ -33,44 +33,71 @@ from django.conf import settings
 
 
 class IndexView(TemplateView):
-    template_name = 'expenses_tracker/index.html'
+    template_name = 'expenses_tracker/index.html'  # Define the template name for this view
 
     def get_context_data(self, **kwargs):
+        # Call the parent class method to get the context data
         context = super(IndexView, self).get_context_data(**kwargs)
+
+        # Add the user authentication status to the context
         context['user_status'] = self.request.user.is_authenticated
+
+        # Add the current year to the context
         context['current_year'] = datetime.now().year
+
+        # Return the updated context
         return context
 
 
 @login_required
 def overview(request):
+    # Get all transactions associated with the logged-in user
     transactions = Transaction.objects.all().filter(user_id=request.user.id)
 
+    # Retrieve the 3 most recent transactions
     category_transactions = transactions.order_by('-date')[:3]
+
+    # Calculate the total sum of all transactions
     transactions_sum_total = transactions.aggregate(amount=Sum('amount'))
 
+    # Group transactions by category and calculate the sum of each category
     category = {field.category: transactions.filter(category=field.category).aggregate(
         sum=Sum('amount')).get('sum') for field in category_transactions}
 
+    # Assign the 3 most recent transactions to recent_transactions
     recent_transactions = category_transactions
+
+    # Get the 3 most recent recurring transactions
     recurring_transaction = transactions.filter(recurring_transaction=True).order_by('next_occurrence')[:3]
 
+    # Retrieve all budgets associated with the logged-in user
     budget = Budget.objects.all().filter(user_id=request.user.id)
+
+    # Calculate the total sum of all budgets
     budget_sum_total = budget.aggregate(budget=Sum('budget'))
+
+    # Calculate the remaining total amount of all budgets
     budget_remaining_total = budget.aggregate(amount=Sum('amount'))
 
+    # Get the 3 budgets with the closest expiration dates
     all_budget = budget.order_by('expiration_date')[:3]
 
+    # Get the current date and time
     date_now = timezone.now()
 
+    # Retrieve all income data associated with the logged-in user
     income_data = Income.objects.all().filter(user_id=request.user.id)
+
+    # Calculate the total sum of all income
     total_income = income_data.aggregate(amount=Sum('amount'))
 
+    # Get the 3 most recent income entries
     recent_income_data = income_data.order_by('-date')[:3]
 
-    # print(request.session.get('current_user'))
+    # Get the user's preferred currency from the session
     user_currency = request.session.get('user_currency')
 
+    # Render the overview template with the calculated context data
     return render(
         request,
         'expenses_tracker/overview.html',
@@ -92,10 +119,17 @@ def overview(request):
 
 
 def budget_calculation(budget_objs, transaction_obj):
+    # Iterate over each budget object
     for field in budget_objs.all():
+        # Check if the current budget amount is greater than the current spent amount
         if field.budget > field.amount:
+            # Increment the amount by the transaction amount
             field.amount += transaction_obj.amount
+
+            # Decrement the spent amount by the transaction amount
             field.spent -= transaction_obj.amount
+
+            # Save the changes to the budget object
             field.save()
 
 
@@ -104,38 +138,50 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
     model = Transaction
     context_object_name = 'transactions'
 
+    # Method to get the queryset of transactions
     def get_queryset(self):
+        # Get session data for filter category, sort order, and search query
         filter_category = self.request.session.get('filter_category')
         sort_order = self.request.session.get('sort_order')
         search_query = self.request.session.get('search_query')
 
+        # Get the initial queryset of all transactions for the logged-in user
         query = super(AllTransactionsView, self).get_queryset().filter(user_id=self.request.user.id)
 
         if filter_category:
+            # Apply filtering based on category if filter category is provided
             filtered_query = expenses_query_filter_func(
                 sort_order=sort_order,
                 filter_category=self.request.session.pop('filter_category'),
-                order_by=self.request.session.pop('order_by'), query_db=query,
+                order_by=self.request.session.pop('order_by'),
+                query_db=query,
                 sort_pop=self.request.session.pop('sort_order')
             )
 
+            # Calculate the total amount of filtered transactions
             total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
-
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
 
+            # Return the filtered queryset ordered by date
             return filtered_query.order_by('date')
 
         elif search_query:
+            # Apply filtering based on search query if search query is provided
             filtered_query = query.filter(description__icontains=search_query)
             total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
 
+            # Return the filtered queryset ordered by date
             return filtered_query.order_by('date')
 
+        # Return the initial queryset ordered by date (default)
         return query.order_by('-date')
 
+    # Method to get context data for the template
     def get_context_data(self, **kwargs):
         context = super(AllTransactionsView, self).get_context_data(**kwargs)
+
+        # Add additional context data
         context['thirty_days_earlier'] = timezone.now() - timedelta(days=30)
         context['user_currency'] = self.request.session.get('user_currency')
         context['user_status'] = self.request.user.is_authenticated
@@ -144,13 +190,17 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
         context["category_source"] = "Category"
         context["total_trans_queried_amount"] = self.request.session.pop('total_trans_queried_amount', None)
         context["search_query"] = self.request.session.pop('search_query', None)
+
         return context
 
+    # Method to handle POST requests
     def post(self, request, *args, **kwargs):
+        # Get transaction ID and search query from POST data
         transaction_id = request.POST.get('all_transaction_id')
         search_query = request.POST.get('search')
 
         if transaction_id:
+            # If transaction ID is provided, delete the transaction and recalculate budgets
             transaction_obj = Transaction.objects.get(id=transaction_id)
 
             budget_objects = Budget.objects.all().filter(user_id=self.request.user.id)
@@ -168,19 +218,27 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
             transaction_obj.delete()
 
         elif search_query:
+            # If search query is provided, store it in session
             self.request.session['search_query'] = search_query
 
         else:
+            # If filter category, order by, and sort order are provided, store them in session
             request.session['filter_category'] = request.POST.get('filter_category')
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
 
+        # Redirect to the all_transactions_page
         return HttpResponseRedirect(reverse('all_transactions_page'))
 
 
 def budget_calc(field, form_instance):
+    # Deduct the amount from the budget field
     field.amount -= form_instance.amount
+
+    # Update the spent amount based on the new budget amount
     field.spent = field.budget - field.amount
+
+    # Save the changes to the budget field
     field.save()
 
 
@@ -192,19 +250,24 @@ class AddTransactionView(LoginRequiredMixin, CreateView):
     context_object_name = 'transactions'
 
     def form_valid(self, form):
+        # Get the value of 'all_transaction_budget' from the POST data
         all_transaction_budget = self.request.POST.get('all_transaction_budget')
 
+        # Set the user_id and is_all_trans_bud fields of the form instance
         form.instance.user_id = self.request.user.id
         form.instance.is_all_trans_bud = all_transaction_budget
 
+        # Iterate over budget objects
         for field in Budget.objects.all().filter(user_id=self.request.user.id):
-
+            # Check if 'all_transaction_budget' is True
             if all_transaction_budget:
-
+                # If category is 'All Transactions', perform budget calculation
                 if field.category == 'All Transactions':
                     budget_calc(field=field, form_instance=form.instance)
 
+            # Check if category matches the form instance category
             if field.category == form.instance.category:
+                # Perform budget calculation
                 budget_calc(field=field, form_instance=form.instance)
 
         return super(AddTransactionView, self).form_valid(form)
@@ -222,8 +285,10 @@ class CategoryView(LoginRequiredMixin, ListView):
     context_object_name = 'categories'
 
     def get_queryset(self):
+        # Get all transactions for the logged-in user
         db = super(CategoryView, self).get_queryset().filter(user_id=self.request.user.id)
 
+        # Aggregate the sum of amounts for each category
         return {field.category: db.filter(category=field.category).aggregate(
             sum=Sum('amount')).get('sum') for field in db.order_by("-date")}
 
@@ -243,24 +308,30 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
     context_object_name = 'recurring_transactions_incomes'
 
     def get_queryset(self):
+        # Get filter category and sort order from session
         filter_category = self.request.session.get('filter_category')
         sort_order = self.request.session.get('sort_order')
 
+        # Get all recurring transactions for the logged-in user
         data = (super(RecurringTransactions, self).get_queryset().filter(
             user_id=self.request.user.id).filter(recurring_transaction=True))
 
+        # Update date for recurring transactions if next occurrence has passed
         for recurring_transaction in data.all():
             if timezone.now() > recurring_transaction.next_occurrence:
                 recurring_transaction.date = timezone.now()
                 recurring_transaction.save()
 
         if filter_category:
+            # Apply filtering based on category if filter category is provided
             return expenses_query_filter_func(
                 sort_order=sort_order,
                 filter_category=self.request.session.pop('filter_category'),
                 order_by=self.request.session.pop('order_by'), query_db=data,
                 sort_pop=self.request.session.pop('sort_order')
             )
+
+        # Return recurring transactions ordered by next occurrence date
         return data.order_by('next_occurrence')
 
     def get_context_data(self, **kwargs):
@@ -274,8 +345,10 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
+        # Get transaction ID from POST data
         transaction_id = request.POST.get('recurring_transaction_id')
         if transaction_id:
+            # If transaction ID is provided, update recurring transaction attributes
             transaction_obj = Transaction.objects.get(id=transaction_id)
             transaction_obj.recurring_transaction = False
             transaction_obj.frequency = None
@@ -283,6 +356,7 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
             transaction_obj.next_occurrence = None
             transaction_obj.save()
         else:
+            # If filter category, order by, and sort order are provided, store them in session
             request.session['filter_category'] = request.POST.get('filter_category')
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
@@ -296,20 +370,26 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
     context_object_name = 'budget'
 
     def get_queryset(self):
+        # Get filter category and sort order from session
         filter_category = self.request.session.get('filter_category')
         sort_order = self.request.session.get('sort_order')
 
+        # Get all budgets for the logged-in user
         db = super(BudgetOverviewView, self).get_queryset().filter(user_id=self.request.user.id)
+
+        # Delete budgets if spent exceeds budget or expiration date has passed
         for field in db:
             if field.spent >= field.budget or timezone.now() > field.expiration_date:
                 field.delete()
 
         if filter_category:
+            # Apply filtering based on category if filter category is provided
             return expenses_query_filter_func(sort_order=sort_order,
                                               filter_category=self.request.session.pop('filter_category'),
                                               order_by=self.request.session.pop('order_by'), query_db=db,
                                               sort_pop=self.request.session.pop('sort_order'))
 
+        # Return budgets ordered by expiration date
         return db.order_by('expiration_date')
 
     def get_context_data(self, **kwargs):
@@ -323,15 +403,19 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
+        # Get budget ID from POST data
         budget_id = request.POST.get('budget_overview_id')
 
         if budget_id:
+            # If budget ID is provided, delete the budget
             Budget.objects.get(id=budget_id).delete()
         else:
+            # If filter category, order by, and sort order are provided, store them in session
             request.session['filter_category'] = request.POST.get('filter_category')
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
 
+        # Redirect to the budget-overview_page
         return HttpResponseRedirect(reverse('budget-overview_page'))
 
 
@@ -342,6 +426,7 @@ class AddBudgetView(LoginRequiredMixin, CreateView):
     success_url = '/budget-overview'
 
     def form_valid(self, form):
+        # Set the budget amount and user ID
         form.instance.budget = float(form.cleaned_data.get('amount'))
         form.instance.user_id = self.request.user.id
         return super(AddBudgetView, self).form_valid(form)
@@ -354,14 +439,18 @@ class AddBudgetView(LoginRequiredMixin, CreateView):
 
 
 def expenses_report_decorator(func):
+    # Define a decorator function that checks if start_date is set in the session
     @wraps(func)
     def decorated_function(request, *args, **kwargs):
+        # Check if start_date is not set in the session
         if not request.session.get('start_date'):
+            # If start_date is not set, redirect to '/expense-reports-form'
             return HttpResponseRedirect('/expense-reports-form')
 
-        # If the condition is met, proceed to the wrapped function
+        # If start_date is set, call the original function with its arguments
         return func(request, *args, **kwargs)
 
+    # Return the decorated function
     return decorated_function
 
 
@@ -370,14 +459,18 @@ def expenses_report_decorator(func):
 def expenses_report(request, *args, **kwargs):
     from .pdf import convert_html_to_pdf
     is_expense_report = True
+
+    # Get user details and user currency from session
     user = User.objects.get(id=request.user.id)
     user_currency = request.session.get('user_currency')
 
+    # Pop session variables
     start_date = request.session.pop('start_date')
     end_date = request.session.pop('end_date')
     purpose = request.session.pop('purpose')
     note = request.session.pop('note')
 
+    # Prepare context dictionary
     context = {
         'first_name': user.profile.first_name,
         'last_name': user.profile.last_name,
@@ -389,41 +482,58 @@ def expenses_report(request, *args, **kwargs):
         'note': note,
         'user_currency': user_currency,
     }
+
+    # Check if request is from income report
     request_from_income_report = request.session.pop("request_from_income_report", default=None)
 
     if request_from_income_report:
+        # If request is from income report
 
+        # Get income data for the specified date range
         income_data = Income.objects.filter(user_id=user.id).filter(date__date__gte=start_date,
                                                                     date__date__lte=end_date).order_by('date')
+        # Calculate total income
         income_data_sum_total = income_data.aggregate(amount=Sum('amount'))
 
+        # Calculate income by source category
         source = {field.category: income_data.filter(category=field.category).aggregate(
             sum=Sum('amount')).get('sum') for field in income_data}
 
+        # Update context with income data
         context["source"] = source
         context["income_data_sum_total"] = income_data_sum_total['amount']
         context["income_data"] = income_data
 
+        # Render HTML template for income report
         html_content = render_to_string('expenses_tracker/income-report.html', context)
         is_expense_report = False
 
     else:
+        # If request is from expense report
 
+        # Get transaction data for the specified date range
         reports_transaction = Transaction.objects.filter(
             user_id=user.id).filter(date__date__gte=start_date, date__date__lte=end_date).order_by('date')
 
+        # Calculate total transactions amount
         transactions_sum_total = reports_transaction.aggregate(amount=Sum('amount'))
 
+        # Calculate expenses by category
         category = {field.category: reports_transaction.filter(category=field.category).aggregate(
             sum=Sum('amount')).get('sum') for field in reports_transaction}
 
+        # Update context with expense data
         context["category"] = category
         context["transactions_sum_total"] = transactions_sum_total['amount']
         context["transactions"] = reports_transaction
 
+        # Render HTML template for expenses report
         html_content = render_to_string('expenses_tracker/expenses-report.html', context)
 
+    # Convert HTML content to PDF
     pdf_response = convert_html_to_pdf(source_html=html_content, is_expense_report=is_expense_report)
+
+    # Return the PDF response
     return pdf_response
 
 
@@ -431,14 +541,15 @@ def expenses_report(request, *args, **kwargs):
 def expense_income_report_form(request):
     error = None
     if request.method == 'POST':
+        # If the request method is POST, process the form
         form = ExpenseIncomeReportForm(request.POST or None)
 
         if form.is_valid():
+            # If the form is valid, store form data in session
             for key, value in form.cleaned_data.items():
-
                 if key != 'csrfmiddlewaretoken':
                     if key == 'start_date' or key == 'end_date':
-                        # Convert a date object to string
+                        # Serialize date objects to string
                         serialized_date = value.isoformat()
                         request.session[key] = serialized_date
                     else:
@@ -448,6 +559,7 @@ def expense_income_report_form(request):
         else:
             error = form.errors
 
+    # Render the form template with appropriate context
     return render(
         request,
         template_name='expenses_tracker/expenses_incomes_report_form.html',
@@ -459,11 +571,13 @@ def expense_income_report_form(request):
 
 
 class IncomeData(LoginRequiredMixin, ListView):
+    # View to display income data
     model = Income
     template_name = 'expenses_tracker/income_data.html'
     context_object_name = 'income_data'
 
     def get_context_data(self, **kwargs):
+        # Get context data for rendering the template
         context = super(IncomeData, self).get_context_data(**kwargs)
         context['user_currency'] = self.request.session.get('user_currency')
         context['user_status'] = self.request.user.is_authenticated
@@ -476,6 +590,7 @@ class IncomeData(LoginRequiredMixin, ListView):
         return context
 
     def get_queryset(self):
+        # Get the queryset based on filtering and search
         filter_category = self.request.session.get('filter_category')
         sort_order = self.request.session.get('sort_order')
         search_query = self.request.session.get('search_query')
@@ -483,6 +598,7 @@ class IncomeData(LoginRequiredMixin, ListView):
         data = (super(IncomeData, self).get_queryset().filter(user_id=self.request.user.id))
 
         if filter_category:
+            # Filter the queryset based on category
             filtered_query = expenses_query_filter_func(
                 sort_order=sort_order,
                 filter_category=self.request.session.pop('filter_category'),
@@ -497,6 +613,7 @@ class IncomeData(LoginRequiredMixin, ListView):
             return filtered_query.order_by('date')
 
         elif search_query:
+            # Filter the queryset based on search query
             filtered_query = data.filter(notes__icontains=search_query)
             total_trans_queried_amount = filtered_query.aggregate(amount=Sum('amount'))
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
@@ -506,15 +623,19 @@ class IncomeData(LoginRequiredMixin, ListView):
         return data.order_by('-date')
 
     def post(self, request, *args, **kwargs):
+        # Handle POST request for deleting or searching income data
         income_data_id = request.POST.get('income_data_id')
         search_query = request.POST.get('search')
 
         if income_data_id:
+            # If income data ID is provided, delete the corresponding record
             Income.objects.get(id=income_data_id).delete()
 
         elif search_query:
+            # If search query is provided, store it in session
             self.request.session['search_query'] = search_query
         else:
+            # Otherwise, store filter options in session
             request.session['filter_category'] = request.POST.get('filter_category')
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
@@ -523,16 +644,19 @@ class IncomeData(LoginRequiredMixin, ListView):
 
 
 class IncomeFormView(LoginRequiredMixin, CreateView):
+    # View for adding income
     model = Income
     template_name = 'expenses_tracker/add_income.html'
     form_class = IncomeForm
     success_url = '/income-data'
 
     def form_valid(self, form):
+        # Ensure user ID is set before saving the form
         form.instance.user_id = self.request.user.id
         return super(IncomeFormView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
+        # Get context data for rendering the template
         context = super(IncomeFormView, self).get_context_data(**kwargs)
         context['user_status'] = self.request.user.is_authenticated
         context['current_year'] = datetime.now().year
@@ -540,17 +664,20 @@ class IncomeFormView(LoginRequiredMixin, CreateView):
 
 
 class IncomeCategoryView(LoginRequiredMixin, ListView):
+    # View for displaying income categories
     model = Income
     template_name = 'expenses_tracker/categories.html'
     context_object_name = 'categories'
 
     def get_queryset(self):
+        # Get queryset for income categories
         db = super(IncomeCategoryView, self).get_queryset().filter(user_id=self.request.user.id)
 
         return {field.category: db.filter(category=field.category).aggregate(
             sum=Sum('amount')).get('sum') for field in db.order_by("-date")}
 
     def get_context_data(self, **kwargs):
+        # Get context data for rendering the template
         context = super(IncomeCategoryView, self).get_context_data(**kwargs)
         context['user_currency'] = self.request.session.get('user_currency')
         context['user_status'] = self.request.user.is_authenticated
@@ -561,11 +688,13 @@ class IncomeCategoryView(LoginRequiredMixin, ListView):
 
 
 class RecurringIncomes(LoginRequiredMixin, ListView):
+    # View for displaying recurring incomes
     template_name = 'expenses_tracker/income-recur.html'
     model = Income
     context_object_name = 'recurring_transactions_incomes'
 
     def get_queryset(self):
+        # Get queryset for recurring incomes
         filter_category = self.request.session.get('filter_category')
         sort_order = self.request.session.get('sort_order')
 
@@ -574,10 +703,12 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
 
         for recurring_income in data.all():
             if timezone.now() > recurring_income.next_occurrence:
+                # Update next occurrence if it's in the past
                 recurring_income.date = timezone.now()
                 recurring_income.save()
 
         if filter_category:
+            # Filter queryset based on category
             return expenses_query_filter_func(
                 sort_order=sort_order,
                 filter_category=self.request.session.pop('filter_category'),
@@ -588,6 +719,7 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
         return data.order_by('next_occurrence')
 
     def get_context_data(self, **kwargs):
+        # Get context data for rendering the template
         context = super(RecurringIncomes, self).get_context_data(**kwargs)
         context['user_currency'] = self.request.session.get('user_currency')
         context['user_status'] = self.request.user.is_authenticated
@@ -598,8 +730,10 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
         return context
 
     def post(self, request, *args, **kwargs):
+        # Handle POST requests for deleting or filtering recurring incomes
         income_id = request.POST.get('recurring_transaction_id')
         if income_id:
+            # If income ID is provided, update the income record
             transaction_obj = Income.objects.get(id=income_id)
             transaction_obj.recurring_transaction = False
             transaction_obj.frequency = None
@@ -607,6 +741,7 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
             transaction_obj.next_occurrence = None
             transaction_obj.save()
         else:
+            # Otherwise, store filter options in session
             request.session['filter_category'] = request.POST.get('filter_category')
             request.session['order_by'] = request.POST.get('order_by')
             request.session['sort_order'] = request.POST.get('sort_order')
@@ -616,10 +751,15 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
 
 @login_required
 def profile_details(request):
+    # Get the profile associated with the current user
     profile = Profile.objects.get(user=request.user)
+
+    # If the profile image is missing, set a default image
     if not profile.image:
         profile.image = 'images/c0749b7cc401421662ae901ec8f9f660.jpg'
         profile.save()
+
+    # Render the profile details template with the profile information
     return render(
         request,
         template_name='expenses_tracker/profile.html',
@@ -650,6 +790,7 @@ def notification(request):
         expiration_date__gt=current_datetime, expiration_date__lte=next_24_hours
     ).order_by('expiration_date')
 
+    # Render the notification template with instances due in the next 24 hours
     return render(
         request,
         template_name='expenses_tracker/notification.html',
@@ -668,16 +809,17 @@ class AccountSettingsView(LoginRequiredMixin, View):
     template_name = 'expenses_tracker/account_settings.html'
 
     def get(self, request, *args, **kwargs):
-
+        # Retrieve any profile update messages stored in session
         try:
             profile_updated = request.session.pop('message')
         except KeyError:
             profile_updated = None
 
+        # Retrieve the profile associated with the current user
         profile = Profile.objects.get(user_id=request.user.id)
 
+        # Initialize profile form with current profile data
         profile_form = ProfileForm(
-
             initial={'currency': profile.currency,
                      'first_name': profile.first_name,
                      'last_name': profile.last_name,
@@ -688,6 +830,7 @@ class AccountSettingsView(LoginRequiredMixin, View):
                      }
         )
 
+        # Render the account settings page with the profile form and other context data
         return render(
             request, self.template_name,
             context={'form': profile_form,
@@ -697,19 +840,26 @@ class AccountSettingsView(LoginRequiredMixin, View):
         )
 
     def post(self, request, *args, **kwargs):
-
+        # Retrieve the profile associated with the current user
         profile = Profile.objects.get(user_id=request.user.id)
+
+        # Initialize profile form with POST data and current profile instance
         profile_form = ProfileForm(request.POST, request.FILES, instance=profile)
 
         if profile_form.is_valid():
+            # Update user currency in session
             self.request.session['user_currency'] = profile_form.instance.currency
 
+            # Save the updated profile
             profile_form.save()
 
+            # Set success message in session
             request.session['message'] = 'Profile updated successfully'
 
+            # Redirect to account settings page
             return HttpResponseRedirect(reverse('account_settings_page'))
 
+        # If form is invalid, render account settings page with form and other context data
         return render(
             request, self.template_name,
             context={'user_status': request.user.is_authenticated,
@@ -722,10 +872,12 @@ class RegisterView(View):
 
     def get(self, request):
         password_not_confirm = None
+        # Initialize user and profile forms
         form = ProfileForm()
         user_form = UserForm(request.POST or None)
         fields_to_display = ['Currency']
 
+        # Render signup page with forms and other context data
         return render(
             request, template_name='expenses_tracker/signup.html',
             context={
@@ -738,30 +890,34 @@ class RegisterView(View):
         )
 
     def post(self, request):
+        # Initialize user and profile forms with POST data
         user_form = UserForm(request.POST or None)
+        form = ProfileForm(request.POST or None)
 
         fields_to_display = ['Currency']
-
-        form = ProfileForm(request.POST or None)
 
         if form.is_valid() and user_form.is_valid():
             user_form.save(commit=False)
 
+            # Set password for user
             user_form.instance.set_password(user_form.cleaned_data['password'])
 
+            # Link profile to user and set default image
             form.instance.user = user_form.instance
-
-            # adding the default blank image
             form.instance.image = 'images/c0749b7cc401421662ae901ec8f9f660.jpg'
 
+            # Store user currency in session
             self.request.session['user_currency'] = form.instance.currency
 
+            # Save user and profile forms
             user_form.save()
             form.save()
 
+            # Set login message in session
             request.session["login_msg"] = f"Now login as - {user_form.instance.username}"
             return HttpResponseRedirect(reverse('login_page'))
 
+        # If forms are invalid, render signup page with forms and other context data
         return render(request, template_name="expenses_tracker/signup.html",
                       context={"form": form,
                                'fields_to_display': fields_to_display,
@@ -786,10 +942,13 @@ def login_user(request):
             user = authenticate(username=username, password=password)
 
             if user is not None:
+                # Store the current user ID in session
                 request.session["current_user"] = user.id
 
+                # Store the user's currency in session
                 request.session['user_currency'] = user.profile.currency
 
+                # Log in the user
                 login(request, user)
 
                 # Redirect to the next parameter if it exists, otherwise redirect to the default URL
@@ -820,13 +979,16 @@ def login_user(request):
     )
 
 
+@login_required
 def logout_user(request):
+    # Delete the session data and log out the user
     request.session.delete()
     logout(request)
     return HttpResponseRedirect(reverse('login_page'))
 
 
 def privacy_policy(request):
+    # Render the privacy policy page
     return render(
         request,
         template_name='expenses_tracker/privacy_policy.html',
@@ -837,6 +999,7 @@ def privacy_policy(request):
 
 
 def terms_of_service(request):
+    # Render the terms of service page
     return render(
         request,
         template_name='expenses_tracker/terms_of_service.html',
@@ -855,18 +1018,21 @@ def contact_us(request):
 
     Returns:
         str: Rendered HTML template.
-
     """
 
+    # Check if a message has been sent successfully
     is_message_sent = request.session.pop('is_message_sent', False)
     validation_error = None
 
+    # Create a ContactForm instance
     form = ContactForm(request.POST or None)
 
     if form.is_valid():
         try:
+            # Validate the form data
             ContactForm.clean_your_field(form)
         except ValidationError:
+            # Handle validation errors
             validation_error = ("Message or Name: Please refrain from using Non-ASCII characters such as 😁 and "
                                 "others. Kindly write your message without emojis or symbols.")
         else:
@@ -881,9 +1047,8 @@ def contact_us(request):
 
             # Set a flag to indicate that the message has been sent
             request.session['is_message_sent'] = True
-            # Render the template with the flag
+            # Redirect to the contact us page to avoid form resubmission
             return HttpResponseRedirect(reverse('contact_us_page'))
-            # return render_template("contact.html", msg_sent=sent)
 
     # Render the contact form template for GET requests
     return render(
@@ -900,34 +1065,42 @@ def contact_us(request):
 
 @login_required
 def line_chart(request):
+    # Import DateForm from form_models
     from expenses_tracker.form_models import DateForm
 
+    # Create a DateForm instance
     date_form = DateForm(request.POST or None)
 
     if date_form.is_valid():
+        # Extract start and end dates from the form
         start_date = date_form.cleaned_data.get('start')
         end_date = date_form.cleaned_data.get('end')
 
+        # Filter transactions by date range
         transaction = Transaction.objects.all().filter(user=request.user).filter(date__date__gte=start_date,
                                                                                  date__date__lte=end_date)
 
+        # Toggle income visualization based on user input
         if request.POST.get('toggle_state') == 'True':
             income = Income.objects.all().filter(user=request.user).filter(date__date__gte=start_date,
                                                                            date__date__lte=end_date)
         else:
             income = Income.objects.all().filter(user=request.user)
     else:
+        # If form is not valid, show all transactions and incomes
         transaction = Transaction.objects.all().filter(user=request.user)
-
         income = Income.objects.all().filter(user=request.user)
 
+    # Generate line charts for transactions and incomes
     chart = linechart(request_obj=request, object_inst=transaction, obj_name='Transaction')
     chart2 = linechart(request_obj=request, object_inst=income, obj_name='Income')
 
+    # Prepare context data for rendering the template
     context = {'chart': chart,
                'chart2': chart2,
                'form': date_form,
                'user_status': request.user.is_authenticated
                }
 
+    # Render the line chart template
     return render(request, 'expenses_tracker/line_chart.html', context)
