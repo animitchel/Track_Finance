@@ -16,9 +16,9 @@ Django==5.0.3
 django-phonenumber-field==7.3.0
 django-storages==1.14.2
 fonttools==4.49.0
-gunicorn==21.2.0
+gunicorn>=22.0.0
 html5lib==1.1
-idna==3.6
+idna>=3.7
 jmespath==1.0.1
 lxml==5.1.0
 numpy==1.26.4
@@ -46,7 +46,7 @@ reportlab==4.0.9
 requests==2.31.0
 s3transfer==0.10.1
 six==1.16.0
-sqlparse==0.4.4
+sqlparse>=0.5.0
 svglib==1.5.1
 tenacity==8.2.3
 tinycss2==1.2.1

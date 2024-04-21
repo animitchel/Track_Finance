@@ -27,6 +27,16 @@ from xhtml2pdf import pisa
 
 
 def convert_html_to_pdf(source_html, is_expense_report):
+    """
+    Convert HTML content to PDF.
+
+    Args:
+        source_html (str): HTML content to be converted.
+        is_expense_report (bool): Flag indicating whether the PDF is for an expense report.
+
+    Returns:
+        HttpResponse: Response object containing the PDF content.
+    """
     # Initialize HttpResponse object to store the PDF result
     result = HttpResponse(content_type='application/pdf')
     if is_expense_report:
