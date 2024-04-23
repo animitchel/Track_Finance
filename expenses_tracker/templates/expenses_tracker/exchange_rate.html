@@ -1,0 +1,31 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block css_file %}
+    <link rel="stylesheet" href="{% static 'expenses_tracker/budget-overview.css' %}">
+{% endblock %}
+
+{% block page_title %} 
+    Track Finance - exchange-rate
+{% endblock %}
+
+{% block content %}
+    <main>
+    
+    <header>
+        <h1>Exchange Rate</h1>
+    </header>
+        
+    <ul>
+    <li style="margin: 30px">
+        <div class="notification-content">
+            <h1 class="notification-text" style="margin: 10px; text-align: center"> Coming Soon...</h1>
+        </div>
+    </li>
+    </ul>
+    </main>
+    
+    
+    {% include "expenses_tracker/include/footer.html" %}
+{% endblock %}

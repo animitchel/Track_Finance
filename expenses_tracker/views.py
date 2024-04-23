@@ -23,11 +23,11 @@ from django.template.loader import render_to_string, get_template
 from django.utils import timezone
 
 from .filter_func import expenses_query_filter_func
-from expenses_tracker.form_models import ExpenseIncomeReportForm
+from expenses_tracker.form_models import ExpenseIncomeReportForm, DateForm
 from expenses_tracker.email_client import send_message
 from django.contrib.auth import get_user_model
 from django.contrib.auth.models import User
-from expenses_tracker.graphical_insights import linechart
+from expenses_tracker.graphical_insights import linechart, barchart
 from expenses_tracker.redirect_endpoints import url_has_allowed_host_and_scheme_func
 from django.conf import settings
 
@@ -864,7 +864,8 @@ class AccountSettingsView(LoginRequiredMixin, View):
             request, self.template_name,
             context={'user_status': request.user.is_authenticated,
                      'form': profile_form,
-                     'current_year': datetime.now().year}
+                     'current_year': datetime.now().year,
+                     }
         )
 
 
@@ -914,7 +915,8 @@ class RegisterView(View):
             form.save()
 
             # Set login message in session
-            request.session["login_msg"] = f"Now login as - {user_form.instance.username}"
+            request.session['login_msg'] = f"Now login as - {user_form.instance.username}"
+
             return HttpResponseRedirect(reverse('login_page'))
 
         # If forms are invalid, render signup page with forms and other context data
@@ -1065,9 +1067,6 @@ def contact_us(request):
 
 @login_required
 def line_chart(request):
-    # Import DateForm from form_models
-    from expenses_tracker.form_models import DateForm
-
     # Create a DateForm instance
     date_form = DateForm(request.POST or None)
 
@@ -1094,13 +1093,75 @@ def line_chart(request):
     # Generate line charts for transactions and incomes
     chart = linechart(request_obj=request, object_inst=transaction, obj_name='Transaction')
     chart2 = linechart(request_obj=request, object_inst=income, obj_name='Income')
+    # chart3 = barchart(request_obj=request, object_inst=transaction, obj_name='Transaction')
 
     # Prepare context data for rendering the template
     context = {'chart': chart,
                'chart2': chart2,
                'form': date_form,
-               'user_status': request.user.is_authenticated
+               'user_status': request.user.is_authenticated,
+               'chart_name': 'Line Chart',
+               'url_name': 'line_chart_page'
                }
 
     # Render the line chart template
     return render(request, 'expenses_tracker/line_chart.html', context)
+
+
+def aggregate_calc(instance):
+    return {field.category: instance.filter(category=field.category).aggregate(
+        sum=Sum('amount')).get('sum') for field in instance}
+
+
+@login_required
+def bar_chart(request):
+    # Create a DateForm instance
+    date_form = DateForm(request.POST or None)
+
+    if date_form.is_valid():
+        # Extract start and end dates from the form
+        start_date = date_form.cleaned_data.get('start')
+        end_date = date_form.cleaned_data.get('end')
+
+        # Filter transactions by date range
+        transaction = Transaction.objects.all().filter(user=request.user).filter(date__date__gte=start_date,
+                                                                                 date__date__lte=end_date)
+
+        # Toggle income visualization based on user input
+        if request.POST.get('toggle_state') == 'True':
+            income = Income.objects.all().filter(user=request.user).filter(date__date__gte=start_date,
+                                                                           date__date__lte=end_date)
+        else:
+            income = Income.objects.all().filter(user=request.user)
+
+    else:
+        transaction = Transaction.objects.all().filter(user=request.user)
+        income = Income.objects.all().filter(user=request.user)
+
+    category_trans = aggregate_calc(transaction)
+
+    category_income = aggregate_calc(income)
+
+    chart = barchart(request_obj=request, object_inst=category_trans, obj_name='Transactions Categories')
+    chart2 = barchart(request_obj=request, object_inst=category_income, obj_name='Incomes Sources')
+
+    context = {'chart': chart,
+               'chart2': chart2,
+               'form': date_form,
+               'user_status': request.user.is_authenticated,
+               'chart_name': 'Bar Chart',
+               'url_name': 'bar_chart_page'
+               }
+
+    return render(request, 'expenses_tracker/line_chart.html', context)
+
+
+@login_required
+def exchange_rate(request):
+
+    return render(
+        request,
+        template_name='expenses_tracker/exchange_rate.html',
+        context={},
+        status=200
+    )
