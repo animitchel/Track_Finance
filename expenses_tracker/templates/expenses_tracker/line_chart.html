@@ -6,17 +6,17 @@
 {% endblock %}
 
 {% block page_title %}
-    Track Finance - Transactions & Incomes Line Chart
+    Track Finance - Transactions & Incomes {{ chart_name }}
 {% endblock %}
 
 {% block content %}
     
     <header>
-        <h1>Line Chart</h1>
+        <h1>{{ chart_name }}</h1>
     </header>
     
     <div class="form-container">
-        <form method="post" action="{% url 'line_chart_page' %}">
+        <form method="post" action="{% url url_name %}">
             {% csrf_token %}
             
             <label for="id_start_date">Start Date:</label>
@@ -36,7 +36,7 @@
             </label>
             
             <button type="submit">Submit</button>
-            <a class="reset" href="{% url 'line_chart_page' %}">Reset</a>
+            <a class="reset" href="{% url url_name %}">Reset</a>
             
             
 

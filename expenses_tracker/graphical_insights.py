@@ -19,7 +19,8 @@ def linechart(object_inst, request_obj, obj_name):
     # Create a DataFrame from the queryset
     df = pd.DataFrame(dict(
         Date=[field.date.date() for field in object_inst],
-        Amount=[object_inst.filter(date__date=field.date.date()).aggregate(sum=Sum('amount')).get('sum') for field in object_inst],
+        Amount=[object_inst.filter(date__date=field.date.date()).aggregate(sum=Sum('amount')).get('sum') for field in
+                object_inst],
     ))
 
     # Sort the DataFrame by date in descending order
@@ -47,5 +48,23 @@ def linechart(object_inst, request_obj, obj_name):
     )
 
     # Convert the figure to HTML code
+    chart = fig.to_html()
+    return chart
+
+
+def barchart(object_inst, request_obj, obj_name):
+    # Create a DataFrame from the queryset
+    df = pd.DataFrame(dict(
+        Categories=[field for field in object_inst.keys()],
+        SubTotal=[field for field in object_inst.values()],
+    ))
+
+    # Sort the DataFrame by date in descending order
+    df.sort_values(by='Categories', ascending=False, inplace=True)
+
+    fig = px.bar(df, y='SubTotal', x='Categories', text_auto='.2s',
+                 title=f"{obj_name} and Sub-Total ({request_obj.session.get('user_currency')})")
+    fig.update_traces(textfont_size=12, textangle=0, textposition="outside", cliponaxis=False)
+
     chart = fig.to_html()
     return chart

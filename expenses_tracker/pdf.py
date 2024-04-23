@@ -3,29 +3,6 @@ from django.http import HttpResponse
 from xhtml2pdf import pisa
 
 
-# def render_template(template_html, context_data=None):
-#     template = Template(template_html)
-#     context_ = Context(context_data)
-#     return template.render(context_)
-
-
-# Utility function to convert HTML to PDF
-# from django.template import Context, Template
-# def convert_html_to_pdf(source_html):
-#     result = HttpResponse(content_type='application/pdf')
-#     result['Content-Disposition'] = 'attachment; filename="Expenses_Report.pdf"'
-#
-#     # Convert rendered HTML to PDF
-#     pisa_status = pisa.CreatePDF(
-#         source_html.encode(encoding='utf-8'),  # the rendered HTML to convert
-#         dest=result)  # response object to receive result
-#
-#     if pisa_status.err:
-#         return HttpResponse('PDF conversion failed', status=500)
-#
-#     return result
-
-
 def convert_html_to_pdf(source_html, is_expense_report):
     """
     Convert HTML content to PDF.
@@ -68,3 +45,25 @@ def convert_html_to_pdf(source_html, is_expense_report):
 
     # Return the result HttpResponse object containing the PDF content
     return result
+
+# def render_template(template_html, context_data=None):
+#     template = Template(template_html)
+#     context_ = Context(context_data)
+#     return template.render(context_)
+
+
+# Utility function to convert HTML to PDF
+# from django.template import Context, Template
+# def convert_html_to_pdf(source_html):
+#     result = HttpResponse(content_type='application/pdf')
+#     result['Content-Disposition'] = 'attachment; filename="Expenses_Report.pdf"'
+#
+#     # Convert rendered HTML to PDF
+#     pisa_status = pisa.CreatePDF(
+#         source_html.encode(encoding='utf-8'),  # the rendered HTML to convert
+#         dest=result)  # response object to receive result
+#
+#     if pisa_status.err:
+#         return HttpResponse('PDF conversion failed', status=500)
+#
+#     return result

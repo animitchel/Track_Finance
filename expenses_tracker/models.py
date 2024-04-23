@@ -128,15 +128,13 @@ class Transaction(models.Model):
 
     def save(self, *args, **kwargs):
         # If the transaction is recurring, calculate the next occurrence based on the frequency
-        if self.recurring_transaction:
-            frequency = next(_frequency[key] for key in _frequency if key == self.frequency)
-            self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
 
-            # If transaction title is not provided, set it as the category
-            if not self.transaction_title:
-                self.transaction_title = self.category
+        if self.recurring_transaction:
+            frequency = _frequency.get(self.frequency)
+            self.next_occurrence = self.date + timedelta(weeks=frequency)
+
+            self.transaction_title = self.transaction_title or self.category
         else:
-            # Reset frequency and transaction title if not recurring
             self.frequency = None
             self.transaction_title = None
 
@@ -211,7 +209,7 @@ class Budget(models.Model):
         # Set expiration date if spent is zero
         if self.spent == 0.0:
             validity_period = _duration.get(self.duration)
-            self.expiration_date = timezone.now() + timedelta(weeks=validity_period)
+            self.expiration_date = self.date + timedelta(weeks=validity_period)
 
         super(Budget, self).save(*args, **kwargs)
 
@@ -248,8 +246,9 @@ class Income(models.Model):
         # Set next occurrence if recurring
 
         if self.recurring_transaction:
-            frequency = next(_frequency[key] for key in _frequency if key == self.frequency)
-            self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
+            # frequency = next(_frequency[key] for key in _frequency if key == self.frequency)
+            frequency = _frequency.get(self.frequency)
+            self.next_occurrence = self.date + timedelta(weeks=frequency)
 
             # Set transaction title if not provided
             if not self.transaction_title:

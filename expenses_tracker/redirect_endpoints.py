@@ -4,7 +4,9 @@ from urllib.parse import urlparse
 allowed_endpoints = ["/linechart/", "/account-settings/", "/notifications/", "/profile-details/",
                      "/expense-reports-form/", "/income-category/", "/add-income/", "/expenses-report/", "/add-budget/",
                      "/budget-overview/", "/recurring-incomes/", "/recurring-transactions/", "/categories/",
-                     "/add_transactions/", "/all_transactions/", "/overview/", "/logout/", "/income-data/"]
+                     "/add_transactions/", "/all_transactions/", "/overview/", "/logout/", "/income-data/",
+                     "/barchart/", "/exchange-rate/",
+                     ]
 
 
 def url_has_allowed_host_and_scheme_func(redirect, allowed_hosts, scheme=None):

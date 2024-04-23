@@ -52,4 +52,8 @@ urlpatterns = [
 
     path('linechart/', views.line_chart, name='line_chart_page'),
 
+    path('barchart/', views.bar_chart, name='bar_chart_page'),
+
+    path('exchange-rate/', views.exchange_rate, name='exchange_rate_page')
+
 ]
