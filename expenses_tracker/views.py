@@ -1101,7 +1101,8 @@ def line_chart(request):
                'form': date_form,
                'user_status': request.user.is_authenticated,
                'chart_name': 'Line Chart',
-               'url_name': 'line_chart_page'
+               'url_name': 'line_chart_page',
+               'current_year': datetime.now().year,
                }
 
     # Render the line chart template
@@ -1150,7 +1151,8 @@ def bar_chart(request):
                'form': date_form,
                'user_status': request.user.is_authenticated,
                'chart_name': 'Bar Chart',
-               'url_name': 'bar_chart_page'
+               'url_name': 'bar_chart_page',
+               'current_year': datetime.now().year,
                }
 
     return render(request, 'expenses_tracker/line_chart.html', context)
@@ -1162,6 +1164,9 @@ def exchange_rate(request):
     return render(
         request,
         template_name='expenses_tracker/exchange_rate.html',
-        context={},
+        context={
+            'current_year': datetime.now().year,
+            'user_status': request.user.is_authenticated,
+        },
         status=200
     )
