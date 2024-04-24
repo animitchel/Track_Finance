@@ -57,6 +57,9 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    # 'django.middleware.cache.UpdateCacheMiddleware',
+    # 'django.middleware.common.CommonMiddleware',
+    # 'django.middleware.cache.FetchFromCacheMiddleware'
 ]
 
 ROOT_URLCONF = 'Track_Finance.urls'
@@ -93,6 +96,18 @@ DATABASES = {
 
 DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
 
+CACHES = {
+    'default': {
+        'BACKEND': "django.core.cache.backends.redis.RedisCache",
+        'LOCATION': os.environ.get('CACHES_REDIS_URL'),
+        # 'OPTIONS': {
+        #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
+        # },
+    },
+}
+
+# CACHE_MIDDLEWARE_SECONDS = 60
+# rediss://username:password@host:port
 
 # Password validation
 # https://docs.djangoproject.com/en/5.0/ref/settings/#auth-password-validators
