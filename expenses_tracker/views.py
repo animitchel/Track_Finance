@@ -31,7 +31,12 @@ from expenses_tracker.graphical_insights import linechart, barchart
 from expenses_tracker.redirect_endpoints import url_has_allowed_host_and_scheme_func
 from django.conf import settings
 
+from django.core.cache import cache
+from django.views.decorators.cache import cache_page, never_cache
+from django.utils.decorators import method_decorator
 
+
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class IndexView(TemplateView):
     template_name = 'expenses_tracker/index.html'  # Define the template name for this view
 
@@ -49,6 +54,7 @@ class IndexView(TemplateView):
         return context
 
 
+@cache_page(60)
 @login_required
 def overview(request):
     # Get all transactions associated with the logged-in user
@@ -163,7 +169,7 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
 
             # Return the filtered queryset ordered by date
-            return filtered_query.order_by('date')
+            return filtered_query
 
         elif search_query:
             # Apply filtering based on search query if search query is provided
@@ -242,6 +248,7 @@ def budget_calc(field, form_instance):
     field.save()
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class AddTransactionView(LoginRequiredMixin, CreateView):
     template_name = 'expenses_tracker/add_transaction.html'
     model = Transaction
@@ -279,6 +286,7 @@ class AddTransactionView(LoginRequiredMixin, CreateView):
         return context
 
 
+@method_decorator(cache_page(60), name='dispatch')
 class CategoryView(LoginRequiredMixin, ListView):
     template_name = 'expenses_tracker/categories.html'
     model = Transaction
@@ -419,6 +427,7 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
         return HttpResponseRedirect(reverse('budget-overview_page'))
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class AddBudgetView(LoginRequiredMixin, CreateView):
     template_name = 'expenses_tracker/add_budget.html'
     model = Budget
@@ -537,6 +546,7 @@ def expenses_report(request, *args, **kwargs):
     return pdf_response
 
 
+@cache_page(60 * 15)
 @login_required
 def expense_income_report_form(request):
     error = None
@@ -610,7 +620,7 @@ class IncomeData(LoginRequiredMixin, ListView):
 
             self.request.session['total_trans_queried_amount'] = total_trans_queried_amount['amount']
 
-            return filtered_query.order_by('date')
+            return filtered_query
 
         elif search_query:
             # Filter the queryset based on search query
@@ -643,6 +653,7 @@ class IncomeData(LoginRequiredMixin, ListView):
         return HttpResponseRedirect(reverse('income_data_page'))
 
 
+@method_decorator(cache_page(60 * 15), name='dispatch')
 class IncomeFormView(LoginRequiredMixin, CreateView):
     # View for adding income
     model = Income
@@ -663,6 +674,7 @@ class IncomeFormView(LoginRequiredMixin, CreateView):
         return context
 
 
+@method_decorator(cache_page(60), name='dispatch')
 class IncomeCategoryView(LoginRequiredMixin, ListView):
     # View for displaying income categories
     model = Income
@@ -749,6 +761,7 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
         return HttpResponseRedirect(reverse('recurring_income_page'))
 
 
+@cache_page(60 * 3)
 @login_required
 def profile_details(request):
     # Get the profile associated with the current user
@@ -770,6 +783,7 @@ def profile_details(request):
     )
 
 
+@cache_page(60 * 10)
 @login_required
 def notification(request):
     current_datetime = timezone.now()
@@ -989,6 +1003,7 @@ def logout_user(request):
     return HttpResponseRedirect(reverse('login_page'))
 
 
+@cache_page(60 * 20)
 def privacy_policy(request):
     # Render the privacy policy page
     return render(
@@ -1000,6 +1015,7 @@ def privacy_policy(request):
     )
 
 
+@cache_page(60 * 20)
 def terms_of_service(request):
     # Render the terms of service page
     return render(
@@ -1065,8 +1081,13 @@ def contact_us(request):
     )
 
 
+@cache_page(60 * 2)
 @login_required
 def line_chart(request):
+
+    transaction_inst = Transaction.objects.all().filter(user=request.user)
+    income_inst = Income.objects.all().filter(user=request.user)
+
     # Create a DateForm instance
     date_form = DateForm(request.POST or None)
 
@@ -1076,24 +1097,22 @@ def line_chart(request):
         end_date = date_form.cleaned_data.get('end')
 
         # Filter transactions by date range
-        transaction = Transaction.objects.all().filter(user=request.user).filter(date__date__gte=start_date,
-                                                                                 date__date__lte=end_date)
+        transaction = transaction_inst.filter(date__date__gte=start_date,
+                                              date__date__lte=end_date)
 
         # Toggle income visualization based on user input
         if request.POST.get('toggle_state') == 'True':
-            income = Income.objects.all().filter(user=request.user).filter(date__date__gte=start_date,
-                                                                           date__date__lte=end_date)
+            income = income_inst.filter(date__date__gte=start_date,
+                                        date__date__lte=end_date)
         else:
-            income = Income.objects.all().filter(user=request.user)
+            income = income_inst
     else:
         # If form is not valid, show all transactions and incomes
-        transaction = Transaction.objects.all().filter(user=request.user)
-        income = Income.objects.all().filter(user=request.user)
+        transaction = transaction_inst
+        income = income_inst
 
-    # Generate line charts for transactions and incomes
     chart = linechart(request_obj=request, object_inst=transaction, obj_name='Transaction')
     chart2 = linechart(request_obj=request, object_inst=income, obj_name='Income')
-    # chart3 = barchart(request_obj=request, object_inst=transaction, obj_name='Transaction')
 
     # Prepare context data for rendering the template
     context = {'chart': chart,
@@ -1114,8 +1133,12 @@ def aggregate_calc(instance):
         sum=Sum('amount')).get('sum') for field in instance}
 
 
+@cache_page(60 * 2)
 @login_required
 def bar_chart(request):
+    transaction_inst = Transaction.objects.all().filter(user=request.user)
+    income_inst = Income.objects.all().filter(user=request.user)
+
     # Create a DateForm instance
     date_form = DateForm(request.POST or None)
 
@@ -1125,19 +1148,19 @@ def bar_chart(request):
         end_date = date_form.cleaned_data.get('end')
 
         # Filter transactions by date range
-        transaction = Transaction.objects.all().filter(user=request.user).filter(date__date__gte=start_date,
-                                                                                 date__date__lte=end_date)
+        transaction = transaction_inst.filter(date__date__gte=start_date,
+                                              date__date__lte=end_date)
 
         # Toggle income visualization based on user input
         if request.POST.get('toggle_state') == 'True':
-            income = Income.objects.all().filter(user=request.user).filter(date__date__gte=start_date,
-                                                                           date__date__lte=end_date)
+            income = income_inst.filter(date__date__gte=start_date,
+                                        date__date__lte=end_date)
         else:
-            income = Income.objects.all().filter(user=request.user)
-
+            income = income_inst
     else:
-        transaction = Transaction.objects.all().filter(user=request.user)
-        income = Income.objects.all().filter(user=request.user)
+        # If form is not valid, show all transactions and incomes
+        transaction = transaction_inst
+        income = income_inst
 
     category_trans = aggregate_calc(transaction)
 
@@ -1158,9 +1181,9 @@ def bar_chart(request):
     return render(request, 'expenses_tracker/line_chart.html', context)
 
 
+@cache_page(60 * 20)
 @login_required
 def exchange_rate(request):
-
     return render(
         request,
         template_name='expenses_tracker/exchange_rate.html',
