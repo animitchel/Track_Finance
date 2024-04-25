@@ -4,10 +4,12 @@ from django.contrib.auth.models import User
 from expenses_tracker.models import Budget
 from expenses_tracker.form_models import BudgetForm
 from expenses_tracker.views import AddBudgetView
+from django.core.cache import cache
 
 
 class AddBudgetViewTestCase(TestCase):
     def setUp(self):
+        cache.clear()
         self.user = User.objects.create_user(username='testuser', password='testpassword')
         self.client.login(username='testuser', password='testpassword')
 

@@ -3,10 +3,12 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from datetime import datetime
 from expenses_tracker.models import Profile
+from django.core.cache import cache
 
 
 class ProfileDetailsTestCase(TestCase):
     def setUp(self):
+        cache.clear()
         # Create a test client
         self.client = Client()
 

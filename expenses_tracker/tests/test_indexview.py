@@ -2,10 +2,12 @@ from django.test import TestCase, RequestFactory, Client
 from django.contrib.auth.models import AnonymousUser, User
 from django.urls import reverse
 from expenses_tracker.views import IndexView
+from django.core.cache import cache
 
 
 class IndexViewTestCase(TestCase):
     def setUp(self):
+        cache.clear()
         self.client = Client()
 
     def test_index_view_rendering(self):

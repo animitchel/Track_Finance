@@ -96,10 +96,14 @@ DATABASES = {
 
 DATABASES['default'] = dj_database_url.parse(os.environ.get('DATABASE_URL'))
 
+cache_url = os.environ.get('CACHES_REDIS_URL')
+if DEBUG:
+    cache_url = os.environ.get('LOCALHOST_REDIS_URL')
+
 CACHES = {
     'default': {
         'BACKEND': "django.core.cache.backends.redis.RedisCache",
-        'LOCATION': os.environ.get('CACHES_REDIS_URL'),
+        'LOCATION': cache_url,
         # 'OPTIONS': {
         #     'CLIENT_CLASS': 'django_redis.client.DefaultClient',
         # },

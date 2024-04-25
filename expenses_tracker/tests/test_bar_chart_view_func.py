@@ -2,11 +2,13 @@ from django.test import TestCase, Client
 from django.contrib.auth.models import User
 from expenses_tracker.views import bar_chart
 from  django.urls import reverse
+from django.core.cache import cache
 
 
 class BarChartTestCase(TestCase):
     def setUp(self):
         # Create a test user
+        cache.clear()
         self.user = User.objects.create_user(username='testuser', password='password')
 
     def test_bar_chart_view(self):

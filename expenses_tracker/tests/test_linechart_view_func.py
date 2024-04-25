@@ -7,9 +7,15 @@ from expenses_tracker.form_models import DateForm
 from unittest.mock import patch
 from django.contrib.auth.models import User
 from django.test import RequestFactory
+from django.views.decorators.cache import cache_page, never_cache
+from django.core.cache import cache
 
 
 class LineChartViewTestCase(TestCase):
+
+    def setUp(self):
+        cache.clear()
+
     @classmethod
     def setUpTestData(cls):
         # Create test user
@@ -83,4 +89,3 @@ class LineChartViewTestCase(TestCase):
                                                                       'toggle_state': 'True'})
         self.assertEqual(response.status_code, 200)
         self.assertTrue(mock_linechart.called)
-

@@ -25,7 +25,7 @@ class BarChartTestCase(TestCase):
         response.session['user_currency'] = '$'
 
         # Generate the bar chart
-        chart = barchart(object_inst, response, 'Transactions Categories')
+        chart = barchart(object_inst, response, 'Transactions Categories', total=450)
 
         # Perform assertions on the generated chart HTML
         self.assertIn('Transactions Categories', chart)

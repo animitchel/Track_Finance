@@ -54,7 +54,7 @@ class IndexView(TemplateView):
         return context
 
 
-@cache_page(60)
+@cache_page(60 * 2)
 @login_required
 def overview(request):
     # Get all transactions associated with the logged-in user
@@ -286,7 +286,7 @@ class AddTransactionView(LoginRequiredMixin, CreateView):
         return context
 
 
-@method_decorator(cache_page(60), name='dispatch')
+@method_decorator(cache_page(60 * 2), name='dispatch')
 class CategoryView(LoginRequiredMixin, ListView):
     template_name = 'expenses_tracker/categories.html'
     model = Transaction
@@ -674,7 +674,7 @@ class IncomeFormView(LoginRequiredMixin, CreateView):
         return context
 
 
-@method_decorator(cache_page(60), name='dispatch')
+@method_decorator(cache_page(60 * 2), name='dispatch')
 class IncomeCategoryView(LoginRequiredMixin, ListView):
     # View for displaying income categories
     model = Income
@@ -1081,9 +1081,12 @@ def contact_us(request):
     )
 
 
-@cache_page(60 * 2)
+@cache_page(60 * 3)
 @login_required
 def line_chart(request):
+    timeframe = ""
+    timeframe_inc = ""
+    seven_days_earlier = timezone.now() - timedelta(days=7)
 
     transaction_inst = Transaction.objects.all().filter(user=request.user)
     income_inst = Income.objects.all().filter(user=request.user)
@@ -1106,13 +1109,27 @@ def line_chart(request):
                                         date__date__lte=end_date)
         else:
             income = income_inst
+            timeframe_inc = '(All Time)'
     else:
         # If form is not valid, show all transactions and incomes
-        transaction = transaction_inst
-        income = income_inst
+        transaction = transaction_inst.filter(date__date__gte=seven_days_earlier)
+        income = income_inst.filter(date__date__gte=seven_days_earlier)
 
-    chart = linechart(request_obj=request, object_inst=transaction, obj_name='Transaction')
-    chart2 = linechart(request_obj=request, object_inst=income, obj_name='Income')
+        timeframe = '(7 days)'
+        timeframe_inc = '(7 days)'
+
+    # Calculate the total sum of all transactions
+    transactions_sum_total = transaction.aggregate(amount=Sum('amount'))
+    incomes_sum_total = income.aggregate(amount=Sum('amount'))
+
+    chart = linechart(
+        request_obj=request, object_inst=transaction, obj_name='Transaction', timeframe=timeframe,
+        total=transactions_sum_total['amount']
+    )
+    chart2 = linechart(
+        request_obj=request, object_inst=income, obj_name='Income', timeframe=timeframe_inc,
+        total=incomes_sum_total['amount']
+    )
 
     # Prepare context data for rendering the template
     context = {'chart': chart,
@@ -1133,9 +1150,13 @@ def aggregate_calc(instance):
         sum=Sum('amount')).get('sum') for field in instance}
 
 
-@cache_page(60 * 2)
+@cache_page(60 * 3)
 @login_required
 def bar_chart(request):
+    timeframe = ""
+    timeframe_inc = ""
+    seven_days_earlier = timezone.now() - timedelta(days=7)
+
     transaction_inst = Transaction.objects.all().filter(user=request.user)
     income_inst = Income.objects.all().filter(user=request.user)
 
@@ -1157,17 +1178,32 @@ def bar_chart(request):
                                         date__date__lte=end_date)
         else:
             income = income_inst
+            timeframe_inc = '(All Time)'
     else:
+
         # If form is not valid, show all transactions and incomes
-        transaction = transaction_inst
-        income = income_inst
+        transaction = transaction_inst.filter(date__date__gte=seven_days_earlier)
+        income = income_inst.filter(date__date__gte=seven_days_earlier)
+
+        timeframe = '(7 days)'
+        timeframe_inc = '(7 days)'
+
+    # Calculate the total sum of all transactions
+    transactions_sum_total = transaction.aggregate(amount=Sum('amount'))
+    incomes_sum_total = income.aggregate(amount=Sum('amount'))
 
     category_trans = aggregate_calc(transaction)
 
     category_income = aggregate_calc(income)
 
-    chart = barchart(request_obj=request, object_inst=category_trans, obj_name='Transactions Categories')
-    chart2 = barchart(request_obj=request, object_inst=category_income, obj_name='Incomes Sources')
+    chart = barchart(
+        request_obj=request, object_inst=category_trans, obj_name='Transactions Categories', timeframe=timeframe,
+        total=transactions_sum_total['amount']
+    )
+    chart2 = barchart(
+        request_obj=request, object_inst=category_income, obj_name='Incomes Sources', timeframe=timeframe_inc,
+        total=incomes_sum_total['amount']
+    )
 
     context = {'chart': chart,
                'chart2': chart2,
