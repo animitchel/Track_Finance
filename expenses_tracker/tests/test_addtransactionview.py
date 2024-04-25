@@ -4,6 +4,7 @@ from datetime import datetime
 from django.contrib.auth.models import User
 from expenses_tracker.models import Transaction, Budget
 from expenses_tracker.views import AddTransactionView, budget_calc
+from django.core.cache import cache
 
 
 # from expenses_tracker.forms import TransactionForm
@@ -11,6 +12,7 @@ from expenses_tracker.views import AddTransactionView, budget_calc
 
 class AddTransactionViewTest(TestCase):
     def setUp(self):
+        cache.clear()
         self.client = Client()
         self.user = User.objects.create_user(username='testuser', password='12345')
 

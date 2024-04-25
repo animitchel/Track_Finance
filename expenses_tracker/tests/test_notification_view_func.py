@@ -4,10 +4,12 @@ from django.urls import reverse
 from datetime import datetime, timedelta
 from django.utils import timezone
 from expenses_tracker.models import Transaction, Income, Budget
+from  django.core.cache import cache
 
 
 class NotificationTestCase(TestCase):
     def setUp(self):
+        cache.clear()
         # Create a test client
         self.client = Client()
 

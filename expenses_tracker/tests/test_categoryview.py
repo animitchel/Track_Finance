@@ -5,9 +5,14 @@ from django.utils.timezone import datetime
 from django.db.models import Sum
 from expenses_tracker.models import Transaction  # Import your Transaction model
 from expenses_tracker.views import CategoryView
+from django.core.cache import cache
 
 
 class CategoryViewTestCase(TestCase):
+
+    def setUp(self):
+        cache.clear()
+
     @classmethod
     def setUpTestData(cls):
         # Create a user for testing

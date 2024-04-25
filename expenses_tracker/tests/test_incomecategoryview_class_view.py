@@ -3,10 +3,12 @@ from django.contrib.auth.models import User
 from django.urls import reverse
 from django.utils import timezone
 from expenses_tracker.models import Income
+from django.core.cache import cache
 
 
 class IncomeCategoryViewTestCase(TestCase):
     def setUp(self):
+        cache.clear()
         # Create a test client
         self.client = Client()
 

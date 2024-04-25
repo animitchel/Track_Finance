@@ -4,10 +4,12 @@ from django.contrib.auth.models import User
 from django.utils import timezone
 from django.db.models import Sum, aggregates
 from expenses_tracker.models import Transaction, Budget, Income
+from django.core.cache import cache
 
 
 class OverviewViewTest(TestCase):
     def setUp(self):
+        cache.clear()
         self.client = Client()
         self.user = User.objects.create_user(username='test_user', email='test@example.com', password='test_password')
 
