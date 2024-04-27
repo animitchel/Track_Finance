@@ -50,11 +50,7 @@
                             <td>{{ user_currency }}{{ field.amount|floatformat:"2g" }}</td>
                             <td>{{ field.notes }}</td>
                             <td>
-                                <form method="POST" action="{% url 'income_data_page' %}">
-                                    {% csrf_token %}
-                                    <input type="hidden" name="income_data_id" value="{{ field.id }}">
-                                    <button type="submit">delete</button>
-                                </form>
+                                <a href="{% url 'income_update' field.id %}"><button >Edit</button></a>
                             </td>
                         </tr>
                         {% endfor %}

@@ -11,12 +11,15 @@
 {% block content %}
     
 <header>    
-    <h1>Add Transaction</h1>
+    <h1>{{ header_name }}</h1>
 </header>
 
 <main>
     <section class="transaction-form">
         <div class="container">
+            {% if update %}
+                <a href="{% url 'transaction_delete' object %}"><button >Delete</button></a>
+            {% endif %}
             <form method="POST">
                 {% csrf_token %}
                 
@@ -53,9 +56,11 @@
                 
 
                 <div class="form-group">
+                
                     {{ form.recurring_transaction.label_tag }}
                     {{ form.recurring_transaction }}
-    
+                    
+                    
                     <div id="recurring-options" style="display: none;">
                         <label>
                             <span class="element1">{{ form.frequency.label_tag }}</span>
@@ -66,11 +71,17 @@
                         <br>
                         {{ form.transaction_title.label_tag }}
                         {{ form.transaction_title }}
+                        
                     </div>
-                    <hr>
-                    <div class="form-group">
-                        <label for="all_transaction_budget">All Transaction Budget:</label>
-                        <input type="checkbox" id="all_transaction_budget" name="all_transaction_budget" value="True">
+                    
+                    <div class="form-group" style="margin-top: 10px">
+                        {% if update %}
+                            <label for="id_is_all_trans_bud" class="unclickable">All Transaction Budget:</label>
+                            <span class="unclickable">{{ form.is_all_trans_bud }}</span>
+                        {% else %}
+                            <label for="id_is_all_trans_bud">All Transaction Budget:</label>
+                            {{ form.is_all_trans_bud }}
+                        {% endif %}
                     </div>
                 </div>
                

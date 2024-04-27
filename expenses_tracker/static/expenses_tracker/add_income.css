@@ -99,5 +99,20 @@ input[type="checkbox"]:checked {
     margin-bottom: 20px;
 }
 
+a button {
+    color: white;
+    background-color: red;
+    /*margin-bottom: 10px;*/
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    padding: 5px 15px;
+}
+
+a button:hover {
+    transform: scale(1.02);
+    background-color: darkred;
+}
+
 
 

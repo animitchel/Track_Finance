@@ -127,5 +127,26 @@ input[type="checkbox"]:checked {
     color: darkred;
 }
 
+a button {
+    color: white;
+    background-color: red;
+    margin-bottom: 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    border: none;
+    padding: 5px 15px;
+}
+
+a button:hover {
+    transform: scale(1.02);
+    background-color: darkred;
+}
+
+.unclickable {
+    pointer-events: none; /* Disable pointer events */
+    cursor: default; /* Use default cursor (usually an arrow) */
+}
+
+
 
 

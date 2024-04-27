@@ -18,6 +18,10 @@ urlpatterns = [
 
     path('add_transactions/', views.AddTransactionView.as_view(), name='add_transactions_page'),
 
+    path('transaction-update/<int:pk>/', views.AllTransactionUpdateAndDeletePage.as_view(), name='transaction_update'),
+
+    path('transaction-delete/<int:pk>/', views.delete_transaction, name='transaction_delete'),
+
     path('categories/', views.CategoryView.as_view(), name='categories_page'),
 
     path('recurring-transactions/', views.RecurringTransactions.as_view(), name='recurring_transactions_page'),
@@ -31,6 +35,10 @@ urlpatterns = [
     path('expenses-report/', views.expenses_report, name='expenses_report_page'),
 
     path('income-data/', views.IncomeData.as_view(), name='income_data_page'),
+
+    path('income-update/<int:pk>/', views.AllIncomeUpdateAndDeletePage.as_view(), name='income_update'),
+
+    path('income-delete/<int:pk>/', views.delete_income, name='income_delete'),
 
     path('add-income/', views.IncomeFormView.as_view(), name='add_income_page'),
 
@@ -54,6 +62,6 @@ urlpatterns = [
 
     path('barchart/', views.bar_chart, name='bar_chart_page'),
 
-    path('exchange-rate/', views.exchange_rate, name='exchange_rate_page')
+    path('exchange-rate/', views.exchange_rate, name='exchange_rate_page'),
 
 ]

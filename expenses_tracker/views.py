@@ -124,21 +124,6 @@ def overview(request):
     )
 
 
-def budget_calculation(budget_objs, transaction_obj):
-    # Iterate over each budget object
-    for field in budget_objs.all():
-        # Check if the current budget amount is greater than the current spent amount
-        if field.budget > field.amount:
-            # Increment the amount by the transaction amount
-            field.amount += transaction_obj.amount
-
-            # Decrement the spent amount by the transaction amount
-            field.spent -= transaction_obj.amount
-
-            # Save the changes to the budget object
-            field.save()
-
-
 class AllTransactionsView(LoginRequiredMixin, ListView):
     template_name = 'expenses_tracker/all_transactions.html'
     model = Transaction
@@ -202,28 +187,9 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
     # Method to handle POST requests
     def post(self, request, *args, **kwargs):
         # Get transaction ID and search query from POST data
-        transaction_id = request.POST.get('all_transaction_id')
         search_query = request.POST.get('search')
 
-        if transaction_id:
-            # If transaction ID is provided, delete the transaction and recalculate budgets
-            transaction_obj = Transaction.objects.get(id=transaction_id)
-
-            budget_objects = Budget.objects.all().filter(user_id=self.request.user.id)
-            budget_objects_categories = budget_objects.filter(category=transaction_obj.category).filter(
-                date__lte=transaction_obj.date)
-
-            all_transactions_budget = budget_objects.filter(
-                category="All Transactions").filter(date__lte=transaction_obj.date)
-
-            budget_calculation(budget_objs=budget_objects_categories, transaction_obj=transaction_obj)
-
-            if transaction_obj.is_all_trans_bud:
-                budget_calculation(budget_objs=all_transactions_budget, transaction_obj=transaction_obj)
-
-            transaction_obj.delete()
-
-        elif search_query:
+        if search_query:
             # If search query is provided, store it in session
             self.request.session['search_query'] = search_query
 
@@ -235,6 +201,90 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
 
         # Redirect to the all_transactions_page
         return HttpResponseRedirect(reverse('all_transactions_page'))
+
+
+def update_budget(budget_obj, object_obj, form_instance):
+    for field in budget_obj:
+
+        if object_obj > form_instance.amount:
+            field.amount += object_obj - form_instance.amount
+            field.spent -= object_obj - form_instance.amount
+
+        elif object_obj < form_instance.amount:
+            field.amount -= form_instance.amount - object_obj
+            field.spent += form_instance.amount - object_obj
+
+        field.save()
+
+
+class AllTransactionUpdateAndDeletePage(LoginRequiredMixin, UpdateView):
+    model = Transaction
+    form_class = TransactionForm
+    template_name = 'expenses_tracker/add_transaction.html'
+    success_url = "/all_transactions"
+
+    def get_context_data(self, **kwargs):
+        context = super(AllTransactionUpdateAndDeletePage, self).get_context_data(**kwargs)
+        self.request.session['object_amount'] = float(self.object.amount)
+        context['update'] = True
+        context['user_status'] = self.request.user.is_authenticated
+        context['current_year'] = datetime.now().year
+        context['object'] = self.object.id
+        context['header_name'] = 'Update Transaction'
+        return context
+
+    def form_valid(self, form):
+        budget = Budget.objects.all().filter(user_id=self.request.user.id, date__lte=self.object.date)
+        budget_cate = budget.filter(category=self.object.category)
+        budget_all = budget.filter(category='All Transactions')
+        object_amount = self.request.session.get('object_amount')
+
+        update_budget(budget_obj=budget_cate, object_obj=object_amount, form_instance=form.instance)
+
+        if form.instance.is_all_trans_bud:
+            update_budget(budget_obj=budget_all, object_obj=object_amount, form_instance=form.instance)
+
+        if object_amount is not None:
+            self.request.session.pop('object_amount')
+
+        return super(AllTransactionUpdateAndDeletePage, self).form_valid(form)
+
+
+def budget_calculation(budget_objs, transaction_obj):
+    # Iterate over each budget object
+    for field in budget_objs.all():
+        # Check if the current budget amount is greater than the current spent amount
+        if field.budget > field.amount:
+            # Increment the amount by the transaction amount
+            field.amount += transaction_obj.amount
+
+            # Decrement the spent amount by the transaction amount
+            field.spent -= transaction_obj.amount
+
+            # Save the changes to the budget object
+            field.save()
+
+
+@login_required
+def delete_transaction(request, pk):
+    transaction_obj = Transaction.objects.get(id=pk)
+
+    # If transaction ID is provided, delete the transaction and recalculate budgets
+
+    budget_objects = Budget.objects.all().filter(user_id=request.user.id)
+    budget_objects_categories = budget_objects.filter(category=transaction_obj.category).filter(
+        date__lte=transaction_obj.date)
+
+    all_transactions_budget = budget_objects.filter(
+        category="All Transactions").filter(date__lte=transaction_obj.date)
+
+    budget_calculation(budget_objs=budget_objects_categories, transaction_obj=transaction_obj)
+
+    if transaction_obj.is_all_trans_bud:
+        budget_calculation(budget_objs=all_transactions_budget, transaction_obj=transaction_obj)
+
+    transaction_obj.delete()
+    return HttpResponseRedirect(reverse('all_transactions_page'))
 
 
 def budget_calc(field, form_instance):
@@ -258,16 +308,14 @@ class AddTransactionView(LoginRequiredMixin, CreateView):
 
     def form_valid(self, form):
         # Get the value of 'all_transaction_budget' from the POST data
-        all_transaction_budget = self.request.POST.get('all_transaction_budget')
 
         # Set the user_id and is_all_trans_bud fields of the form instance
         form.instance.user_id = self.request.user.id
-        form.instance.is_all_trans_bud = all_transaction_budget
 
         # Iterate over budget objects
         for field in Budget.objects.all().filter(user_id=self.request.user.id):
             # Check if 'all_transaction_budget' is True
-            if all_transaction_budget:
+            if form.instance.is_all_trans_bud:
                 # If category is 'All Transactions', perform budget calculation
                 if field.category == 'All Transactions':
                     budget_calc(field=field, form_instance=form.instance)
@@ -283,6 +331,7 @@ class AddTransactionView(LoginRequiredMixin, CreateView):
         context = super(AddTransactionView, self).get_context_data(**kwargs)
         context['user_status'] = self.request.user.is_authenticated
         context['current_year'] = datetime.now().year
+        context['header_name'] = 'Add Transaction'
         return context
 
 
@@ -634,14 +683,9 @@ class IncomeData(LoginRequiredMixin, ListView):
 
     def post(self, request, *args, **kwargs):
         # Handle POST request for deleting or searching income data
-        income_data_id = request.POST.get('income_data_id')
         search_query = request.POST.get('search')
 
-        if income_data_id:
-            # If income data ID is provided, delete the corresponding record
-            Income.objects.get(id=income_data_id).delete()
-
-        elif search_query:
+        if search_query:
             # If search query is provided, store it in session
             self.request.session['search_query'] = search_query
         else:
@@ -651,6 +695,28 @@ class IncomeData(LoginRequiredMixin, ListView):
             request.session['sort_order'] = request.POST.get('sort_order')
 
         return HttpResponseRedirect(reverse('income_data_page'))
+
+
+class AllIncomeUpdateAndDeletePage(LoginRequiredMixin, UpdateView):
+    model = Income
+    form_class = IncomeForm
+    template_name = 'expenses_tracker/add_income.html'
+    success_url = "/income-data"
+
+    def get_context_data(self, **kwargs):
+        context = super(AllIncomeUpdateAndDeletePage, self).get_context_data(**kwargs)
+        context['update'] = True
+        context['user_status'] = self.request.user.is_authenticated
+        context['current_year'] = datetime.now().year
+        context['object'] = self.object.id
+        context['header_name'] = 'Update Income'
+        return context
+
+
+@login_required
+def delete_income(request, pk):
+    Income.objects.get(id=pk).delete()
+    return HttpResponseRedirect(reverse('income_data_page'))
 
 
 @method_decorator(cache_page(60 * 15), name='dispatch')
@@ -671,6 +737,7 @@ class IncomeFormView(LoginRequiredMixin, CreateView):
         context = super(IncomeFormView, self).get_context_data(**kwargs)
         context['user_status'] = self.request.user.is_authenticated
         context['current_year'] = datetime.now().year
+        context['header_name'] = 'Add Income'
         return context
 
 
