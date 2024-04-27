@@ -5,7 +5,7 @@ allowed_endpoints = ["/linechart/", "/account-settings/", "/notifications/", "/p
                      "/expense-reports-form/", "/income-category/", "/add-income/", "/expenses-report/", "/add-budget/",
                      "/budget-overview/", "/recurring-incomes/", "/recurring-transactions/", "/categories/",
                      "/add_transactions/", "/all_transactions/", "/overview/", "/logout/", "/income-data/",
-                     "/barchart/", "/exchange-rate/",
+                     "/barchart/", "/exchange-rate/", "/transaction-update/<int:pk>/",
                      ]
 
 

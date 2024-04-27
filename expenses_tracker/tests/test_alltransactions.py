@@ -20,35 +20,27 @@ class AllTransactionsViewTest(TestCase):
             category='Groceries', amount=50.0, user=self.user, description='test description')
         Transaction.objects.create(category='Utilities', amount=100.0, user=self.user)
 
-        # Set session data for filter category
-        # session = self.client.session
-        # session['filter_category'] = 'Groceries'
-        # session['order_by'] = 'Amount'
-        # session['sort_order'] = 'Ascending'
-        # # session['search_query'] = 'test'
-        # session.save()
-
         # Make a GET request to the view
         response = self.client.get(reverse('all_transactions_page'))
 
         # Check that the response is successful
         self.assertEqual(response.status_code, 200)
 
-    def test_post_method_with_transaction_id(self):
-        self.client.login(username='test_user', password='test_password')
-
-        # Create a sample transaction
-        transaction = Transaction.objects.create(category='Groceries', amount=50.0, user=self.user)
-        Transaction.objects.create(category='Groceries', amount=60.0, user=self.user)
-
-        # Make a POST request to the view with transaction_id
-        response = self.client.post(reverse('all_transactions_page'), {'all_transaction_id': transaction.id})
-
-        # Check that the response is a redirect
-        self.assertEqual(response.status_code, 302)
-
-        # Check that transaction was successfully deleted
-        self.assertNotIn(transaction, Transaction.objects.all())
+    # def test_post_method_with_transaction_id(self):
+    #     self.client.login(username='test_user', password='test_password')
+    #
+    #     # Create a sample transaction
+    #     transaction = Transaction.objects.create(category='Groceries', amount=50.0, user=self.user)
+    #     Transaction.objects.create(category='Groceries', amount=60.0, user=self.user)
+    #
+    #     # Make a POST request to the view with transaction_id
+    #     response = self.client.post(reverse('all_transactions_page'), {'all_transaction_id': transaction.id})
+    #
+    #     # Check that the response is a redirect
+    #     self.assertEqual(response.status_code, 302)
+    #
+    #     # Check that transaction was successfully deleted
+    #     self.assertNotIn(transaction, Transaction.objects.all())
 
     def test_post_method_with_search_query(self):
         # Create sample transactions

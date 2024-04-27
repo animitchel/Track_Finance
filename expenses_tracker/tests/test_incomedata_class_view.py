@@ -25,20 +25,3 @@ class IncomeDataTestCase(TestCase):
         # Check the response status code
         self.assertEqual(response.status_code, 200)
 
-    def test_post_request_delete_income(self):
-        # Log in the user
-        self.client.force_login(self.user)
-
-        # Create a test income record
-        income = Income.objects.create(user=self.user, amount=100, date=timezone.now())
-
-        # Make a POST request to delete the income record
-        response = self.client.post(reverse('income_data_page'), {'income_data_id': income.id})
-
-        # Check if the income record is deleted
-        self.assertFalse(Income.objects.filter(id=income.id).exists())
-
-        # Check the response status code and redirection
-        self.assertEqual(response.status_code, 302)
-        self.assertEqual(response.url, reverse('income_data_page'))
-

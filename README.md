@@ -14,7 +14,7 @@ Track Finance is a powerful web application designed to help you manage your fin
 ![Track Finance Screenshot](https://track-finance.s3.amazonaws.com/static/expenses_tracker/images/Budget-overview+Screenshot+2024-04-23+at+04.36.41.png)
 - **Recurring Transactions**: Automate recurring expenses and income to save time and stay organized.
 ![Track Finance Screenshot](https://track-finance.s3.amazonaws.com/static/expenses_tracker/images/Recurring-transaction+Screenshot+2024-04-23+at+04.36.32.png)
-- **Data Visualization**: Visualize your financial data with interactive charts and graphs for better insights.
+- **Data Visualization**: Visualize your financial data with interactive charts and graphs for better insights. Now with improved performance through Django per-view caching.
 ![Track Finance Screenshot](https://track-finance.s3.amazonaws.com/static/expenses_tracker/images/Line-chart+Screenshot+2024-04-23+at+04.29.52.png)
 ![Track Finance Screenshot](https://track-finance.s3.amazonaws.com/static/expenses_tracker/images/Bar-chart+Screenshot+2024-04-23+at+04.30.25.png)
 - **Generate Reports PDF**: Create income and expense summaries pdf.

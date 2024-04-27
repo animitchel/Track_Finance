@@ -94,7 +94,7 @@ class TransactionForm(forms.ModelForm):
     class Meta:
         model = Transaction
         # fields = '__all__'
-        exclude = ['user', 'next_occurrence', 'date', 'is_all_trans_bud']
+        exclude = ['user', 'next_occurrence', 'date']
 
         labels = {'category': 'Category', 'amount': 'Amount', 'description': 'Description',
                   'recurring_transaction': 'Recurring Transaction', 'frequency': 'Frequency',
@@ -179,6 +179,7 @@ class IncomeForm(forms.ModelForm):
     notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=True, max_length=50, min_length=10)
     frequency = forms.ChoiceField(required=False, choices=FREQUENCY_CHOICES)
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10, required=True)
+    transaction_title = forms.CharField(max_length=50, required=False)
 
 
 class ContactForm(forms.Form):
