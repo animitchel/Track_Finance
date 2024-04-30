@@ -36,7 +36,7 @@ from django.views.decorators.cache import cache_page, never_cache
 from django.utils.decorators import method_decorator
 
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
+@method_decorator(cache_page(60 * 30), name='dispatch')
 class IndexView(TemplateView):
     template_name = 'expenses_tracker/index.html'  # Define the template name for this view
 
@@ -298,7 +298,7 @@ def budget_calc(field, form_instance):
     field.save()
 
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
+@method_decorator(cache_page(60 * 30), name='dispatch')
 class AddTransactionView(LoginRequiredMixin, CreateView):
     template_name = 'expenses_tracker/add_transaction.html'
     model = Transaction
@@ -335,7 +335,7 @@ class AddTransactionView(LoginRequiredMixin, CreateView):
         return context
 
 
-@method_decorator(cache_page(60 * 2), name='dispatch')
+@method_decorator(cache_page(60 * 5), name='dispatch')
 class CategoryView(LoginRequiredMixin, ListView):
     template_name = 'expenses_tracker/categories.html'
     model = Transaction
@@ -476,7 +476,7 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
         return HttpResponseRedirect(reverse('budget-overview_page'))
 
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
+@method_decorator(cache_page(60 * 30), name='dispatch')
 class AddBudgetView(LoginRequiredMixin, CreateView):
     template_name = 'expenses_tracker/add_budget.html'
     model = Budget
@@ -595,7 +595,7 @@ def expenses_report(request, *args, **kwargs):
     return pdf_response
 
 
-@cache_page(60 * 15)
+@cache_page(60 * 30)
 @login_required
 def expense_income_report_form(request):
     error = None
@@ -719,7 +719,7 @@ def delete_income(request, pk):
     return HttpResponseRedirect(reverse('income_data_page'))
 
 
-@method_decorator(cache_page(60 * 15), name='dispatch')
+@method_decorator(cache_page(60 * 30), name='dispatch')
 class IncomeFormView(LoginRequiredMixin, CreateView):
     # View for adding income
     model = Income
@@ -741,7 +741,7 @@ class IncomeFormView(LoginRequiredMixin, CreateView):
         return context
 
 
-@method_decorator(cache_page(60 * 2), name='dispatch')
+@method_decorator(cache_page(60 * 5), name='dispatch')
 class IncomeCategoryView(LoginRequiredMixin, ListView):
     # View for displaying income categories
     model = Income
@@ -1070,7 +1070,7 @@ def logout_user(request):
     return HttpResponseRedirect(reverse('login_page'))
 
 
-@cache_page(60 * 20)
+@cache_page(60 * 30)
 def privacy_policy(request):
     # Render the privacy policy page
     return render(
@@ -1082,7 +1082,7 @@ def privacy_policy(request):
     )
 
 
-@cache_page(60 * 20)
+@cache_page(60 * 30)
 def terms_of_service(request):
     # Render the terms of service page
     return render(
@@ -1148,7 +1148,7 @@ def contact_us(request):
     )
 
 
-@cache_page(60 * 3)
+@cache_page(60 * 5)
 @login_required
 def line_chart(request):
     timeframe = ""
@@ -1217,7 +1217,7 @@ def aggregate_calc(instance):
         sum=Sum('amount')).get('sum') for field in instance}
 
 
-@cache_page(60 * 3)
+@cache_page(60 * 5)
 @login_required
 def bar_chart(request):
     timeframe = ""
@@ -1284,7 +1284,7 @@ def bar_chart(request):
     return render(request, 'expenses_tracker/line_chart.html', context)
 
 
-@cache_page(60 * 20)
+@cache_page(60 * 30)
 @login_required
 def exchange_rate(request):
     return render(
