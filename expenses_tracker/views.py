@@ -36,7 +36,7 @@ from django.views.decorators.cache import cache_page, never_cache
 from django.utils.decorators import method_decorator
 
 
-@method_decorator(cache_page(60 * 30), name='dispatch')
+@method_decorator(cache_page(60), name='dispatch')
 class IndexView(TemplateView):
     template_name = 'expenses_tracker/index.html'  # Define the template name for this view
 
