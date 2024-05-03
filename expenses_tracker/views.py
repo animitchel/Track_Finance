@@ -36,7 +36,7 @@ from django.views.decorators.cache import cache_page, never_cache
 from django.utils.decorators import method_decorator
 
 
-@method_decorator(cache_page(60), name='dispatch')
+@method_decorator(cache_page(30), name='dispatch')
 class IndexView(TemplateView):
     template_name = 'expenses_tracker/index.html'  # Define the template name for this view
 
@@ -54,7 +54,7 @@ class IndexView(TemplateView):
         return context
 
 
-@cache_page(60 * 2)
+@cache_page(60 * 3)
 @login_required
 def overview(request):
     # Get all transactions associated with the logged-in user
@@ -128,6 +128,7 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
     template_name = 'expenses_tracker/all_transactions.html'
     model = Transaction
     context_object_name = 'transactions'
+    paginate_by = 50
 
     # Method to get the queryset of transactions
     def get_queryset(self):
@@ -222,6 +223,7 @@ class AllTransactionUpdateAndDeletePage(LoginRequiredMixin, UpdateView):
     form_class = TransactionForm
     template_name = 'expenses_tracker/add_transaction.html'
     success_url = "/all_transactions"
+
 
     def get_context_data(self, **kwargs):
         context = super(AllTransactionUpdateAndDeletePage, self).get_context_data(**kwargs)
@@ -634,6 +636,7 @@ class IncomeData(LoginRequiredMixin, ListView):
     model = Income
     template_name = 'expenses_tracker/income_data.html'
     context_object_name = 'income_data'
+    paginate_by = 50
 
     def get_context_data(self, **kwargs):
         # Get context data for rendering the template
@@ -850,7 +853,7 @@ def profile_details(request):
     )
 
 
-@cache_page(60 * 10)
+@cache_page(60 * 30)
 @login_required
 def notification(request):
     current_datetime = timezone.now()

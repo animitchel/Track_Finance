@@ -180,3 +180,5 @@ MEDIAFILES_FOLDER = 'media'
 STATICFILES_STORAGE = 'custom_storages.StaticFileStorage'
 
 DEFAULT_FILE_STORAGE = 'custom_storages.MediaFileStorage'
+
+SESSION_COOKIE_AGE = 1209600  # 2 weeks in seconds

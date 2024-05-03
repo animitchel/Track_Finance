@@ -148,7 +148,6 @@ body {
 }
 
 
-
 .sidebar2 {
     width: 15%;
     background-color: #fff;
@@ -164,8 +163,6 @@ body {
     transition: 0.5s;
     z-index: 1;
 }
-
-
 
 .filter_header {
     margin-bottom: 10px;
@@ -228,6 +225,7 @@ footer {
     color: #fff;
     text-align: center;
     padding: 20px 0;
+    margin-top: 20px;
 }
 
 .footer-links {
