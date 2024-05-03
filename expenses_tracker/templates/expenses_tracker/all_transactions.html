@@ -6,7 +6,11 @@
 {% endblock %}
 
 {% block css_file %}
+    
+    <!-- Bootstrap CSS via CDN -->
+    <link href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="{% static 'expenses_tracker/income_data.css' %}">
+    
 {% endblock %}
 
 {% block content %}
@@ -27,7 +31,7 @@
             {% if search_query %}
             <em>Showing search results for {{ search_query|title }} ...</em>
             {% endif %}
-            {% if transactions  %}
+            {% if transactions or search_query %}
                 <table>
                     <thead>
                         <tr>
@@ -81,8 +85,13 @@
         <form method="post" action="{% url 'all_transactions_page' %}">
             {% include "expenses_tracker/include/right_sidebar.html" with url='all_transactions_page'%}
         </form>
+    
+        {% include 'expenses_tracker/include/pagination.html' %}
     </main>
     
     {% include "expenses_tracker/include/footer.html" %}
+    <!-- Bootstrap JS via CDN -->
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    
     
 {% endblock %}
