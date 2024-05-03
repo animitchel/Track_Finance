@@ -1182,8 +1182,8 @@ def line_chart(request):
         transaction = transaction_inst.filter(date__date__gte=seven_days_earlier)
         income = income_inst.filter(date__date__gte=seven_days_earlier)
 
-        timeframe = '(7 days)'
-        timeframe_inc = '(7 days)'
+        timeframe = '(1 Week)'
+        timeframe_inc = '(1 Week)'
 
     # Calculate the total sum of all transactions
     transactions_sum_total = transaction.aggregate(amount=Sum('amount'))
