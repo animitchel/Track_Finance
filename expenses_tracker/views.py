@@ -249,6 +249,9 @@ class AllTransactionUpdateAndDeletePage(LoginRequiredMixin, UpdateView):
         if object_amount is not None:
             self.request.session.pop('object_amount')
 
+        if form.instance.recurring_transaction is False:
+            form.instance.next_occurrence = None
+
         return super(AllTransactionUpdateAndDeletePage, self).form_valid(form)
 
 
@@ -715,6 +718,12 @@ class AllIncomeUpdateAndDeletePage(LoginRequiredMixin, UpdateView):
         context['header_name'] = 'Update Income'
         return context
 
+    def form_valid(self, form):
+        if form.instance.recurring_transaction is False:
+            form.instance.next_occurrence = None
+
+        return super(AllIncomeUpdateAndDeletePage, self).form_valid(form)
+
 
 @login_required
 def delete_income(request, pk):
@@ -1151,7 +1160,7 @@ def contact_us(request):
     )
 
 
-@cache_page(60 * 10)
+@cache_page(60 * 30)
 @login_required
 def line_chart(request):
     timeframe = ""
@@ -1220,7 +1229,7 @@ def aggregate_calc(instance):
         sum=Sum('amount')).get('sum') for field in instance}
 
 
-@cache_page(60 * 10)
+@cache_page(60 * 30)
 @login_required
 def bar_chart(request):
     timeframe = ""

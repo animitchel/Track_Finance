@@ -131,7 +131,7 @@ class Transaction(models.Model):
 
         if self.recurring_transaction:
             frequency = _frequency.get(self.frequency)
-            self.next_occurrence = self.date + timedelta(weeks=frequency)
+            self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
 
             self.transaction_title = self.transaction_title or self.category
         else:
@@ -217,6 +217,7 @@ class Budget(models.Model):
         # Return string representation of the budget
         return f"{self.category} - {self.amount}"
 
+
 class Income(models.Model):
     # Choices for income sources
     INCOME_SOURCES = [
@@ -248,7 +249,7 @@ class Income(models.Model):
         if self.recurring_transaction:
             # frequency = next(_frequency[key] for key in _frequency if key == self.frequency)
             frequency = _frequency.get(self.frequency)
-            self.next_occurrence = self.date + timedelta(weeks=frequency)
+            self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
 
             # Set transaction title if not provided
             if not self.transaction_title:
@@ -263,4 +264,3 @@ class Income(models.Model):
     def __str__(self):
         # Return string representation of the income
         return f"{self.category} - {self.amount}"
-
