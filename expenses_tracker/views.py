@@ -224,7 +224,6 @@ class AllTransactionUpdateAndDeletePage(LoginRequiredMixin, UpdateView):
     template_name = 'expenses_tracker/add_transaction.html'
     success_url = "/all_transactions"
 
-
     def get_context_data(self, **kwargs):
         context = super(AllTransactionUpdateAndDeletePage, self).get_context_data(**kwargs)
         self.request.session['object_amount'] = float(self.object.amount)
@@ -303,7 +302,7 @@ def budget_calc(field, form_instance):
     field.save()
 
 
-@method_decorator(cache_page(60 * 30), name='dispatch')
+# @method_decorator(cache_page(60 * 30), name='dispatch')
 class AddTransactionView(LoginRequiredMixin, CreateView):
     template_name = 'expenses_tracker/add_transaction.html'
     model = Transaction
@@ -731,7 +730,7 @@ def delete_income(request, pk):
     return HttpResponseRedirect(reverse('income_data_page'))
 
 
-@method_decorator(cache_page(60 * 30), name='dispatch')
+# @method_decorator(cache_page(60 * 30), name='dispatch')
 class IncomeFormView(LoginRequiredMixin, CreateView):
     # View for adding income
     model = Income
@@ -1201,13 +1200,34 @@ def line_chart(request):
     transactions_sum_total = transaction.aggregate(amount=Sum('amount'))
     incomes_sum_total = income.aggregate(amount=Sum('amount'))
 
+    transactions_total = transactions_sum_total['amount']
+    incomes_total = incomes_sum_total['amount']
+
+    if transactions_sum_total['amount'] is None:
+        transaction = transaction_inst
+        transactions_total = transaction.aggregate(amount=Sum('amount'))
+        transactions_total = transactions_total['amount']
+        timeframe = '(All Time)'
+
+        if transactions_total is None:
+            transactions_total = '-- no transaction data --'
+
+    if incomes_sum_total['amount'] is None:
+        income = income_inst
+        incomes_total = income.aggregate(amount=Sum('amount'))
+        incomes_total = incomes_total['amount']
+        timeframe_inc = '(All Time)'
+
+        if incomes_total is None:
+            incomes_total = '-- no income data --'
+
     chart = linechart(
         request_obj=request, object_inst=transaction, obj_name='Transaction', timeframe=timeframe,
-        total=transactions_sum_total['amount']
+        total=transactions_total
     )
     chart2 = linechart(
         request_obj=request, object_inst=income, obj_name='Income', timeframe=timeframe_inc,
-        total=incomes_sum_total['amount']
+        total=incomes_total
     )
 
     # Prepare context data for rendering the template
@@ -1271,17 +1291,38 @@ def bar_chart(request):
     transactions_sum_total = transaction.aggregate(amount=Sum('amount'))
     incomes_sum_total = income.aggregate(amount=Sum('amount'))
 
+    transactions_total = transactions_sum_total['amount']
+    incomes_total = incomes_sum_total['amount']
+
+    if transactions_sum_total['amount'] is None:
+        transaction = transaction_inst
+        transactions_total = transaction.aggregate(amount=Sum('amount'))
+        transactions_total = transactions_total['amount']
+        timeframe = '(All Time)'
+
+        if transactions_total is None:
+            transactions_total = '-- no transaction data --'
+
+    if incomes_sum_total['amount'] is None:
+        income = income_inst
+        incomes_total = income.aggregate(amount=Sum('amount'))
+        incomes_total = incomes_total['amount']
+        timeframe_inc = '(All Time)'
+
+        if incomes_total is None:
+            incomes_total = '-- no income data --'
+
     category_trans = aggregate_calc(transaction)
 
     category_income = aggregate_calc(income)
 
     chart = barchart(
         request_obj=request, object_inst=category_trans, obj_name='Transactions Categories', timeframe=timeframe,
-        total=transactions_sum_total['amount']
+        total=transactions_total
     )
     chart2 = barchart(
         request_obj=request, object_inst=category_income, obj_name='Incomes Sources', timeframe=timeframe_inc,
-        total=incomes_sum_total['amount']
+        total=incomes_total
     )
 
     context = {'chart': chart,
