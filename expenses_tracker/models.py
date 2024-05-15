@@ -7,8 +7,6 @@ from datetime import datetime, timedelta
 from django.utils import timezone
 from django.contrib.auth.models import User
 
-# Create your models here.
-
 _frequency = {
     'weekly': 1,
     'monthly': 4.4286,

@@ -9,6 +9,7 @@ def linechart(object_inst, request_obj, obj_name, total, timeframe=""):
     Generate a line chart using Plotly based on the given queryset and request object.
 
     Args:
+        total:
         timeframe:
         object_inst (QuerySet): The queryset of objects (transactions or incomes).
         request_obj (HttpRequest): The request object.
