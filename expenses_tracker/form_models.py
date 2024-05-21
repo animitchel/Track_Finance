@@ -109,7 +109,7 @@ class TransactionForm(forms.ModelForm):
     frequency = forms.ChoiceField(required=False, choices=FREQUENCY_CHOICES)
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10)
     description = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=True, max_length=100,
-                                  min_length=10)
+                                  min_length=1)
 
 
 class BudgetForm(forms.ModelForm):
@@ -171,12 +171,12 @@ class IncomeForm(forms.ModelForm):
             'amount': {'required': 'please enter a valid amount',
                        'invalid': 'Please enter a valid amount'},
             'notes': {'required': 'please enter a valid notes/description',
-                      'max_length': 'Please keep your notes 50 characters long and under',
-                      'min_length': 'Please keep your notes/description above 10 characters'}
+                      'max_length': 'Please keep your notes 100 characters long and under',
+                      'min_length': 'Please keep your notes/description above 1 character'}
 
         }
 
-    notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=True, max_length=50, min_length=10)
+    notes = forms.CharField(widget=forms.Textarea(attrs={'rows': 3}), required=True, max_length=100, min_length=1)
     frequency = forms.ChoiceField(required=False, choices=FREQUENCY_CHOICES)
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10, required=True)
     transaction_title = forms.CharField(max_length=50, required=False)
