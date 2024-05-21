@@ -1164,7 +1164,7 @@ def contact_us(request):
 def line_chart(request):
     timeframe = ""
     timeframe_inc = ""
-    seven_days_earlier = timezone.now() - timedelta(days=7)
+    seven_days_earlier = timezone.now() - timedelta(days=6)
 
     transaction_inst = Transaction.objects.all().filter(user=request.user)
     income_inst = Income.objects.all().filter(user=request.user)
@@ -1254,7 +1254,7 @@ def aggregate_calc(instance):
 def bar_chart(request):
     timeframe = ""
     timeframe_inc = ""
-    seven_days_earlier = timezone.now() - timedelta(days=7)
+    seven_days_earlier = timezone.now() - timedelta(days=6)
 
     transaction_inst = Transaction.objects.all().filter(user=request.user)
     income_inst = Income.objects.all().filter(user=request.user)
