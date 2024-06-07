@@ -130,6 +130,12 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
     context_object_name = 'transactions'
     paginate_by = 50
 
+    def get_paginate_by(self, queryset):
+        search_query = self.request.session.get('search_query')
+        if search_query:
+            return None   # Disable pagination
+        return self.paginate_by  # Use default pagination
+
     # Method to get the queryset of transactions
     def get_queryset(self):
         # Get session data for filter category, sort order, and search query
@@ -380,8 +386,20 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
         # Update date for recurring transactions if next occurrence has passed
         for recurring_transaction in data.all():
             if timezone.now() > recurring_transaction.next_occurrence:
-                recurring_transaction.date = timezone.now()
-                recurring_transaction.save()
+
+                # Creat new transaction, with same details if it's in the past
+
+                Transaction.objects.create(
+                    category=recurring_transaction.category,
+                    amount=recurring_transaction.amount,
+                    description=recurring_transaction.description,
+                    recurring_transaction=recurring_transaction.recurring_transaction,
+                    frequency=recurring_transaction.frequency,
+                    transaction_title=recurring_transaction.transaction_title,
+                    next_occurrence=recurring_transaction.next_occurrence,
+                    is_all_trans_bud=recurring_transaction.is_all_trans_bud,
+                    user=recurring_transaction.user,
+                )
 
         if filter_category:
             # Apply filtering based on category if filter category is provided
@@ -491,6 +509,7 @@ class AddBudgetView(LoginRequiredMixin, CreateView):
         # Set the budget amount and user ID
         form.instance.budget = float(form.cleaned_data.get('amount'))
         form.instance.user_id = self.request.user.id
+        print(self.request.user.password)
         return super(AddBudgetView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
@@ -599,7 +618,7 @@ def expenses_report(request, *args, **kwargs):
     return pdf_response
 
 
-@cache_page(60 * 30)
+# @cache_page(60 * 30)
 @login_required
 def expense_income_report_form(request):
     error = None
@@ -639,6 +658,13 @@ class IncomeData(LoginRequiredMixin, ListView):
     template_name = 'expenses_tracker/income_data.html'
     context_object_name = 'income_data'
     paginate_by = 50
+
+    def get_paginate_by(self, queryset):
+        # paginate = self.request.GET.get('paginate', 'yes')
+        search_query = self.request.session.get('search_query')
+        if search_query:
+            return None   # Disable pagination
+        return self.paginate_by  # Use default pagination
 
     def get_context_data(self, **kwargs):
         # Get context data for rendering the template
@@ -793,9 +819,18 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
 
         for recurring_income in data.all():
             if timezone.now() > recurring_income.next_occurrence:
-                # Update next occurrence if it's in the past
-                recurring_income.date = timezone.now()
-                recurring_income.save()
+                # Creat new transaction, with same details if it's in the past
+                Income.objects.create(
+                    category=recurring_income.category,
+                    amount=recurring_income.amount,
+                    description=recurring_income.description,
+                    recurring_transaction=recurring_income.recurring_transaction,
+                    frequency=recurring_income.frequency,
+                    transaction_title=recurring_income.transaction_title,
+                    next_occurrence=recurring_income.next_occurrence,
+                    is_all_trans_bud=recurring_income.is_all_trans_bud,
+                    user=recurring_income.user,
+                )
 
         if filter_category:
             # Filter queryset based on category

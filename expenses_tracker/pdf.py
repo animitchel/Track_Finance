@@ -45,6 +45,7 @@ def convert_html_to_pdf(source_html, is_expense_report):
 
     # Return the result HttpResponse object containing the PDF content
     return result
+    # pdf_content.read()
 
 # def render_template(template_html, context_data=None):
 #     template = Template(template_html)

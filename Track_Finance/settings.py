@@ -162,7 +162,7 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 # Authentication settings
 LOGIN_URL = '/login/'  # URL where login form is located
-# LOGIN_REDIRECT_URL = '/overview/'  # URL to redirect to after successful login
+LOGIN_REDIRECT_URL = '/overview/'  # URL to redirect to after successful login
 
 # Set AWS credentials
 AWS_ACCESS_KEY_ID = os.getenv('AWS_ACCESS_KEY_ID_ENV')
