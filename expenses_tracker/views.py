@@ -396,7 +396,6 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
                     recurring_transaction=recurring_transaction.recurring_transaction,
                     frequency=recurring_transaction.frequency,
                     transaction_title=recurring_transaction.transaction_title,
-                    next_occurrence=recurring_transaction.next_occurrence,
                     is_all_trans_bud=recurring_transaction.is_all_trans_bud,
                     user=recurring_transaction.user,
                 )
@@ -826,7 +825,6 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
                     recurring_transaction=recurring_income.recurring_transaction,
                     frequency=recurring_income.frequency,
                     transaction_title=recurring_income.transaction_title,
-                    next_occurrence=recurring_income.next_occurrence,
                     is_all_trans_bud=recurring_income.is_all_trans_bud,
                     user=recurring_income.user,
                 )
