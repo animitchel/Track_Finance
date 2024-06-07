@@ -509,7 +509,6 @@ class AddBudgetView(LoginRequiredMixin, CreateView):
         # Set the budget amount and user ID
         form.instance.budget = float(form.cleaned_data.get('amount'))
         form.instance.user_id = self.request.user.id
-        print(self.request.user.password)
         return super(AddBudgetView, self).form_valid(form)
 
     def get_context_data(self, **kwargs):
