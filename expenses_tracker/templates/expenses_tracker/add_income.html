@@ -45,11 +45,20 @@
                         {{ form.recurring_transaction }}
         
                         <div id="recurring-options" style="display: none;">
+                            {% if update %}
                             <label>
                                 <span class="element1">{{ form.frequency.label_tag }}</span>
                                 <span class="element2">*</span>
+                                <span class="unclickable">{{ form.frequency }}</span>
                             </label>
-                            {{ form.frequency }}
+                                
+                            {% else %}
+                                <label>
+                                    <span class="element1">{{ form.frequency.label_tag }}</span>
+                                    <span class="element2">*</span>
+                                </label>
+                                {{ form.frequency }}
+                            {% endif %}
                             
                             <br>
                             {{ form.transaction_title.label_tag }}

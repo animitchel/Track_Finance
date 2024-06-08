@@ -62,11 +62,20 @@
                     
                     
                     <div id="recurring-options" style="display: none;">
-                        <label>
-                            <span class="element1">{{ form.frequency.label_tag }}</span>
-                            <span class="element2">*</span>
-                        </label>
-                        {{ form.frequency }}
+                        {% if update %}
+                            <label>
+                                <span class="element1">{{ form.frequency.label_tag }}</span>
+                                <span class="element2">*</span>
+                                <span class="unclickable">{{ form.frequency }}</span>
+                            </label>
+                                
+                        {% else %}
+                            <label>
+                                <span class="element1">{{ form.frequency.label_tag }}</span>
+                                <span class="element2">*</span>
+                            </label>
+                            {{ form.frequency }}
+                        {% endif %}
                         
                         <br>
                         {{ form.transaction_title.label_tag }}

@@ -129,7 +129,9 @@ class Transaction(models.Model):
 
         if self.recurring_transaction:
             frequency = _frequency.get(self.frequency)
-            self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
+
+            if not self.next_occurrence:
+                self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
 
             self.transaction_title = self.transaction_title or self.category
         else:
@@ -247,7 +249,9 @@ class Income(models.Model):
         if self.recurring_transaction:
             # frequency = next(_frequency[key] for key in _frequency if key == self.frequency)
             frequency = _frequency.get(self.frequency)
-            self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
+
+            if not self.next_occurrence:
+                self.next_occurrence = timezone.now() + timedelta(weeks=frequency)
 
             # Set transaction title if not provided
             if not self.transaction_title:

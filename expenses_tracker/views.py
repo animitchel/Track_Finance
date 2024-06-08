@@ -400,6 +400,12 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
                     user=recurring_transaction.user,
                 )
 
+                recurring_transaction.recurring_transaction = False
+                recurring_transaction.next_occurrence = None
+                recurring_transaction.frequency = None
+                recurring_transaction.transaction_title = None
+                recurring_transaction.save()
+
         if filter_category:
             # Apply filtering based on category if filter category is provided
             return expenses_query_filter_func(
@@ -745,6 +751,7 @@ class AllIncomeUpdateAndDeletePage(LoginRequiredMixin, UpdateView):
         if form.instance.recurring_transaction is False:
             form.instance.next_occurrence = None
 
+
         return super(AllIncomeUpdateAndDeletePage, self).form_valid(form)
 
 
@@ -821,13 +828,18 @@ class RecurringIncomes(LoginRequiredMixin, ListView):
                 Income.objects.create(
                     category=recurring_income.category,
                     amount=recurring_income.amount,
-                    description=recurring_income.description,
+                    notes=recurring_income.notes,
                     recurring_transaction=recurring_income.recurring_transaction,
                     frequency=recurring_income.frequency,
                     transaction_title=recurring_income.transaction_title,
-                    is_all_trans_bud=recurring_income.is_all_trans_bud,
                     user=recurring_income.user,
                 )
+
+                recurring_income.recurring_transaction = False
+                recurring_income.next_occurrence = None
+                recurring_income.frequency = None
+                recurring_income.transaction_title = None
+                recurring_income.save()
 
         if filter_category:
             # Filter queryset based on category
@@ -972,6 +984,7 @@ class AccountSettingsView(LoginRequiredMixin, View):
 
         if profile_form.is_valid():
             # Update user currency in session
+            self.request.session.pop('user_currency')
             self.request.session['user_currency'] = profile_form.instance.currency
 
             # Save the updated profile
