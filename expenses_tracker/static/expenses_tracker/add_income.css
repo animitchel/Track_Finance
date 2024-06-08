@@ -114,5 +114,10 @@ a button:hover {
     background-color: darkred;
 }
 
+.unclickable {
+    pointer-events: none; /* Disable pointer events */
+    cursor: default; /* Use default cursor (usually an arrow) */
+}
+
 
 
