@@ -133,7 +133,7 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
     def get_paginate_by(self, queryset):
         search_query = self.request.session.get('search_query')
         if search_query:
-            return None   # Disable pagination
+            return None  # Disable pagination
         return self.paginate_by  # Use default pagination
 
     # Method to get the queryset of transactions
@@ -234,6 +234,9 @@ class AllTransactionUpdateAndDeletePage(LoginRequiredMixin, UpdateView):
         context = super(AllTransactionUpdateAndDeletePage, self).get_context_data(**kwargs)
         self.request.session['object_amount'] = float(self.object.amount)
         context['update'] = True
+
+        context['update_frequency'] = self.object.recurring_transaction is True
+
         context['user_status'] = self.request.user.is_authenticated
         context['current_year'] = datetime.now().year
         context['object'] = self.object.id
@@ -386,7 +389,6 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
         # Update date for recurring transactions if next occurrence has passed
         for recurring_transaction in data.all():
             if timezone.now() > recurring_transaction.next_occurrence:
-
                 # Creat new transaction, with same details if it's in the past
 
                 Transaction.objects.create(
@@ -667,7 +669,7 @@ class IncomeData(LoginRequiredMixin, ListView):
         # paginate = self.request.GET.get('paginate', 'yes')
         search_query = self.request.session.get('search_query')
         if search_query:
-            return None   # Disable pagination
+            return None  # Disable pagination
         return self.paginate_by  # Use default pagination
 
     def get_context_data(self, **kwargs):
@@ -741,6 +743,7 @@ class AllIncomeUpdateAndDeletePage(LoginRequiredMixin, UpdateView):
     def get_context_data(self, **kwargs):
         context = super(AllIncomeUpdateAndDeletePage, self).get_context_data(**kwargs)
         context['update'] = True
+        context['update_frequency'] = self.object.recurring_transaction is True
         context['user_status'] = self.request.user.is_authenticated
         context['current_year'] = datetime.now().year
         context['object'] = self.object.id
@@ -750,7 +753,6 @@ class AllIncomeUpdateAndDeletePage(LoginRequiredMixin, UpdateView):
     def form_valid(self, form):
         if form.instance.recurring_transaction is False:
             form.instance.next_occurrence = None
-
 
         return super(AllIncomeUpdateAndDeletePage, self).form_valid(form)
 
