@@ -45,7 +45,7 @@
                         {{ form.recurring_transaction }}
         
                         <div id="recurring-options" style="display: none;">
-                            {% if update %}
+                            {% if update and update_frequency %}
                             <label>
                                 <span class="element1">{{ form.frequency.label_tag }}</span>
                                 <span class="element2">*</span>
