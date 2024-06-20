@@ -311,6 +311,15 @@ footer {
     padding: 15px;
 }
 
+.links {
+    text-decoration: underline;
+}
+
+.links:hover {
+    transform: scale(1.02);
+    color: darkred;
+}
+
 
 
 
