@@ -152,7 +152,7 @@ class BudgetForm(forms.ModelForm):
 
     amount = forms.DecimalField(min_value=1.00, decimal_places=2, max_digits=10)
     duration = forms.ChoiceField(choices=DURATION_CHOICES)
-    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=False, max_length=400,
+    description = forms.CharField(widget=forms.Textarea(attrs={'rows': 4}), required=False, max_length=50,
                                   min_length=10)
 
 
