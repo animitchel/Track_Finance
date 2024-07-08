@@ -6,6 +6,7 @@ from django.core.validators import RegexValidator
 from datetime import datetime, timedelta
 from django.utils import timezone
 from django.contrib.auth.models import User
+from decimal import Decimal
 
 _frequency = {
     'weekly': 1,
@@ -114,7 +115,9 @@ class Transaction(models.Model):
 
     # Define fields for the Transaction model
     category = models.CharField(max_length=20, choices=EXPENSE_CATEGORIES, null=False)
-    amount = models.FloatField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2,
+                                 default=Decimal('0.00'), null=True,
+                                 )
     description = models.TextField(null=True, max_length=100)
     recurring_transaction = models.BooleanField(default=False)
     frequency = models.CharField(max_length=10, null=True, blank=True)
@@ -177,9 +180,17 @@ class Budget(models.Model):
 
     # Define fields for the Budget model
     category = models.CharField(max_length=20, choices=BUDGET_CATEGORIES)
-    amount = models.FloatField()
-    budget = models.FloatField(null=True)
-    spent = models.FloatField(default=0.0)
+    amount = models.DecimalField(max_digits=10, decimal_places=2,
+                                 default=Decimal('0.00'), null=True,
+                                 )
+    budget = models.DecimalField(max_digits=10, decimal_places=2,
+                                 default=Decimal('0.00'), null=True,
+                                 blank=True
+                                 )
+    spent = models.DecimalField(max_digits=10, decimal_places=2,
+                                default=Decimal('0.00'), null=True,
+                                blank=True
+                                )
     description = models.TextField(max_length=400)
     duration = models.CharField(max_length=20, null=True, blank=True)
     expiration_date = models.DateTimeField(null=True)
@@ -234,7 +245,9 @@ class Income(models.Model):
     ]
     # Define fields for the Income model
     category = models.CharField(max_length=40, choices=INCOME_SOURCES)
-    amount = models.FloatField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2,
+                                 default=Decimal('0.00'), null=True,
+                                 )
     notes = models.TextField(max_length=100)
     date = models.DateTimeField(default=timezone.now)
     recurring_transaction = models.BooleanField(default=False)
