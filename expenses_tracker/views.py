@@ -36,7 +36,7 @@ from django.views.decorators.cache import cache_page, never_cache
 from django.utils.decorators import method_decorator
 
 
-@method_decorator(cache_page(10), name='dispatch')
+@method_decorator(cache_page(5), name='dispatch')
 class IndexView(TemplateView):
     template_name = 'expenses_tracker/index.html'  # Define the template name for this view
 
@@ -311,6 +311,20 @@ def budget_calc(field, form_instance):
     field.save()
 
 
+def update_budget_amount_spend_and_remaining(form_or_transaction_instance, budget_obj, request_user_id) -> None:
+    for field in budget_obj.objects.all().filter(user_id=request_user_id):
+        # Check if 'all_transaction_budget' is True
+        if form_or_transaction_instance.is_all_trans_bud:
+            # If category is 'All Transactions', perform budget calculation
+            if field.category == 'All Transactions':
+                budget_calc(field=field, form_instance=form_or_transaction_instance)
+
+        # Check if category matches the form instance category
+        if field.category == form_or_transaction_instance.category:
+            # Perform budget calculation
+            budget_calc(field=field, form_instance=form_or_transaction_instance)
+
+
 # @method_decorator(cache_page(60 * 30), name='dispatch')
 class AddTransactionView(LoginRequiredMixin, CreateView):
     template_name = 'expenses_tracker/add_transaction.html'
@@ -326,17 +340,7 @@ class AddTransactionView(LoginRequiredMixin, CreateView):
         form.instance.user_id = self.request.user.id
 
         # Iterate over budget objects
-        for field in Budget.objects.all().filter(user_id=self.request.user.id):
-            # Check if 'all_transaction_budget' is True
-            if form.instance.is_all_trans_bud:
-                # If category is 'All Transactions', perform budget calculation
-                if field.category == 'All Transactions':
-                    budget_calc(field=field, form_instance=form.instance)
-
-            # Check if category matches the form instance category
-            if field.category == form.instance.category:
-                # Perform budget calculation
-                budget_calc(field=field, form_instance=form.instance)
+        update_budget_amount_spend_and_remaining(form.instance, Budget, self.request.user.id)
 
         return super(AddTransactionView, self).form_valid(form)
 
@@ -387,26 +391,30 @@ class RecurringTransactions(LoginRequiredMixin, ListView):
             user_id=self.request.user.id).filter(recurring_transaction=True))
 
         # Update date for recurring transactions if next occurrence has passed
-        for recurring_transaction in data.all():
-            if timezone.now() > recurring_transaction.next_occurrence:
-                # Creat new transaction, with same details if it's in the past
+        for recurring_transaction in data.all().filter(next_occurrence__lt=timezone.now()):
 
-                Transaction.objects.create(
-                    category=recurring_transaction.category,
-                    amount=recurring_transaction.amount,
-                    description=recurring_transaction.description,
-                    recurring_transaction=recurring_transaction.recurring_transaction,
-                    frequency=recurring_transaction.frequency,
-                    transaction_title=recurring_transaction.transaction_title,
-                    is_all_trans_bud=recurring_transaction.is_all_trans_bud,
-                    user=recurring_transaction.user,
-                )
+            # Creat new transaction, with same details if it's in the past
+            transaction_instance = Transaction.objects.create(
+                category=recurring_transaction.category,
+                amount=recurring_transaction.amount,
+                description=recurring_transaction.description,
+                recurring_transaction=recurring_transaction.recurring_transaction,
+                frequency=recurring_transaction.frequency,
+                transaction_title=recurring_transaction.transaction_title,
+                is_all_trans_bud=recurring_transaction.is_all_trans_bud,
+                user=recurring_transaction.user,
+            )
 
-                recurring_transaction.recurring_transaction = False
-                recurring_transaction.next_occurrence = None
-                recurring_transaction.frequency = None
-                recurring_transaction.transaction_title = None
-                recurring_transaction.save()
+            """ Update the budget amount spent and remaining for the user.
+            Updates the user's budget based on the new transaction. """
+            update_budget_amount_spend_and_remaining(transaction_instance, Budget, self.request.user.id)
+
+            # Disable recurrence for the transaction and clear recurrence-related fields
+            recurring_transaction.recurring_transaction = False
+            recurring_transaction.next_occurrence = None
+            recurring_transaction.frequency = None
+            recurring_transaction.transaction_title = None
+            recurring_transaction.save()
 
         if filter_category:
             # Apply filtering based on category if filter category is provided
