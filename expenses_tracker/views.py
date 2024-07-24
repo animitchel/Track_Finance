@@ -35,6 +35,8 @@ from django.core.cache import cache
 from django.views.decorators.cache import cache_page, never_cache
 from django.utils.decorators import method_decorator
 
+import decimal
+
 
 @method_decorator(cache_page(5), name='dispatch')
 class IndexView(TemplateView):
@@ -211,15 +213,18 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
 
 
 def update_budget(budget_obj, object_obj, form_instance):
+
     for field in budget_obj:
+        object_obj = decimal.Decimal().from_float(object_obj)
 
-        if object_obj > form_instance.amount:
-            field.amount += object_obj - form_instance.amount
-            field.spent -= object_obj - form_instance.amount
+        if object_obj > form_instance:
+            field.amount += object_obj - form_instance
+            field.spent -= object_obj - form_instance
 
-        elif object_obj < form_instance.amount:
-            field.amount -= form_instance.amount - object_obj
-            field.spent += form_instance.amount - object_obj
+        elif object_obj < form_instance:
+
+            field.amount -= form_instance - object_obj
+            field.spent += form_instance - object_obj
 
         field.save()
 
@@ -249,10 +254,10 @@ class AllTransactionUpdateAndDeletePage(LoginRequiredMixin, UpdateView):
         budget_all = budget.filter(category='All Transactions')
         object_amount = self.request.session.get('object_amount')
 
-        update_budget(budget_obj=budget_cate, object_obj=object_amount, form_instance=form.instance)
+        update_budget(budget_obj=budget_cate, object_obj=object_amount, form_instance=form.instance.amount)
 
         if form.instance.is_all_trans_bud:
-            update_budget(budget_obj=budget_all, object_obj=object_amount, form_instance=form.instance)
+            update_budget(budget_obj=budget_all, object_obj=object_amount, form_instance=form.instance.amount)
 
         if object_amount is not None:
             self.request.session.pop('object_amount')
@@ -473,7 +478,7 @@ class BudgetOverviewView(LoginRequiredMixin, ListView):
 
         # Delete budgets if spent exceeds budget or expiration date has passed
         for field in db:
-            if field.spent >= field.budget or timezone.now() > field.expiration_date:
+            if field.spent >= field.budget or timezone.now() > field.expiration_date or field.amount > field.budget:
                 field.delete()
 
         if filter_category:
