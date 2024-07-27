@@ -134,7 +134,7 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
 
     def get_paginate_by(self, queryset):
         search_query = self.request.session.get('search_query')
-        filter_category = self.request.session.get('filter_category')
+        filter_category = self.request.session.pop('filter_category')
         if search_query or filter_category:
             return None  # Disable pagination
         return self.paginate_by  # Use default pagination
@@ -153,7 +153,7 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
             # Apply filtering based on category if filter category is provided
             filtered_query = expenses_query_filter_func(
                 sort_order=sort_order,
-                filter_category=self.request.session.pop('filter_category'),
+                filter_category=filter_category,
                 order_by=self.request.session.pop('order_by'),
                 query_db=query,
                 sort_pop=self.request.session.pop('sort_order')
@@ -680,9 +680,9 @@ class IncomeData(LoginRequiredMixin, ListView):
     paginate_by = 50
 
     def get_paginate_by(self, queryset):
-        # paginate = self.request.GET.get('paginate', 'yes')
+        filter_category = self.request.session.pop('filter_category')
         search_query = self.request.session.get('search_query')
-        if search_query:
+        if search_query or filter_category:
             return None  # Disable pagination
         return self.paginate_by  # Use default pagination
 
@@ -711,7 +711,7 @@ class IncomeData(LoginRequiredMixin, ListView):
             # Filter the queryset based on category
             filtered_query = expenses_query_filter_func(
                 sort_order=sort_order,
-                filter_category=self.request.session.pop('filter_category'),
+                filter_category=filter_category,
                 order_by=self.request.session.pop('order_by'), query_db=data,
                 sort_pop=self.request.session.pop('sort_order')
             )
