@@ -134,7 +134,7 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
 
     def get_paginate_by(self, queryset):
         search_query = self.request.session.get('search_query')
-        filter_category = self.request.session.pop('filter_category')
+        filter_category = self.request.session.pop('filter_category', None)
         if search_query or filter_category:
             return None  # Disable pagination
         return self.paginate_by  # Use default pagination
@@ -680,7 +680,7 @@ class IncomeData(LoginRequiredMixin, ListView):
     paginate_by = 50
 
     def get_paginate_by(self, queryset):
-        filter_category = self.request.session.pop('filter_category')
+        filter_category = self.request.session.pop('filter_category', None)
         search_query = self.request.session.get('search_query')
         if search_query or filter_category:
             return None  # Disable pagination
