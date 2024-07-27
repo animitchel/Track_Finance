@@ -134,7 +134,8 @@ class AllTransactionsView(LoginRequiredMixin, ListView):
 
     def get_paginate_by(self, queryset):
         search_query = self.request.session.get('search_query')
-        if search_query:
+        filter_category = self.request.session.get('filter_category')
+        if search_query or filter_category:
             return None  # Disable pagination
         return self.paginate_by  # Use default pagination
 
